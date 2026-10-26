@@ -16,7 +16,10 @@ if (!personalBuildId.isBlank() && !(personalBuildId ==~ /(?:personal|b[0-9]+a[0-
     throw new GradleException('Invalid PERSONAL_BUILD_ID')
 }
 def isolatedBuild = !personalBuildId.isBlank()
-def personalPackage = isolatedBuild ? "${APP_PACKAGE}.${personalBuildId}" : APP_PACKAGE
+def personalPackage = isolatedBuild ? (System.getenv('PERSONAL_APPLICATION_ID') ?: "${APP_PACKAGE}.${personalBuildId}") : APP_PACKAGE
+if (isolatedBuild && !(personalPackage ==~ /[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+/)) {
+    throw new GradleException('Invalid PERSONAL_APPLICATION_ID')
+}
 def personalLabel = System.getenv('PERSONAL_BUILD_LABEL') ?: 'Freezgram'
 def bundledUiLanguages = ['en', 'ru', 'uk', 'be', 'kk', 'uz', 'ky', 'tg', 'tk', 'hy', 'az', 'ro']
 // AAPT locale filtering requires explicit regional variants used by bundled strings.
