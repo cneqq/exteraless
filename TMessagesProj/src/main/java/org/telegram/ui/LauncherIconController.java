@@ -40,6 +40,8 @@ public class LauncherIconController {
     public enum LauncherIcon {
         EXTERALESS("ExteralessIcon", R.drawable.exteraless_icon_background,
                 R.drawable.exteraless_icon_foreground, R.string.AppIconExteraless),
+        FREEZGRAM_WHITE("FreezgramWhiteIcon", R.drawable.freezgram_white_icon_background,
+                R.drawable.freezgram_white_icon_foreground, R.string.AppIconFreezgramWhite),
         BLUEPRINT("BlueprintIcon", R.drawable.blueprint_icon_background,
                 R.drawable.blueprint_icon_foreground, R.string.AppIconBlueprint),
         RED("RedIcon", R.drawable.red_icon_background,

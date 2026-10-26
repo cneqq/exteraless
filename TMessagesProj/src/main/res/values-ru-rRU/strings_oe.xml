@@ -24,7 +24,7 @@
     <string name="QrWifiUnknownNetwork">В коде нет имени сети</string>
     <string name="QrLoginHint">Этот код входит в аккаунт. Используйте Настройки → Устройства → Подключить устройство: тот экран проверяет код и защищает аккаунт.</string>
     <string name="QrLoginConfirm">Этот код входит в ваш аккаунт с нового устройства. Разрешайте, только если входите сами на своём устройстве.</string>
-    <string name="AppIconExteraless" translatable="false">exteraless</string>
+    <string name="AppIconExteraless" translatable="false">Freezgram</string>
     <string name="AppIconBlueprint" translatable="false">Blueprint</string>
     <string name="AppIconRed" translatable="false">Red</string>
     <string name="AppIconNya" translatable="false">Nya</string>
@@ -70,4 +70,5 @@
     <string name="AppIconsKeep">Оставить эту</string>
     <string name="FreezgramForkInfo">Freezgram — форк exteraless.</string>
     <string name="FreezgramUpstream">Исходный проект</string>
+    <string name="AppIconFreezgramWhite">Freezgram · Белая</string>
 </resources>

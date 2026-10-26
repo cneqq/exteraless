@@ -26,7 +26,7 @@
     <string name="QrWifiUnknownNetwork">Network name is missing from the code</string>
     <string name="QrLoginHint">This code logs into an account. Use Settings → Devices → Link Desktop Device — that screen checks the code and protects your account.</string>
     <string name="QrLoginConfirm">This code signs a new device into your account. Allow only if you are logging in on your own device.</string>
-    <string name="AppIconExteraless" translatable="false">exteraless</string>
+    <string name="AppIconExteraless" translatable="false">Freezgram</string>
     <string name="AppIconBlueprint" translatable="false">Blueprint</string>
     <string name="AppIconRed" translatable="false">Red</string>
     <string name="AppIconNya" translatable="false">Nya</string>
@@ -97,4 +97,5 @@
     <string name="OEProfileJoinDateUnknown">Join date is unavailable</string>
     <string name="FreezgramForkInfo">Freezgram is a fork of exteraless.</string>
     <string name="FreezgramUpstream">Original project</string>
+    <string name="AppIconFreezgramWhite">Freezgram · White</string>
 </resources>
