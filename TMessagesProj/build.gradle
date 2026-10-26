@@ -17,7 +17,7 @@ if (!personalBuildId.isBlank() && !(personalBuildId ==~ /(?:personal|b[0-9]+a[0-
 }
 def isolatedBuild = !personalBuildId.isBlank()
 def personalPackage = isolatedBuild ? "${APP_PACKAGE}.${personalBuildId}" : APP_PACKAGE
-def personalLabel = System.getenv('PERSONAL_BUILD_LABEL') ?: "exteraless ${personalBuildId}"
+def personalLabel = System.getenv('PERSONAL_BUILD_LABEL') ?: 'Freezgram'
 if (!isolatedBuild) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'

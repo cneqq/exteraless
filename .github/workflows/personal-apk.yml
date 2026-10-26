@@ -18,7 +18,7 @@ jobs:
     env:
       NATIVE_TARGET: arm64-v8a
       PERSONAL_BUILD_ID: personal
-      PERSONAL_BUILD_LABEL: exteraless Personal
+      PERSONAL_BUILD_LABEL: Freezgram
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 2G
       CCACHE_COMPILERCHECK: content

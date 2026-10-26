@@ -19,7 +19,7 @@
     <string name="QrWifiUnknownNetwork">اسم الشبكة غير موجود في الرمز</string>
     <string name="QrLoginHint">هذا الرمز يسجّل الدخول إلى حساب. استخدم الإعدادات ← الأجهزة ← ربط جهاز سطح المكتب، فهذه الشاشة تتحقق من الرمز وتحمي حسابك.</string>
     <string name="QrLoginConfirm">هذا الرمز يسجّل دخول جهاز جديد إلى حسابك. اسمح بذلك فقط إذا كنت تسجّل الدخول بنفسك على جهازك.</string>
-    <string name="OpenExteraPreferences">تفضيلات exteraless</string>
+    <string name="OpenExteraPreferences">تفضيلات Freezgram</string>
     <string name="OpenExteraDesignSection">التصميم</string>
     <string name="OpenExteraDesigner">الأيقونات والتصميم</string>
     <string name="OpenExteraDesignStudio">استوديو التصميم</string>

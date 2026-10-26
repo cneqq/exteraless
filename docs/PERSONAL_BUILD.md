@@ -50,7 +50,7 @@ Gradle также запрещает временную подпись для PE
 ## Установка поверх предыдущей версии
 
 Постоянный applicationId — `com.exteraless.app.personal`, название —
-`exteraless Personal`. Java/JNI namespace остаётся org.telegram.messenger.
+`Freezgram`. Java/JNI namespace остаётся org.telegram.messenger.
 Версия из GitHub Actions получает versionCode = 1000000 + RUN_NUMBER * 1000 + ATTEMPT.
 Следующий запуск и повторный запуск имеют больший versionCode. Не переименовывать
 и не пересоздавать workflow без проверки счётчика: старая более высокая версия

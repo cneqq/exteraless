@@ -19,7 +19,7 @@
     <string name="QrWifiUnknownNetwork">二维码中没有网络名称</string>
     <string name="QrLoginHint">此二维码用于登录账号。请改用「设置 → 设备 → 关联桌面设备」，该界面会校验二维码并保护你的账号。</string>
     <string name="QrLoginConfirm">此二维码会在新设备上登录你的账号。仅当你本人在自己的设备上登录时才允许。</string>
-    <string name="OpenExteraPreferences">exteraless 设置</string>
+    <string name="OpenExteraPreferences">Freezgram 设置</string>
     <string name="OpenExteraDesignSection">设计</string>
     <string name="OpenExteraDesigner">图标与设计</string>
     <string name="OpenExteraDesignStudio">设计工作室</string>
