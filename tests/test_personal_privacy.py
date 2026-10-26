@@ -24,6 +24,38 @@ def run_java(body):
 
 
 class PersonalPrivacyTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
+    def test_startup_without_login_draft_opens_intro(self):
+        launch = (JAVA / 'org/telegram/ui/LaunchActivity.java').read_text()
+        selection = method(launch, '    private BaseFragment getClientNotActivatedFragment(')
+        run_java('''
+class PrivacyCheck {
+  static class Bundle {
+    int view;
+    Bundle(int view) { this.view = view; }
+    int getInt(String key, int fallback) { return view; }
+  }
+  static class BaseFragment {}
+  static class IntroActivity extends BaseFragment {}
+  static class LoginActivity extends BaseFragment {
+    static Bundle state;
+    static Bundle loadCurrentState(boolean newAccount, int account) { return state; }
+  }
+  int currentAccount;
+  SELECTION
+  public static void main(String[] args) {
+    PrivacyCheck launch = new PrivacyCheck();
+    for (Bundle state : new Bundle[]{null, new Bundle(0), new Bundle(1)}) {
+      LoginActivity.state = state;
+      BaseFragment result = launch.getClientNotActivatedFragment();
+      boolean resume = state != null && state.view != 0;
+      if (resume ? !(result instanceof LoginActivity) : !(result instanceof IntroActivity))
+        throw new AssertionError("Wrong unauthenticated startup screen");
+    }
+  }
+}
+'''.replace('SELECTION', selection))
+
     def test_backup_is_disabled_and_transfer_exclusions_cover_private_data(self):
         ns = '{http://schemas.android.com/apk/res/android}'
         app = ET.parse(MAIN / 'AndroidManifest.xml').getroot().find('application')
