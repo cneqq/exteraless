@@ -83,6 +83,10 @@ Python 3.12 лишь под них, и на `armeabi-v7a` конфигураци
 
 ### Сборка через GitHub Actions
 
+Для этого форка используйте [личную сборку ARM64](docs/PERSONAL_BUILD.md).
+Старые workflows ниже отключены; инструкция upstream сохранена для справки.
+
+
 Нужны два секрета репозитория:
 
 * `LOCAL_PROPERTIES` — содержимое `local.properties` в base64:

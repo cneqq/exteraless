@@ -1,0 +1,185 @@
+name: Personal release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      telegram_credentials:
+        description: Include TG_API_ID and TG_API_HASH from this repository Secrets
+        type: boolean
+        default: false
+      personal_signing:
+        description: Use personal RELEASE_KEYSTORE and signing Secrets (otherwise temporary test signature)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: personal-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'cneqq/exteraless'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      NATIVE_TARGET: arm64-v8a
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_COMPILERCHECK: content
+      CCACHE_BASEDIR: ${{ github.workspace }}
+    steps:
+      - name: Checkout with pinned submodules
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Java 21
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Install native and Android tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends --yes ccache nasm ninja-build
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" \
+            'platforms;android-37.0' 'build-tools;36.0.0' \
+            'ndk;27.2.12479018' 'cmake;3.31.6'
+          echo "CHAQUOPY_BUILD_PYTHON=$(command -v python3)" >> "$GITHUB_ENV"
+          echo "CMAKE=${ANDROID_HOME}/cmake/3.31.6/bin/cmake" >> "$GITHUB_ENV"
+          ccache --max-size=2G
+
+      - name: Restore downloaded dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper/dists
+          key: dependencies-linux-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: dependencies-linux-
+
+      - name: Restore native compiler cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .ccache
+          key: native-arm64-ndk27-${{ github.sha }}
+          restore-keys: native-arm64-ndk27-
+
+      - name: Configure build
+        shell: bash
+        env:
+          USE_TELEGRAM: ${{ inputs.telegram_credentials }}
+          USE_SIGNING: ${{ inputs.personal_signing }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
+          ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          import re
+          from pathlib import Path
+          def property_value(value):
+              return ''.join('\\u%04x' % ord(c) if c in '\\=:#! \n\r\t' or ord(c) > 126 else c for c in value)
+          props = {'sdk.dir': os.environ['ANDROID_HOME'],
+                   'TELEGRAM_APP_ID': '0', 'TELEGRAM_APP_HASH': '0' * 32}
+          if os.environ['USE_TELEGRAM'] == 'true':
+              api_id = os.environ.get('TG_API_ID', '')
+              api_hash = os.environ.get('TG_API_HASH', '')
+              if not re.fullmatch(r'[1-9][0-9]{0,9}', api_id) or int(api_id) > 2147483647:
+                  raise SystemExit('Set TG_API_ID in this repository Actions Secrets.')
+              if not re.fullmatch(r'[0-9a-fA-F]{32}', api_hash):
+                  raise SystemExit('Set TG_API_HASH in this repository Actions Secrets.')
+              props.update(TELEGRAM_APP_ID=api_id, TELEGRAM_APP_HASH=api_hash)
+          if os.environ['USE_SIGNING'] == 'true':
+              for key in ('RELEASE_KEYSTORE', 'KEYSTORE_PASS', 'ALIAS_NAME', 'ALIAS_PASS'):
+                  if not os.environ.get(key):
+                      raise SystemExit('Missing personal signing Secret: ' + key)
+              key_file = Path('TMessagesProj/release.keystore')
+              key_file.touch(mode=0o600)
+              key_file.write_bytes(base64.b64decode(os.environ['RELEASE_KEYSTORE'], validate=True))
+              props.update({key: os.environ[key] for key in ('KEYSTORE_PASS', 'ALIAS_NAME', 'ALIAS_PASS')})
+          path = Path('local.properties')
+          path.touch(mode=0o600)
+          path.write_text(''.join(f'{k}={property_value(v)}\n' for k, v in props.items()))
+          PY
+
+      - name: Build ARM64 release APK
+        shell: bash
+        env:
+          COMMIT_ID: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          export BUILD_TIMESTAMP=$(date +%s)
+          ./gradlew --no-daemon --console=plain --max-workers=2 :TMessagesProj:assembleRelease
+
+      - name: Verify APK contents, manifest and signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifact
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import subprocess
+          import zipfile
+          apks = list(Path('TMessagesProj/build/outputs/apk/release').glob('*.apk'))
+          if len(apks) != 1:
+              raise SystemExit('Expected exactly one ARM64 release APK.')
+          apk = Path('artifact/exteraless-arm64-release.apk')
+          shutil.copyfile(apks[0], apk)
+          tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0'
+          manifest = subprocess.check_output([str(tools / 'aapt2'), 'dump', 'badging', str(apk)], text=True)
+          if 'application-debuggable' in manifest:
+              raise SystemExit('Release APK must not be debuggable.')
+          if 'arm64-v8a' not in manifest:
+              raise SystemExit('APK is missing the ARM64 ABI.')
+          with zipfile.ZipFile(apk) as z:
+              if 'lib/arm64-v8a/libtmessages.so' not in z.namelist():
+                  raise SystemExit('Native Telegram/wallet library is missing.')
+          subprocess.run([str(tools / 'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], check=True)
+          checksum = hashlib.sha256(apk.read_bytes()).hexdigest()
+          Path('artifact/SHA256SUMS.txt').write_text(f'{checksum}  {apk.name}\n')
+          Path('artifact/build-info.json').write_text(json.dumps({
+              'commit': os.environ['GITHUB_SHA'], 'build_type': 'release', 'abi': 'arm64-v8a',
+              'telegram_credentials': '${{ inputs.telegram_credentials }}',
+              'personal_signing': '${{ inputs.personal_signing }}', 'sha256': checksum}, indent=2))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('ARM64 release APK built. Download artifact and verify SHA256SUMS.\n\n')
+              f.write('Personal signing and Telegram credentials are controlled by workflow inputs.\n\n')
+              f.write('Plugins/updater/GramWallet are present. Login, transfers and wallet key security were not tested.\n')
+          PY
+          ccache --show-stats
+
+      - name: Upload APK only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: exteraless-arm64-${{ github.sha }}
+          path: artifact/
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Remove build credentials and temporary keys
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          rm -f local.properties TMessagesProj/release.keystore "$HOME/.android/debug.keystore"
