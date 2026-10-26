@@ -18,6 +18,8 @@ if (!personalBuildId.isBlank() && !(personalBuildId ==~ /(?:personal|b[0-9]+a[0-
 def isolatedBuild = !personalBuildId.isBlank()
 def personalPackage = isolatedBuild ? "${APP_PACKAGE}.${personalBuildId}" : APP_PACKAGE
 def personalLabel = System.getenv('PERSONAL_BUILD_LABEL') ?: 'Freezgram'
+def fastPersonalBuild = System.getenv('PERSONAL_FAST_BUILD') == 'true'
+def bundledUiLanguages = ['en', 'ru', 'uk', 'be', 'kk', 'uz', 'ky', 'tg', 'tk', 'hy', 'az', 'ro']
 if (!isolatedBuild) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'
@@ -38,7 +40,7 @@ idea {
 def buildTimestamp = System.getenv('BUILD_TIMESTAMP') ?: '0'
 def commitId = System.getenv('COMMIT_ID')
 def shortCommit = commitId?.take(7) ?: ''
-def verName = "${APP_VERSION_NAME}${shortCommit ? "-${shortCommit}" : ''}"
+def verName = "${APP_VERSION_NAME}${shortCommit ? "-${shortCommit}" : ''}${fastPersonalBuild ? "-quick" : ""}"
 def personalVersionCode = System.getenv('PERSONAL_VERSION_CODE')
 if (personalVersionCode != null && (!(personalVersionCode ==~ /[1-9][0-9]{0,9}/)
         || personalVersionCode.toLong() > 2100000000L)) {
@@ -100,6 +102,7 @@ android {
     defaultConfig.applicationId = personalPackage
     defaultConfig {
         buildConfigField 'boolean', 'ISOLATED_BUILD', isolatedBuild.toString()
+        buildConfigField 'String', 'UI_LANGUAGES', '"' + bundledUiLanguages.join(',') + '"'
         resValue 'string', 'personal_application_id', personalPackage
         resValue 'string', 'personal_contact_profile_mime', "vnd.android.cursor.item/vnd.${personalPackage}.android.profile"
         resValue 'string', 'personal_contact_call_mime', "vnd.android.cursor.item/vnd.${personalPackage}.android.call"
@@ -111,10 +114,7 @@ android {
     }
 
     androidResources {
-        localeFilters += [
-                'en', 'ar', 'de', 'es', 'es-rES', 'fa-rIR', 'in-rID', 'it', 'it-rIT', 'ja-rJP',
-                'ko', 'nl', 'pl-rPL', 'pt-rBR', 'ru-rRU', 'tr-rTR', 'uk-rUA', 'vi-rVN', 'zh-rCN', 'zh-rTW'
-        ]
+        localeFilters += bundledUiLanguages
     }
 
     packaging {
@@ -300,8 +300,9 @@ android {
         release {
             debuggable = false
             jniDebuggable = false
-            minifyEnabled = true
-            shrinkResources = true
+            // Quick builds retain release signing/security flags, skipping only R8/shrinking.
+            minifyEnabled = !fastPersonalBuild
+            shrinkResources = !fastPersonalBuild
             multiDexEnabled = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             matchingFallbacks = ['release', 'staging', 'debug']

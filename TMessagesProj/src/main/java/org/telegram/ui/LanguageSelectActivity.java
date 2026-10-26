@@ -464,10 +464,15 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
 
         sortedLanguages = new ArrayList<>();
         unofficialLanguages = new ArrayList<>(LocaleController.getInstance().unofficialLanguages);
+        unofficialLanguages.removeIf(info -> info != currentLocale
+                && !LocaleController.isSupportedUiLanguage(info.shortName));
 
         ArrayList<LocaleController.LocaleInfo> arrayList = LocaleController.getInstance().languages;
         for (int a = 0, size = arrayList.size(); a < size; a++) {
             LocaleController.LocaleInfo info = arrayList.get(a);
+            if (info != currentLocale && !LocaleController.isSupportedUiLanguage(info.shortName)) {
+                continue;
+            }
             if (info.serverIndex != Integer.MAX_VALUE) {
                 sortedLanguages.add(info);
             } else {

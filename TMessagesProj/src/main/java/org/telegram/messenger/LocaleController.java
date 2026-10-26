@@ -1469,6 +1469,14 @@ public class LocaleController {
         return getStringInternal(key, null, 0, res);
     }
 
+    public static boolean isSupportedUiLanguage(String languageCode) {
+        if (languageCode == null) {
+            return false;
+        }
+        String base = languageCode.toLowerCase(Locale.ROOT).split("[-_]", 2)[0];
+        return ("," + BuildConfig.UI_LANGUAGES + ",").contains("," + base + ",");
+    }
+
     /** Имя форка. */
     public static String getAppName() {
         try {
