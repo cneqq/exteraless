@@ -3,17 +3,12 @@ package app.exteraless.settings;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.text.TextUtils;
-import android.graphics.Canvas;
-import android.graphics.Path;
-import android.view.HapticFeedbackConstants;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import app.exteraless.icons.IconPacksConfig;
-import app.exteraless.icons.IconShapeHelper;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -23,58 +18,19 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 
-/**
- * About-шапка корневого экрана exteraless.
- * Порт HeaderSettingsCell из exteraGram 12.9.0: логотип 72dp,
- * название 20sp bold, версия 15sp bold с кодом сборки в скобках.
- *
- * Форма логотипа — маска лаунчера, а не жёсткий круг: на прошивке со сквирклом
- * или каплей иконка в настройках выглядит так же, как на рабочем столе
- *. Переключается долгим
- * нажатием по самому логотипу, отдельной строки нет и у exteraGram.
- */
+/** Freezgram settings header with an unmasked, aspect-preserving paper-plane logo. */
 public class AboutHeaderCell extends LinearLayout {
 
-    /** Цвет подложки иконки приложения, как R.color.ic_background в exteraGram. */
-    public static final int LOGO_BACKGROUND = 0xFFE83030;
-
-    /** Путь формы логотипа. Считается один раз, сбрасывается при смене режима. */
-    private Path shapePath;
     private final ImageView logo;
-
-    private Path shapePath() {
-        if (shapePath == null) {
-            shapePath = IconShapeHelper.getFinalIconShapePath(72, 72, 18);
-        }
-        return shapePath;
-    }
 
     public AboutHeaderCell(Context context) {
         super(context);
         setOrientation(VERTICAL);
         setGravity(Gravity.CENTER);
 
-        logo = new ImageView(context) {
-            @Override
-            public void draw(Canvas canvas) {
-                canvas.save();
-                canvas.clipPath(shapePath());
-                super.draw(canvas);
-                canvas.restore();
-            }
-        };
-        logo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        logo.setBackgroundColor(LOGO_BACKGROUND);
+        logo = new ImageView(context);
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
         logo.setImageResource(R.drawable.exteraless_icon);
-        logo.setOnLongClickListener(v -> {
-            IconPacksConfig.toggleSystemIconShape();
-            IconShapeHelper.invalidate();
-            shapePath = null;
-            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
-                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-            v.invalidate();
-            return true;
-        });
         addView(logo, LayoutHelper.createLinear(72, 72,
                 Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 40, 0, 0));
 
