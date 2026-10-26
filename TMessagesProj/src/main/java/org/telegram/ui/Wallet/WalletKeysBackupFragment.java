@@ -23,6 +23,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.ui.Wallet.GramWallet.SecretPhrase;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.Emoji;
@@ -590,9 +591,7 @@ public class WalletKeysBackupFragment extends UniversalFragment implements Notif
                         new AlertDialog.Builder(getContext(), getResourceProvider())
                             .setTitle(LocaleController.getString(R.string.WalletReplaceWalletTitle))
                             .setPositiveButton(LocaleController.getString(R.string.WalletCreateNew), (di2, w2) -> {
-                                if (!saveLocally) {
-                                    wallet.storage.wipe();
-                                }
+                                final String pastAddress = wallet.getAddress();
                                 BaseFragment previousFragment = getParentLayout() != null && getParentLayout().getFragmentStack().size() > 1
                                         ? getParentLayout().getFragmentStack().get(getParentLayout().getFragmentStack().size() - 2)
                                         : null;
@@ -600,6 +599,13 @@ public class WalletKeysBackupFragment extends UniversalFragment implements Notif
                                     if (error != null) {
                                         BulletinFactory.of(WalletKeysBackupFragment.this).showForError(error);
                                         return;
+                                    }
+                                    // Preserve the old keys if replacement fails or is cancelled.
+                                    // Storage may be null while the wallet state is unavailable.
+                                    if (!saveLocally && !TextUtils.isEmpty(pastAddress)
+                                            && !TextUtils.isEmpty(wallet.getAddress())
+                                            && !TextUtils.equals(pastAddress, wallet.getAddress())) {
+                                        new GramWalletStorage(ApplicationLoader.applicationContext, currentAccount, pastAddress).wipe();
                                     }
                                     finishFragment();
                                     if (previousFragment instanceof WalletActivity) {
