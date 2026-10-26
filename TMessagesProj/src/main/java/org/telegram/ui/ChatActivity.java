@@ -7603,10 +7603,6 @@ public class ChatActivity extends BaseFragment implements
 
                 chatListView.invalidate();
                 if (contentView != null) {
-                    // Dates and share buttons are drawn outside message bounds.
-                    // Redraw the backdrop and parent as well as the scrolling cells.
-                    contentView.invalidateBackground();
-                    contentView.invalidate();
                     contentView.updateBlurContent();
                 }
                 if (chatListThanosEffect != null) {
