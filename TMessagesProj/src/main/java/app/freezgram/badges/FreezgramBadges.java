@@ -23,7 +23,7 @@ public final class FreezgramBadges {
     }
 
     public static Drawable getDrawable(Context context) {
-        Drawable drawable = ContextCompat.getDrawable(context, R.drawable.freezgram_profile_badge);
+        Drawable drawable = ContextCompat.getDrawable(context, R.drawable.freezgram_community_badge);
         return drawable == null ? null : drawable.mutate();
     }
 

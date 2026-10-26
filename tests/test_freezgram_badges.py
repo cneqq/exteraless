@@ -32,7 +32,7 @@ class BadgeCheck {
   FreezgramBadges.showInfo(new BaseFragment(null));check(BulletinFactory.shown==0);
   FreezgramBadges.showInfo(new BaseFragment(new Context()));check(BulletinFactory.shown==1);
   check("Founder".equals(BulletinFactory.title)&&"Local community".equals(BulletinFactory.info));
-  check(ContextCompat.lastResource==R.drawable.freezgram_profile_badge);
+  check(ContextCompat.lastResource==R.drawable.freezgram_community_badge);
  }
 }
 class TLRPC {static class User {long id;boolean verified,scam,fake;}}
@@ -40,7 +40,7 @@ class Context {}
 class Drawable {Drawable mutate(){return this;}}
 class ContextCompat {static int lastResource;static Drawable getDrawable(Context c,int id){lastResource=id;return new Drawable();}}
 class R {
- static class drawable {static int freezgram_profile_badge=1;}
+ static class drawable {static int freezgram_community_badge=1;}
  static class string {static int FreezgramBadgeFounder=2,FreezgramBadgeLocalInfo=3;}
 }
 class LocaleController {static String getString(int id){return id==2?"Founder":"Local community";}}

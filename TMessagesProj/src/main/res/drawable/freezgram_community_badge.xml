@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="24dp" android:height="24dp" android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="#727C89" />
+            <stroke android:width="0.5dp" android:color="#B6C0CC" />
+            <size android:width="24dp" android:height="24dp" />
+        </shape>
+    </item>
+    <item android:width="16dp" android:height="16dp" android:gravity="center">
+        <bitmap android:src="@drawable/freezgram_profile_badge"
+            android:gravity="fill" android:tint="#F1F4F8" />
+    </item>
+</layer-list>
