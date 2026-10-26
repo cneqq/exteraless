@@ -762,7 +762,8 @@ public class LocaleController {
 
         try {
             SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-            String lang = preferences.getString("language", null);
+            // Start in Russian unless a language was explicitly selected earlier.
+            String lang = preferences.getString("language", "ru");
             if (lang != null) {
                 currentInfo = getLanguageFromDict(lang);
                 if (currentInfo != null) {
