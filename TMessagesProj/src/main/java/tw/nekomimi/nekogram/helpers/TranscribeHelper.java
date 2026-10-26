@@ -631,7 +631,7 @@ public class TranscribeHelper {
                 OkHttpClient client = getOkHttpClient();
                 RequestBody requestBody = RequestBody.create(jsonRequest, HttpClient.MEDIA_TYPE_JSON);
                 Request request = new Request.Builder()
-                        .url(endpointUrl)
+                        .url(org.telegram.messenger.SecureAiUrl.requireHttps(endpointUrl))
                         .header("Authorization", "Bearer " + apiKey)
                         .header("Content-Type", "application/json")
                         .post(requestBody)

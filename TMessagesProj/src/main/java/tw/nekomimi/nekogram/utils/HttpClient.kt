@@ -30,6 +30,8 @@ object HttpClient {
 
     val transcribeInstance: OkHttpClient by lazy {
         llmInstance.newBuilder()
+            .followRedirects(false)
+            .followSslRedirects(false)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(0, TimeUnit.SECONDS)
             .writeTimeout(0, TimeUnit.SECONDS)

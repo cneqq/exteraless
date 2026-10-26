@@ -103,7 +103,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.AutoDeleteMediaTask;
-import org.telegram.messenger.BackupAgent;
 import org.telegram.messenger.BetaUpdate;
 import org.telegram.messenger.BirthdayController;
 import org.telegram.messenger.BotGuardHelper;
@@ -770,7 +769,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             EmojiHelper.getInstance().checkEmojiPacks();
             PagePreviewRulesHelper.getInstance().checkPagePreviewRules();
         });
-        BackupAgent.requestBackup();
 
         RestrictedLanguagesSelectActivity.checkRestrictedLanguages(false);
         // Жест «назад» системы (Android 14+) обязан двигать экран на любом фрагменте.

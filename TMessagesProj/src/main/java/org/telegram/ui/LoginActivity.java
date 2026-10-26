@@ -1047,41 +1047,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     }
 
     public static Bundle loadCurrentState(boolean newAccount, int currentAccount) {
-        try {
-            Bundle bundle = new Bundle();
-            SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("logininfo2" + (newAccount ? "_" + currentAccount : ""), Context.MODE_PRIVATE);
-            Map<String, ?> params = preferences.getAll();
-            for (Map.Entry<String, ?> entry : params.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                String[] args = key.split("_\\|_");
-                if (args.length == 1) {
-                    if (value instanceof String) {
-                        bundle.putString(key, (String) value);
-                    } else if (value instanceof Integer) {
-                        bundle.putInt(key, (Integer) value);
-                    } else if (value instanceof Boolean) {
-                        bundle.putBoolean(key, (Boolean) value);
-                    }
-                } else if (args.length == 2) {
-                    Bundle inner = bundle.getBundle(args[0]);
-                    if (inner == null) {
-                        inner = new Bundle();
-                        bundle.putBundle(args[0], inner);
-                    }
-                    if (value instanceof String) {
-                        inner.putString(args[1], (String) value);
-                    } else if (value instanceof Integer) {
-                        inner.putInt(args[1], (Integer) value);
-                    } else if (value instanceof Boolean) {
-                        inner.putBoolean(args[1], (Boolean) value);
-                    }
-                }
-            }
-            return bundle;
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
+        AuthTokensHelper.clearSavedLoginState();
         return null;
     }
 
@@ -1090,34 +1056,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();
         editor.commit();
-    }
-
-    private void putBundleToEditor(Bundle bundle, SharedPreferences.Editor editor, String prefix) {
-        Set<String> keys = bundle.keySet();
-        for (String key : keys) {
-            Object obj = bundle.get(key);
-            if (obj instanceof String) {
-                if (prefix != null) {
-                    editor.putString(prefix + "_|_" + key, (String) obj);
-                } else {
-                    editor.putString(key, (String) obj);
-                }
-            } else if (obj instanceof Integer) {
-                if (prefix != null) {
-                    editor.putInt(prefix + "_|_" + key, (Integer) obj);
-                } else {
-                    editor.putInt(key, (Integer) obj);
-                }
-            } else if (obj instanceof Boolean) {
-                if (prefix != null) {
-                    editor.putBoolean(prefix + "_|_" + key, (Boolean) obj);
-                } else {
-                    editor.putBoolean(key, (Boolean) obj);
-                }
-            } else if (obj instanceof Bundle) {
-                putBundleToEditor((Bundle) obj, editor, key);
-            }
-        }
     }
 
     @Override
@@ -1634,24 +1572,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
     @Override
     public void saveSelfArgs(Bundle outState) {
-        try {
-            Bundle bundle = new Bundle();
-            bundle.putInt("currentViewNum", currentViewNum);
-            bundle.putInt("syncContacts", syncContacts ? 1 : 0);
-            for (int a = 0; a <= currentViewNum; a++) {
-                SlideView v = views[a];
-                if (v != null) {
-                    v.saveStateParams(bundle);
-                }
-            }
-            SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("logininfo2" + (newAccount ? "_" + currentAccount : ""), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.clear();
-            putBundleToEditor(bundle, editor, null);
-            editor.commit();
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
+        // Login progress stays in memory; process death requires a fresh login flow.
+        clearCurrentState();
     }
 
     private void needFinishActivity(boolean afterSignup, boolean showSetPasswordConfirm, int otherwiseRelogin) {
@@ -3183,9 +3105,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                     if (settings.logout_tokens == null) {
                         settings.logout_tokens = new ArrayList<>();
-                    }
-                    if (BuildVars.DEBUG_VERSION) {
-                        FileLog.d("login token to check " + new String(loginTokens.get(i).future_auth_token, StandardCharsets.UTF_8));
                     }
                     settings.logout_tokens.add(loginTokens.get(i).future_auth_token);
                     if (settings.logout_tokens.size() >= 20) {
@@ -5299,10 +5218,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
         @Override
         public void saveStateParams(Bundle bundle) {
-            String code = codeFieldContainer.getCode();
-            if (code.length() != 0) {
-                bundle.putString("smsview_code_" + currentType, code);
-            }
             if (catchedPhone != null) {
                 bundle.putString("catchedPhone", catchedPhone);
             }
@@ -5326,10 +5241,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             String catched = bundle.getString("catchedPhone");
             if (catched != null) {
                 catchedPhone = catched;
-            }
-            String code = bundle.getString("smsview_code_" + currentType);
-            if (code != null && codeFieldContainer.codeField != null) {
-                codeFieldContainer.setText(code);
             }
             int t = bundle.getInt("time");
             if (t != 0) {
@@ -5771,10 +5682,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
         @Override
         public void saveStateParams(Bundle bundle) {
-            String code = codeField.getText().toString();
-            if (code.length() != 0) {
-                bundle.putString("passview_code", code);
-            }
             if (currentParams != null) {
                 bundle.putBundle("passview_params", currentParams);
             }
@@ -5785,10 +5692,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             currentParams = bundle.getBundle("passview_params");
             if (currentParams != null) {
                 setParams(currentParams, true);
-            }
-            String code = bundle.getString("passview_code");
-            if (code != null) {
-                codeField.setText(code);
             }
         }
     }
@@ -10432,7 +10335,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                             purpose.phone_number = phone;
                             purpose.premium_days = premium_days;
 
-                            FileLog.d("LoginBilling found \"" + product + "\" product, with currency=" + purpose.currency + " amount=" + purpose.amount + "; phone=" + phone + ", phone_code_hash=" + phoneHash);
+                            FileLog.d("LoginBilling found \"" + product + "\" product, with currency=" + purpose.currency + " amount=" + purpose.amount);
 
                             final TLRPC.TL_payments_canPurchaseStore req = new TLRPC.TL_payments_canPurchaseStore();
                             req.purpose = purpose;

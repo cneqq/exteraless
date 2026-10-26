@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class BuildVars {
 
-    public static boolean DEBUG_VERSION = BuildConfig.BUILD_TYPE.equals("debug");
+    public static final boolean DEBUG_VERSION = BuildConfig.BUILD_TYPE.equals("debug");
     public static boolean LOGS_ENABLED = false;
     public static boolean DEBUG_PRIVATE_VERSION = false;
     public static boolean USE_CLOUD_STRINGS = true;

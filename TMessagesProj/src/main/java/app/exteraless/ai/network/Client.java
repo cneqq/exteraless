@@ -98,6 +98,8 @@ public class Client {
                 client = sharedHttpClient;
                 if (client == null) {
                     client = new OkHttpClient.Builder()
+                            .followRedirects(false)
+                            .followSslRedirects(false)
                             .connectTimeout(30, TimeUnit.SECONDS)
                             .readTimeout(5, TimeUnit.MINUTES)
                             .writeTimeout(30, TimeUnit.SECONDS)
@@ -126,7 +128,7 @@ public class Client {
         String url = base + (base.endsWith("/") ? "models" : "/models");
         final Request built;
         try {
-            Request.Builder request = new Request.Builder().url(url).get();
+            Request.Builder request = new Request.Builder().url(org.telegram.messenger.SecureAiUrl.requireHttps(url)).get();
             if (!TextUtils.isEmpty(service.getKey())) {
                 request.addHeader("Authorization", "Bearer " + service.getKey());
             }
@@ -345,7 +347,7 @@ public class Client {
         String base = Service.normalizeUrl(service.getUrl());
         String url = base + (base.endsWith("/") ? "chat/completions" : "/chat/completions");
         return new Request.Builder()
-                .url(url)
+                .url(org.telegram.messenger.SecureAiUrl.requireHttps(url))
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer " + service.getKey())
                 .addHeader("HTTP-Referer", "https://github.com/exteraless/exteraless")

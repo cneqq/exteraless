@@ -53,7 +53,6 @@ def _publish_token(token: str) -> None:
         _log(f"token written to {path}")
     except Exception as e:
         _log(f"cannot write token file: {e}")
-    _log(f"token: {token}")
 
 
 def _log(message):

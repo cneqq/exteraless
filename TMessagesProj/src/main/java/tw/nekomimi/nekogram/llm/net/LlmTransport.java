@@ -21,7 +21,10 @@ import tw.nekomimi.nekogram.utils.HttpClient;
 
 final class LlmTransport {
 
-    static final OkHttpClient HTTP_CLIENT = HttpClient.INSTANCE.getLlmInstance();
+    static final OkHttpClient HTTP_CLIENT = HttpClient.INSTANCE.getLlmInstance().newBuilder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .build();
     static final OkHttpClient TEST_HTTP_CLIENT = HTTP_CLIENT.newBuilder()
             .callTimeout(20, TimeUnit.SECONDS)
             .build();
@@ -62,6 +65,11 @@ final class LlmTransport {
         if (requestBaseUrl.isEmpty()) {
             return new Credentials("", "", "Empty base URL");
         }
+        try {
+            org.telegram.messenger.SecureAiUrl.requireHttps(requestBaseUrl);
+        } catch (IllegalArgumentException e) {
+            return new Credentials("", "", "AI endpoint must use HTTPS without URL credentials");
+        }
         String key = apiKey != null ? apiKey.trim() : "";
         if (key.isEmpty()) {
             return new Credentials(requestBaseUrl, "", getString(R.string.ApiKeyNotSet));
@@ -74,7 +82,17 @@ final class LlmTransport {
 
     static LlmResponse<String> execute(RequestFactory requestFactory, OkHttpClient client) {
         long start = System.currentTimeMillis();
-        try (Response response = client.newCall(requestFactory.create()).execute()) {
+        try {
+            Request request = requestFactory.create();
+            org.telegram.messenger.SecureAiUrl.requireHttps(request.url().toString());
+            return executeSecure(request, client, start);
+        } catch (Exception e) {
+            return new LlmResponse<>(null, e.toString(), System.currentTimeMillis() - start, 0);
+        }
+    }
+
+    private static LlmResponse<String> executeSecure(Request request, OkHttpClient client, long start) {
+        try (Response response = client.newCall(request).execute()) {
             String body = response.body().string();
             long duration = System.currentTimeMillis() - start;
             int code = response.code();

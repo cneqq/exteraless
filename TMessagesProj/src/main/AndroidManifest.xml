@@ -111,10 +111,11 @@
 
     <application
         android:name="org.telegram.messenger.ApplicationLoader"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/personal_data_extraction_rules"
         android:appCategory="social"
         android:restoreAnyVersion="true"
-        android:backupAgent=".BackupAgent"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher_exteraless"
         android:label="${appLabel}"

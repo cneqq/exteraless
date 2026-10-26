@@ -304,6 +304,7 @@ public class ApplicationLoader extends Application implements CameraXConfig.Prov
             app.exteraless.debug.EnergyProfiler.resumeIfEnabled(applicationContext);
         }
         SharedPrefsHelper.init(applicationContext);
+        AuthTokensHelper.clearSavedLoginState();
         if (!BuildConfig.ISOLATED_BUILD) {
             FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(AndroidUtil.shouldEnableCrashlytics());
         }
