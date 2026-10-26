@@ -186,7 +186,7 @@ public class OpenExteraSettingsActivity extends BaseNekoSettingsActivity {
             getMessagesController().openByUserName("freezgram", this, 1);
         } else if (position == sourceRow) {
             org.telegram.messenger.browser.Browser.openUrl(getParentActivity(),
-                    "https://github.com/cneqq/exteraless");
+                    "https://github.com/cneqq/freezgram");
         } else if (position == upstreamRow) {
             org.telegram.messenger.browser.Browser.openUrl(getParentActivity(),
                     "https://github.com/exteraless/exteraless");
@@ -241,7 +241,7 @@ public class OpenExteraSettingsActivity extends BaseNekoSettingsActivity {
                                 "@freezgram", R.drawable.msg_channel, true);
                     } else if (position == sourceRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.OpenExteraSource),
-                                "cneqq/exteraless", R.drawable.msg_language, true);
+                                "cneqq/freezgram", R.drawable.msg_language, true);
                     } else if (position == upstreamRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.FreezgramUpstream),
                                 "exteraless", R.drawable.msg_language, false);
