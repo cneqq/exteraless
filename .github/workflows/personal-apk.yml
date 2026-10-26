@@ -2,15 +2,6 @@ name: Personal release APK
 
 on:
   workflow_dispatch:
-    inputs:
-      telegram_credentials:
-        description: Use personal TG_API_ID and TG_API_HASH Secrets instead of upstream API defaults
-        type: boolean
-        default: false
-      personal_signing:
-        description: Use personal RELEASE_KEYSTORE and signing Secrets (otherwise temporary test signature)
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -26,30 +17,34 @@ jobs:
     timeout-minutes: 120
     env:
       NATIVE_TARGET: arm64-v8a
-      PERSONAL_BUILD_ID: b${{ github.run_id }}a${{ github.run_attempt }}
-      PERSONAL_BUILD_LABEL: "exteraless #${{ github.run_number }}.${{ github.run_attempt }}"
+      PERSONAL_BUILD_ID: personal
+      PERSONAL_BUILD_LABEL: exteraless Personal
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 2G
       CCACHE_COMPILERCHECK: content
       CCACHE_BASEDIR: ${{ github.workspace }}
     steps:
-      - name: Check Telegram credentials before downloading sources
-        if: ${{ inputs.telegram_credentials }}
+      - name: Check Telegram and signing Secrets before downloading sources
         shell: bash
         env:
-          TG_API_ID: ${{ secrets.TG_API_ID }}
-          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
         run: |
           python3 - <<'PYCODE'
           import os
           import re
-          api_id = os.environ.get('TG_API_ID', '')
-          api_hash = os.environ.get('TG_API_HASH', '')
+          api_id = os.environ.get('API_ID', '')
+          api_hash = os.environ.get('API_HASH', '')
           if not re.fullmatch(r'[1-9][0-9]{0,9}', api_id) or int(api_id) > 2147483647:
-              raise SystemExit('Missing or invalid TG_API_ID. Add it at Settings > Secrets and variables > Actions in cneqq/exteraless.')
+              raise SystemExit('Missing or invalid API_ID. Add it at Settings > Secrets and variables > Actions in cneqq/exteraless.')
           if not re.fullmatch(r'[0-9a-fA-F]{32}', api_hash):
-              raise SystemExit('Missing or invalid TG_API_HASH. Add it at Settings > Secrets and variables > Actions in cneqq/exteraless.')
-          print('Telegram application credentials are configured; their values are hidden.')
+              raise SystemExit('Missing or invalid API_HASH. Add it at Settings > Secrets and variables > Actions in cneqq/exteraless.')
+          for name in ('RELEASE_KEYSTORE', 'KEYSTORE_PASS'):
+              if not os.environ.get(name):
+                  raise SystemExit('Missing signing Secret: ' + name + '. See docs/PERSONAL_BUILD.md. Temporary signing is disabled.')
+          print('Telegram and signing Secrets are present; their values are hidden.')
           PYCODE
 
       - name: Checkout with pinned submodules
@@ -105,6 +100,12 @@ jobs:
           workers = max(1, min(4, os.cpu_count() or 2))
           with open(os.environ['GITHUB_ENV'], 'a') as f:
               f.write(f'BUILD_HEAP_GIB={heap}\nBUILD_WORKERS={workers}\n')
+          attempt = int(os.environ['GITHUB_RUN_ATTEMPT'])
+          version_code = 1_000_000 + 1000 * int(os.environ['GITHUB_RUN_NUMBER']) + attempt
+          if not 0 < attempt < 1000 or not 0 < version_code <= 2_100_000_000:
+              raise SystemExit('Version code is out of range.')
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write(f'PERSONAL_VERSION_CODE={version_code}\n')
           print(f'Runner memory: {memory_gib} GiB; Gradle heap: {heap} GiB; workers: {workers}')
           PYSETTINGS
 
@@ -137,10 +138,8 @@ jobs:
       - name: Configure build
         shell: bash
         env:
-          USE_TELEGRAM: ${{ inputs.telegram_credentials }}
-          USE_SIGNING: ${{ inputs.personal_signing }}
-          TG_API_ID: ${{ secrets.TG_API_ID }}
-          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
           RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
           KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
           ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
@@ -155,30 +154,26 @@ jobs:
               encoded = value.encode('utf-16-be')
               return ''.join('\\u' + encoded[i:i+2].hex() for i in range(0, len(encoded), 2))
           props = {'sdk.dir': os.environ['ANDROID_HOME']}
-          if os.environ['USE_TELEGRAM'] == 'true':
-              api_id = os.environ.get('TG_API_ID', '')
-              api_hash = os.environ.get('TG_API_HASH', '')
-              if not re.fullmatch(r'[1-9][0-9]{0,9}', api_id) or int(api_id) > 2147483647:
-                  raise SystemExit('Set TG_API_ID in this repository Actions Secrets.')
-              if not re.fullmatch(r'[0-9a-fA-F]{32}', api_hash):
-                  raise SystemExit('Set TG_API_HASH in this repository Actions Secrets.')
-              props.update(TELEGRAM_APP_ID=api_id, TELEGRAM_APP_HASH=api_hash)
-          else:
-              # Keep the Telegram API defaults already defined by upstream.
-              source = Path('TMessagesProj/build.gradle').read_text()
-              api_id = re.search(r"def appId = '([0-9]+)'", source)
-              api_hash = re.search(r"def appHash = '([0-9a-fA-F]{32})'", source)
-              if not api_id or int(api_id.group(1)) <= 0 or not api_hash:
-                  raise SystemExit('Upstream Telegram API defaults are missing or invalid.')
-              print('Using Telegram application API defaults from upstream source.')
-          if os.environ['USE_SIGNING'] == 'true':
-              for key in ('RELEASE_KEYSTORE', 'KEYSTORE_PASS', 'ALIAS_NAME', 'ALIAS_PASS'):
-                  if not os.environ.get(key):
-                      raise SystemExit('Missing personal signing Secret: ' + key)
-              key_file = Path('TMessagesProj/release.keystore')
-              key_file.touch(mode=0o600)
-              key_file.write_bytes(base64.b64decode(os.environ['RELEASE_KEYSTORE'], validate=True))
-              props.update({key: os.environ[key] for key in ('KEYSTORE_PASS', 'ALIAS_NAME', 'ALIAS_PASS')})
+          api_id = os.environ.get('API_ID', '')
+          api_hash = os.environ.get('API_HASH', '')
+          if not re.fullmatch(r'[1-9][0-9]{0,9}', api_id) or int(api_id) > 2147483647:
+              raise SystemExit('Set API_ID in this repository Actions Secrets.')
+          if not re.fullmatch(r'[0-9a-fA-F]{32}', api_hash):
+              raise SystemExit('Set API_HASH in this repository Actions Secrets.')
+          props.update(TELEGRAM_APP_ID=api_id, TELEGRAM_APP_HASH=api_hash)
+          for key in ('RELEASE_KEYSTORE', 'KEYSTORE_PASS'):
+              if not os.environ.get(key):
+                  raise SystemExit('Missing personal signing Secret: ' + key)
+          key_file = Path('TMessagesProj/release.keystore')
+          key_file.touch(mode=0o600)
+          key_file.write_bytes(base64.b64decode(os.environ['RELEASE_KEYSTORE'], validate=True))
+          props.update(KEYSTORE_PASS=os.environ['KEYSTORE_PASS'],
+                       ALIAS_NAME=os.environ.get('ALIAS_NAME') or 'personal',
+                       ALIAS_PASS=os.environ.get('ALIAS_PASS') or os.environ['KEYSTORE_PASS'])
+          import subprocess
+          subprocess.run(['keytool', '-list', '-keystore', str(key_file),
+                          '-storepass:env', 'KEYSTORE_PASS', '-alias', props['ALIAS_NAME']],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
           path = Path('local.properties')
           path.touch(mode=0o600)
           path.write_text(''.join(f'{k}={property_value(v)}\n' for k, v in props.items()))
@@ -198,6 +193,9 @@ jobs:
 
       - name: Verify APK contents, manifest and signature
         shell: bash
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
         run: |
           set -euo pipefail
           mkdir -p artifact
@@ -216,11 +214,13 @@ jobs:
           shutil.copyfile(apks[0], apk)
           tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0'
           manifest = subprocess.check_output([str(tools / 'aapt2'), 'dump', 'badging', str(apk)], text=True)
-          expected_package = 'com.exteraless.app.' + os.environ['PERSONAL_BUILD_ID']
+          expected_package = 'com.exteraless.app.personal'
           if f"package: name='{expected_package}'" not in manifest:
-              raise SystemExit('APK package is not unique to this workflow run.')
+              raise SystemExit('APK does not use the stable personal package.')
           if os.environ['PERSONAL_BUILD_LABEL'] not in manifest:
-              raise SystemExit('APK launcher label is missing the build number.')
+              raise SystemExit('APK launcher label does not identify the personal app.')
+          if f"versionCode='{os.environ['PERSONAL_VERSION_CODE']}'" not in manifest:
+              raise SystemExit('APK version code does not match this run.')
           if 'application-debuggable' in manifest:
               raise SystemExit('Release APK must not be debuggable.')
           if 'arm64-v8a' not in manifest:
@@ -228,19 +228,26 @@ jobs:
           with zipfile.ZipFile(apk) as z:
               if 'lib/arm64-v8a/libtmessages.49.so' not in z.namelist():
                   raise SystemExit('Native Telegram/wallet library is missing.')
-          subprocess.run([str(tools / 'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], check=True)
+          certificate = subprocess.check_output(['keytool', '-exportcert', '-keystore', 'TMessagesProj/release.keystore',
+                                                 '-storepass:env', 'KEYSTORE_PASS', '-alias', os.environ.get('ALIAS_NAME') or 'personal'])
+          signer_sha256 = hashlib.sha256(certificate).hexdigest()
+          signature = subprocess.check_output([str(tools / 'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], text=True)
+          if f'Signer #1 certificate SHA-256 digest: {signer_sha256}' not in signature:
+              raise SystemExit('APK was not signed with the configured personal key.')
+          print(signature)
+
           checksum = hashlib.sha256(apk.read_bytes()).hexdigest()
           Path('artifact/SHA256SUMS.txt').write_text(f'{checksum}  {apk.name}\n')
           Path('artifact/build-info.json').write_text(json.dumps({
               'commit': os.environ['GITHUB_SHA'], 'build_type': 'release', 'abi': 'arm64-v8a',
               'application_id': expected_package, 'app_label': os.environ['PERSONAL_BUILD_LABEL'],
               'firebase': False,
-              'api_source': 'personal' if '${{ inputs.telegram_credentials }}' == 'true' else 'upstream',
-              'personal_signing': '${{ inputs.personal_signing }}', 'sha256': checksum}, indent=2))
+              'api_source': 'personal', 'version_code': int(os.environ['PERSONAL_VERSION_CODE']),
+              'signer_sha256': signer_sha256, 'personal_signing': True, 'sha256': checksum}, indent=2))
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-              f.write(f'Independent app: `{expected_package}` — {os.environ["PERSONAL_BUILD_LABEL"]}\n\n')
-              f.write('Uses its own app data and login. Firebase is disabled for this package; background notifications need device verification.\n\n')
-              f.write('Telegram API source: personal Secrets if selected, otherwise upstream defaults. Signing is controlled separately.\n\n')
+              f.write(f'Stable personal app: `{expected_package}` — {os.environ["PERSONAL_BUILD_LABEL"]}\n\n')
+              f.write('Future versions with the same signing key update this app and preserve its data. Old isolated packages remain separate. Firebase is disabled; background notifications need device verification.\n\n')
+              f.write('Telegram API source: API_ID/API_HASH Secrets. A persistent personal signing key is required.\n\n')
               f.write('Plugins/updater/GramWallet are present. Login, transfers and wallet key security were not tested.\n')
           PY
           ccache --show-stats
@@ -248,7 +255,7 @@ jobs:
       - name: Upload APK only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: exteraless-arm64-personal-api-${{ inputs.telegram_credentials }}-${{ github.run_id }}
+          name: exteraless-arm64-personal-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifact/
           if-no-files-found: error
           retention-days: 3

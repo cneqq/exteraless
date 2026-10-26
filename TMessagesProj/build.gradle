@@ -10,9 +10,9 @@ plugins {
     id 'idea'
 }
 
-// Every CI run can install beside previous versions. Java/JNI namespaces stay stable.
+// Personal CI uses a stable package and signing key. Java/JNI namespaces stay stable.
 def personalBuildId = System.getenv('PERSONAL_BUILD_ID') ?: ''
-if (!personalBuildId.isBlank() && !(personalBuildId ==~ /b[0-9]+a[0-9]+/)) {
+if (!personalBuildId.isBlank() && !(personalBuildId ==~ /(?:personal|b[0-9]+a[0-9]+)/)) {
     throw new GradleException('Invalid PERSONAL_BUILD_ID')
 }
 def isolatedBuild = !personalBuildId.isBlank()
@@ -39,7 +39,15 @@ def buildTimestamp = System.getenv('BUILD_TIMESTAMP') ?: '0'
 def commitId = System.getenv('COMMIT_ID')
 def shortCommit = commitId?.take(7) ?: ''
 def verName = "${APP_VERSION_NAME}${shortCommit ? "-${shortCommit}" : ''}"
-def verCode = 1261
+def personalVersionCode = System.getenv('PERSONAL_VERSION_CODE')
+if (personalVersionCode != null && (!(personalVersionCode ==~ /[1-9][0-9]{0,9}/)
+        || personalVersionCode.toLong() > 2100000000L)) {
+    throw new GradleException('Invalid PERSONAL_VERSION_CODE')
+}
+if (personalBuildId == 'personal' && personalVersionCode == null) {
+    throw new GradleException('Stable personal builds require PERSONAL_VERSION_CODE')
+}
+def verCode = personalVersionCode != null ? personalVersionCode.toInteger() : 1261
 
 def officialVer = APP_VERSION_NAME
 def officialCode = APP_VERSION_CODE
@@ -254,6 +262,9 @@ android {
     // local.properties; без него сборка подписывается отладочным ключом Android.
     def releaseKeystore = project.file('release.keystore')
     def hasReleaseKeystore = releaseKeystore.exists() && keystorePwd != null && alias != null
+    if (personalBuildId == 'personal' && (!hasReleaseKeystore || pwd == null)) {
+        throw new GradleException('Stable personal builds require a persistent release signing key')
+    }
 
     signingConfigs {
         release {
