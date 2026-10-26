@@ -85,6 +85,10 @@ if (nativeTarget == 'SKIP') {
 }
 
 android {
+    buildFeatures {
+        resValues = true
+    }
+
     defaultConfig.applicationId = personalPackage
     defaultConfig {
         buildConfigField 'boolean', 'ISOLATED_BUILD', isolatedBuild.toString()
