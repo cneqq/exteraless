@@ -212,7 +212,6 @@ public class OpenExteraSettingsActivity extends BaseNekoSettingsActivity {
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_ABOUT) {
                 AboutHeaderCell view = new AboutHeaderCell(mContext);
-                view.setOnLogoClickListener(v -> showDialog(new app.exteraless.updater.UpdaterSheet(OpenExteraSettingsActivity.this)));
                 // У экстеры шапка лежит на фоне окна, а не в карточке-секции.
                 view.setTag(RecyclerListView.TAG_NOT_SECTION);
                 view.setLayoutParams(new RecyclerView.LayoutParams(

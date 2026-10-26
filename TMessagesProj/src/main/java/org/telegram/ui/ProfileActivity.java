@@ -377,7 +377,6 @@ import tw.nekomimi.nekogram.helpers.PasscodeHelper;
 import tw.nekomimi.nekogram.helpers.ProfileDateHelper;
 import tw.nekomimi.nekogram.helpers.SettingsHelper;
 import tw.nekomimi.nekogram.helpers.SettingsSearchResult;
-import tw.nekomimi.nekogram.helpers.remote.UpdateHelper;
 import tw.nekomimi.nekogram.settings.NekoPasscodeSettingsActivity;
 import tw.nekomimi.nekogram.llm.LlmConfig;
 import tw.nekomimi.nekogram.menu.forum.CustomForumTabsPopupWrapper;
@@ -4813,60 +4812,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     return Unit.INSTANCE;
                 });
 
-                {
-                builder.addItem(getString(R.string.CheckUpdate), R.drawable.msg_search_solar,
-                        (it) -> {
-                            Browser.openUrl(context, "tg://update");
-                            return Unit.INSTANCE;
-                        });
-
-                String currentChannel = " - ";
-                switch (NaConfig.INSTANCE.getAutoUpdateChannel().Int()) {
-                    case UpdateHelper.UPDATE_OFF:
-                        currentChannel += getString(R.string.AutoCheckUpdateOFF);
-                        break;
-                    case UpdateHelper.UPDATE_CHANNEL_RELEASE:
-                        currentChannel += getString(R.string.AutoCheckUpdateRelease);
-                        break;
-                    case UpdateHelper.UPDATE_CHANNEL_BETA:
-                        currentChannel += getString( R.string.AutoCheckUpdateBeta);
-                        break;
-                }
-
-                builder.addItem(getString(R.string.AutoCheckUpdateSwitch) + currentChannel, R.drawable.sync_outline_28, (it) -> {
-                    BottomBuilder switchBuilder = new BottomBuilder(getParentActivity());
-                    switchBuilder.addTitle(getString(R.string.AutoCheckUpdateSwitch));
-                    switchBuilder.addRadioItem(getString(R.string.AutoCheckUpdateOFF), NaConfig.INSTANCE.getAutoUpdateChannel().Int() == UpdateHelper.UPDATE_OFF, (radioButtonCell) -> {
-                        NaConfig.INSTANCE.getAutoUpdateChannel().setConfigInt(UpdateHelper.UPDATE_OFF);
-                        switchBuilder.doRadioCheck(radioButtonCell);
-                        AndroidUtilities.runOnUIThread(() -> {
-                            switchBuilder.dismiss();
-                            UpdateHelper.cleanAppUpdate();
-                        }, 500);
-                        return Unit.INSTANCE;
-                    });
-                    switchBuilder.addRadioItem(getString(R.string.AutoCheckUpdateRelease), NaConfig.INSTANCE.getAutoUpdateChannel().Int() == UpdateHelper.UPDATE_CHANNEL_RELEASE, (radioButtonCell) -> {
-                        NaConfig.INSTANCE.getAutoUpdateChannel().setConfigInt(UpdateHelper.UPDATE_CHANNEL_RELEASE);
-                        switchBuilder.doRadioCheck(radioButtonCell);
-                        AndroidUtilities.runOnUIThread(() -> {
-                            switchBuilder.dismiss();
-                            Browser.openUrl(context, "tg://update");
-                        }, 500);
-                        return Unit.INSTANCE;
-                    });
-                    switchBuilder.addRadioItem(getString(R.string.AutoCheckUpdateBeta), NaConfig.INSTANCE.getAutoUpdateChannel().Int() == UpdateHelper.UPDATE_CHANNEL_BETA, (radioButtonCell) -> {
-                        NaConfig.INSTANCE.getAutoUpdateChannel().setConfigInt(UpdateHelper.UPDATE_CHANNEL_BETA);
-                        switchBuilder.doRadioCheck(radioButtonCell);
-                        AndroidUtilities.runOnUIThread(() -> {
-                            switchBuilder.dismiss();
-                            Browser.openUrl(context, "tg://update");
-                        }, 500);
-                        return Unit.INSTANCE;
-                    });
-                    showDialog(switchBuilder.create());
-                    return Unit.INSTANCE;
-                });
-                }
                 builder.show();
             } else if (position == premiumRow) {
                 presentFragment(new PremiumPreviewFragment("settings"));
@@ -4972,7 +4917,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 null, // BuildVars.DEBUG_PRIVATE_VERSION || ApplicationLoader.isStandaloneBuild() ? getString(R.string.DebugMenuCheckAppUpdate) : null,
                                 getString(R.string.DebugMenuReadAllDialogs),
                                 BuildVars.DEBUG_PRIVATE_VERSION ? SharedConfig.disableVoiceAudioEffects ? "Enable voip audio effects" : "Disable voip audio effects" : null,
-                                getString(R.string.DebugMenuCleanAppUpdate),
+                                null, // App updater removed; preserve debug-menu indices.
                                 BuildVars.DEBUG_PRIVATE_VERSION ? "Reset suggestions" : null,
                                 BuildVars.DEBUG_PRIVATE_VERSION ? getString(R.string.DebugMenuClearWebViewCache) : null,
                                 getString(R.string.DebugMenuClearWebViewCookies),
@@ -5080,7 +5025,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             } else if (which == 11) { // Voip audio effects
                                 SharedConfig.toggleDisableVoiceAudioEffects();
                             } else if (which == 12) { // Clean app update
-                                UpdateHelper.cleanAppUpdate();
+                                SharedConfig.setNewAppVersionAvailable(null);
                             } else if (which == 13) { // Reset suggestions
                                 Set<String> suggestions = getMessagesController().pendingSuggestions;
                                 suggestions.add("VALIDATE_PHONE_NUMBER");

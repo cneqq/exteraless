@@ -348,4 +348,5 @@
     <string name="ImportAyuDBAlert">Текущая база данных сообщений будет заменена. После импорта приложение перезапустится.</string>
     <string name="DisableSwipeToNext">Отключить переход к следующему</string>
     <string name="IconReplacementRemix">Remix Icons от @Remixicon</string>
+    <string name="ManualAppUpdatesOnly">Обновления устанавливаются вручную вне приложения.</string>
 </resources>

@@ -4267,6 +4267,9 @@ public class AndroidUtilities {
         if (f == null || f != null && !f.exists()) {
             f = FileLoader.getInstance(UserConfig.selectedAccount).getPathToMessage(message.messageOwner);
         }
+        if (isApkFile(f, fileName, document.mime_type)) {
+            return;
+        }
         if (f != null && f.exists()) {
             // exteraless plugins: плагин может перехватить открытие файла по расширению.
             if (app.exteraless.plugins.files.FilesControllerJava.dispatchOpenFile(f, fileName, document.mime_type, message, activity, parentFragment, UserConfig.selectedAccount)) {
@@ -4345,7 +4348,16 @@ public class AndroidUtilities {
         }
     }
 
+    private static boolean isApkFile(File file, String fileName, String mimeType) {
+        return "application/vnd.android.package-archive".equalsIgnoreCase(mimeType)
+                || (fileName != null && fileName.toLowerCase(Locale.ROOT).endsWith(".apk"))
+                || (file != null && file.getName().toLowerCase(Locale.ROOT).endsWith(".apk"));
+    }
+
     public static boolean openForView(File f, String fileName, String mimeType, final Activity activity, Theme.ResourcesProvider resourcesProvider, boolean restrict) {
+        if (isApkFile(f, fileName, mimeType)) {
+            return true;
+        }
         if (f != null && f.exists()) {
             // exteraless plugins: плагин может перехватить открытие файла по расширению.
             if (app.exteraless.plugins.files.FilesControllerJava.dispatchOpenFile(f, fileName, mimeType, null, activity, null, UserConfig.selectedAccount)) {
@@ -4367,13 +4379,6 @@ public class AndroidUtilities {
                     if (realMimeType == null || realMimeType.length() == 0) {
                         realMimeType = null;
                     }
-                }
-            }
-            if (realMimeType != null && realMimeType.equals("application/vnd.android.package-archive")) {
-                if (restrict) return true;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !ApplicationLoader.applicationContext.getPackageManager().canRequestPackageInstalls()) {
-                    AlertsCreator.createApkRestrictedDialog(activity, resourcesProvider).show();
-                    return true;
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

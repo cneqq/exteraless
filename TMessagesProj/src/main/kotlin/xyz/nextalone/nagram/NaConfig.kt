@@ -1243,7 +1243,7 @@ object NaConfig {
         addConfig(
             "AutoUpdateChannel",
             ConfigItem.configTypeInt,
-            1 // 0: off; 1: release; 2: beta
+            0 // Legacy preference retained for compatibility; app updater removed.
         )
     val sendLockedCustomEmojiAsSticker =
         addConfig(

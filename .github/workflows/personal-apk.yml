@@ -221,6 +221,8 @@ jobs:
               raise SystemExit('APK launcher label does not identify the personal app.')
           if f"versionCode='{os.environ['PERSONAL_VERSION_CODE']}'" not in manifest:
               raise SystemExit('APK version code does not match this run.')
+          if 'android.permission.REQUEST_INSTALL_PACKAGES' in manifest:
+              raise SystemExit('APK installation permission must not be present.')
           if 'application-debuggable' in manifest:
               raise SystemExit('Release APK must not be debuggable.')
           if 'arm64-v8a' not in manifest:
@@ -248,7 +250,7 @@ jobs:
               f.write(f'Stable personal app: `{expected_package}` — {os.environ["PERSONAL_BUILD_LABEL"]}\n\n')
               f.write('Future versions with the same signing key update this app and preserve its data. Old isolated packages remain separate. Firebase is disabled; background notifications need device verification.\n\n')
               f.write('Telegram API source: API_ID/API_HASH Secrets. A persistent personal signing key is required.\n\n')
-              f.write('Plugins/updater/GramWallet are present. Login, transfers and wallet key security were not tested.\n')
+              f.write('The app updater and APK installation are removed. Plugins/GramWallet remain. Login, transfers and wallet key security were not tested.\n')
           PY
           ccache --show-stats
 

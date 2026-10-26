@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import tw.nekomimi.nekogram.helpers.remote.UpdateHelper;
 
 public class FileRefController extends BaseController {
 
@@ -649,15 +648,8 @@ public class FileRefController extends BaseController {
                 }
                 favStickersWaiter.add(new Waiter(locationKey, parentKey));
             } else if ("update".equals(string)) {
-                UpdateHelper.getInstance().checkNewVersionAvailable((response, error) -> {
-                    if (error != null) {
-                        TLRPC.TL_error error1 = new TLRPC.TL_error();
-                        error1.text = error;
-                        onRequestComplete(locationKey, parentKey, response, error1, true, false);
-                    } else {
-                        onRequestComplete(locationKey, parentKey, response, null, true, false);
-                    }
-                });
+                // Never re-fetch old app-update documents from the developer's channel.
+                onRequestComplete(locationKey, parentKey, null, null, true, false);
             } else if (string.startsWith("avatar_")) {
                 long id = Utilities.parseLong(string);
                 if (id > 0) {

@@ -172,7 +172,6 @@ import tw.nekomimi.nekogram.NekoConfig;
 import tw.nekomimi.nekogram.helpers.MainTabsHelper;
 import tw.nekomimi.nekogram.helpers.MonetHelper;
 import tw.nekomimi.nekogram.helpers.PasscodeHelper;
-import tw.nekomimi.nekogram.helpers.remote.UpdateHelper;
 import tw.nekomimi.nekogram.settings.NekoSettingsActivity;
 import tw.nekomimi.nekogram.ui.BottomBuilder;
 import tw.nekomimi.nekogram.utils.AndroidUtil;
@@ -1714,59 +1713,6 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             }
         }
 
-        {
-        builder.addItem(getString(R.string.CheckUpdate), R.drawable.msg_search_solar, (it) -> {
-            Browser.openUrl(getContext(), "tg://update");
-            return Unit.INSTANCE;
-        });
-
-        String currentChannel = " - ";
-        switch (NaConfig.INSTANCE.getAutoUpdateChannel().Int()) {
-            case UpdateHelper.UPDATE_OFF:
-                currentChannel += getString(R.string.AutoCheckUpdateOFF);
-                break;
-            case UpdateHelper.UPDATE_CHANNEL_RELEASE:
-                currentChannel += getString(R.string.AutoCheckUpdateRelease);
-                break;
-            case UpdateHelper.UPDATE_CHANNEL_BETA:
-                currentChannel += getString(R.string.AutoCheckUpdateBeta);
-                break;
-        }
-
-        builder.addItem(getString(R.string.AutoCheckUpdateSwitch) + currentChannel, R.drawable.sync_outline_28, (it) -> {
-            BottomBuilder switchBuilder = new BottomBuilder(getParentActivity());
-            switchBuilder.addTitle(getString(R.string.AutoCheckUpdateSwitch));
-            switchBuilder.addRadioItem(getString(R.string.AutoCheckUpdateOFF), NaConfig.INSTANCE.getAutoUpdateChannel().Int() == UpdateHelper.UPDATE_OFF, (radioButtonCell) -> {
-                NaConfig.INSTANCE.getAutoUpdateChannel().setConfigInt(UpdateHelper.UPDATE_OFF);
-                switchBuilder.doRadioCheck(radioButtonCell);
-                AndroidUtilities.runOnUIThread(() -> {
-                    switchBuilder.dismiss();
-                    UpdateHelper.cleanAppUpdate();
-                }, 500);
-                return Unit.INSTANCE;
-            });
-            switchBuilder.addRadioItem(getString(R.string.AutoCheckUpdateRelease), NaConfig.INSTANCE.getAutoUpdateChannel().Int() == UpdateHelper.UPDATE_CHANNEL_RELEASE, (radioButtonCell) -> {
-                NaConfig.INSTANCE.getAutoUpdateChannel().setConfigInt(UpdateHelper.UPDATE_CHANNEL_RELEASE);
-                switchBuilder.doRadioCheck(radioButtonCell);
-                AndroidUtilities.runOnUIThread(() -> {
-                    switchBuilder.dismiss();
-                    Browser.openUrl(getContext(), "tg://update");
-                }, 500);
-                return Unit.INSTANCE;
-            });
-            switchBuilder.addRadioItem(getString(R.string.AutoCheckUpdateBeta), NaConfig.INSTANCE.getAutoUpdateChannel().Int() == UpdateHelper.UPDATE_CHANNEL_BETA, (radioButtonCell) -> {
-                NaConfig.INSTANCE.getAutoUpdateChannel().setConfigInt(UpdateHelper.UPDATE_CHANNEL_BETA);
-                switchBuilder.doRadioCheck(radioButtonCell);
-                AndroidUtilities.runOnUIThread(() -> {
-                    switchBuilder.dismiss();
-                    Browser.openUrl(getContext(), "tg://update");
-                }, 500);
-                return Unit.INSTANCE;
-            });
-            showDialog(switchBuilder.create());
-            return Unit.INSTANCE;
-        });
-        }
         builder.show();
     }
 
@@ -1794,7 +1740,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 null, // BuildVars.DEBUG_PRIVATE_VERSION || ApplicationLoader.isStandaloneBuild() ? getString(R.string.DebugMenuCheckAppUpdate) : null,
                 getString(R.string.DebugMenuReadAllDialogs),
                 BuildVars.DEBUG_PRIVATE_VERSION ? SharedConfig.disableVoiceAudioEffects ? "Enable voip audio effects" : "Disable voip audio effects" : null,
-                getString(R.string.DebugMenuCleanAppUpdate),
+                null, // App updater removed; preserve debug-menu indices.
                 BuildVars.DEBUG_PRIVATE_VERSION ? "Reset suggestions" : null,
                 BuildVars.DEBUG_PRIVATE_VERSION ? getString(R.string.DebugMenuClearWebViewCache) : null,
                 getString(R.string.DebugMenuClearWebViewCookies),
