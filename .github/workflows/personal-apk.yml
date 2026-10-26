@@ -96,7 +96,8 @@ jobs:
           import re
           from pathlib import Path
           def property_value(value):
-              return ''.join('\\u%04x' % ord(c) if c in '\\=:#! \n\r\t' or ord(c) > 126 else c for c in value)
+              encoded = value.encode('utf-16-be')
+              return ''.join('\\u' + encoded[i:i+2].hex() for i in range(0, len(encoded), 2))
           props = {'sdk.dir': os.environ['ANDROID_HOME'],
                    'TELEGRAM_APP_ID': '0', 'TELEGRAM_APP_HASH': '0' * 32}
           if os.environ['USE_TELEGRAM'] == 'true':
@@ -154,7 +155,7 @@ jobs:
           if 'arm64-v8a' not in manifest:
               raise SystemExit('APK is missing the ARM64 ABI.')
           with zipfile.ZipFile(apk) as z:
-              if 'lib/arm64-v8a/libtmessages.so' not in z.namelist():
+              if 'lib/arm64-v8a/libtmessages.49.so' not in z.namelist():
                   raise SystemExit('Native Telegram/wallet library is missing.')
           subprocess.run([str(tools / 'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], check=True)
           checksum = hashlib.sha256(apk.read_bytes()).hexdigest()
