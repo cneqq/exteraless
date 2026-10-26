@@ -32,22 +32,6 @@ public final class AppIcons {
     // пока все подписи пустые, строка под названием не показывается
     static {
         DESCRIPTIONS.put("EXTERALESS", R.string.AppIconInfoExteraless);
-        DESCRIPTIONS.put("BLUEPRINT", R.string.AppIconInfoBlueprint);
-        DESCRIPTIONS.put("RED", R.string.AppIconInfoRed);
-        DESCRIPTIONS.put("NYA", R.string.AppIconInfoNya);
-        DESCRIPTIONS.put("AYU", R.string.AppIconInfoAyu);
-        DESCRIPTIONS.put("QUACK", R.string.AppIconInfoQuack);
-        DESCRIPTIONS.put("GO", R.string.AppIconInfoGo);
-        DESCRIPTIONS.put("HAND", R.string.AppIconInfoHand);
-        DESCRIPTIONS.put("MONO", R.string.AppIconInfoMono);
-        DESCRIPTIONS.put("NOTHING", R.string.AppIconInfoNothing);
-        DESCRIPTIONS.put("PLUS", R.string.AppIconInfoPlus);
-        DESCRIPTIONS.put("TELEGRAM", R.string.AppIconInfoTelegram);
-        DESCRIPTIONS.put("VINTAGE", R.string.AppIconInfoVintage);
-        DESCRIPTIONS.put("AQUA", R.string.AppIconInfoAqua);
-        DESCRIPTIONS.put("PREMIUM", R.string.AppIconInfoPremium);
-        DESCRIPTIONS.put("TURBO", R.string.AppIconInfoTurbo);
-        DESCRIPTIONS.put("NOX", R.string.AppIconInfoNox);
     }
 
     private AppIcons() {

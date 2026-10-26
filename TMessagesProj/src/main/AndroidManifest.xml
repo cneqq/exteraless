@@ -188,8 +188,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.BlueprintIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_blueprint"
-            android:roundIcon="@mipmap/ic_launcher_blueprint_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -204,8 +204,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.RedIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_red"
-            android:roundIcon="@mipmap/ic_launcher_red_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -220,8 +220,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.NyaIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_nya"
-            android:roundIcon="@mipmap/ic_launcher_nya_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -236,8 +236,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.AyuIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_ayu"
-            android:roundIcon="@mipmap/ic_launcher_ayu_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -252,8 +252,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.QuackIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_quack"
-            android:roundIcon="@mipmap/ic_launcher_quack_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -268,8 +268,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.GoIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_go"
-            android:roundIcon="@mipmap/ic_launcher_go_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -284,8 +284,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.HandIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_hand"
-            android:roundIcon="@mipmap/ic_launcher_hand_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -300,8 +300,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.MonoIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_mono"
-            android:roundIcon="@mipmap/ic_launcher_mono_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -316,8 +316,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.NothingIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_nothing"
-            android:roundIcon="@mipmap/ic_launcher_nothing_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -332,8 +332,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.PlusIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_plus"
-            android:roundIcon="@mipmap/ic_launcher_plus_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -357,8 +357,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.TelegramIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_dr"
-            android:roundIcon="@mipmap/ic_launcher_dr_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -373,8 +373,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.VintageIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/icon_6_launcher"
-            android:roundIcon="@mipmap/icon_6_launcher_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -389,8 +389,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.AquaIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/icon_4_launcher"
-            android:roundIcon="@mipmap/icon_4_launcher_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -405,8 +405,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.PremiumIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/icon_3_launcher"
-            android:roundIcon="@mipmap/icon_3_launcher_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -421,8 +421,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.TurboIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/icon_5_launcher"
-            android:roundIcon="@mipmap/icon_5_launcher_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>
@@ -437,8 +437,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.NoxIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/icon_2_launcher"
-            android:roundIcon="@mipmap/icon_2_launcher_round"
+            android:icon="@mipmap/ic_launcher_exteraless"
+            android:roundIcon="@mipmap/ic_launcher_exteraless_round"
             android:exported="true">
 
             <intent-filter>

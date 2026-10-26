@@ -8,14 +8,24 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.R;
 
 public class LauncherIconController {
+    // Compatibility aliases keep an existing launcher entry usable during an update.
+    // They all show the Freezgram artwork and are disabled after selecting a current icon.
+    private static final String[] LEGACY_ICONS = {
+        "BlueprintIcon", "RedIcon", "NyaIcon", "AyuIcon",
+        "QuackIcon", "GoIcon", "HandIcon", "MonoIcon",
+        "NothingIcon", "PlusIcon", "TelegramIcon", "VintageIcon",
+        "AquaIcon", "PremiumIcon", "TurboIcon", "NoxIcon"
+    };
+
     public static void tryFixLauncherIconIfNeeded() {
+        LauncherIcon selected = LauncherIcon.EXTERALESS;
         for (LauncherIcon icon : LauncherIcon.values()) {
             if (isEnabled(icon)) {
-                return;
+                selected = icon;
+                break;
             }
         }
-
-        setIcon(LauncherIcon.EXTERALESS);
+        setIcon(selected);
     }
 
     public static boolean isEnabled(LauncherIcon icon) {
@@ -31,9 +41,25 @@ public class LauncherIconController {
     public static void setIcon(LauncherIcon icon) {
         Context ctx = ApplicationLoader.applicationContext;
         PackageManager pm = ctx.getPackageManager();
-        for (LauncherIcon i : LauncherIcon.values()) {
-            pm.setComponentEnabledSetting(i.getComponentName(ctx), i == icon ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        // Enable the replacement before disabling any entry, avoiding a launcher gap.
+        if (pm.getComponentEnabledSetting(icon.getComponentName(ctx)) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            pm.setComponentEnabledSetting(icon.getComponentName(ctx), PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.DONT_KILL_APP);
+        }
+        for (LauncherIcon other : LauncherIcon.values()) {
+            if (other != icon) {
+                disableIcon(pm, other.getComponentName(ctx));
+            }
+        }
+        for (String legacy : LEGACY_ICONS) {
+            disableIcon(pm, new ComponentName(ctx.getPackageName(), "org.telegram.messenger." + legacy));
+        }
+    }
+
+    private static void disableIcon(PackageManager pm, ComponentName name) {
+        if (pm.getComponentEnabledSetting(name) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+            pm.setComponentEnabledSetting(name, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
         }
     }
 
@@ -43,33 +69,8 @@ public class LauncherIconController {
         FREEZGRAM_WHITE("FreezgramWhiteIcon", R.drawable.freezgram_white_icon_background,
                 R.drawable.freezgram_white_icon_foreground, R.string.AppIconFreezgramWhite),
         FREEZGRAM_MONO_DARK("FreezgramMonoDarkIcon", R.drawable.freezgram_mono_dark_icon_background,
-                R.drawable.freezgram_mono_dark_icon_foreground, R.string.AppIconFreezgramMonoDark),
-        BLUEPRINT("BlueprintIcon", R.drawable.blueprint_icon_background,
-                R.drawable.blueprint_icon_foreground, R.string.AppIconBlueprint),
-        RED("RedIcon", R.drawable.red_icon_background,
-                R.drawable.red_icon_foreground, R.string.AppIconRed),
-        NYA("NyaIcon", R.drawable.nya_icon_background,
-                R.drawable.nya_icon_foreground, R.string.AppIconNya),
-        AYU("AyuIcon", R.drawable.ayu_icon_background,
-                R.drawable.ayu_icon_foreground, R.string.AppIconAyu),
-        QUACK("QuackIcon", R.drawable.quack_icon_background,
-                R.drawable.quack_icon_foreground, R.string.AppIconQuack),
-        GO("GoIcon", R.drawable.go_icon_background,
-                R.drawable.app_icon_empty_foreground, R.string.AppIconGo),
-        HAND("HandIcon", R.drawable.hand_icon_background,
-                R.drawable.app_icon_empty_foreground, R.string.AppIconHand),
-        MONO("MonoIcon", R.drawable.mono_icon_background,
-                R.drawable.app_icon_empty_foreground, R.string.AppIconMono),
-        NOTHING("NothingIcon", R.drawable.nothing_icon_background,
-                R.drawable.app_icon_empty_foreground, R.string.AppIconNothing),
-        PLUS("PlusIcon", R.drawable.plus_icon_background,
-                R.drawable.app_icon_empty_foreground, R.string.AppIconPlus),
-        TELEGRAM("TelegramIcon", R.drawable.icon_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconTelegramOriginal),
-        VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.mipmap.icon_6_foreground_sa, R.string.AppIconVintage),
-        AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconAqua),
-        PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground_sa, R.string.AppIconPremium),
-        TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.mipmap.icon_5_foreground_sa, R.string.AppIconTurbo),
-        NOX("NoxIcon", R.mipmap.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox);
+                R.drawable.freezgram_mono_dark_icon_foreground, R.string.AppIconFreezgramMonoDark);
+
 
         public final String key;
         public final int background;
