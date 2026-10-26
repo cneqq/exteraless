@@ -19,6 +19,8 @@ def isolatedBuild = !personalBuildId.isBlank()
 def personalPackage = isolatedBuild ? "${APP_PACKAGE}.${personalBuildId}" : APP_PACKAGE
 def personalLabel = System.getenv('PERSONAL_BUILD_LABEL') ?: 'Freezgram'
 def bundledUiLanguages = ['en', 'ru', 'uk', 'be', 'kk', 'uz', 'ky', 'tg', 'tk', 'hy', 'az', 'ro']
+// AAPT locale filtering requires explicit regional variants used by bundled strings.
+def bundledUiResourceLocales = bundledUiLanguages + ['ru-rRU', 'uk-rUA']
 if (!isolatedBuild) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'
@@ -113,7 +115,7 @@ android {
     }
 
     androidResources {
-        localeFilters += bundledUiLanguages
+        localeFilters += bundledUiResourceLocales
     }
 
     packaging {

@@ -215,6 +215,10 @@ jobs:
           shutil.copyfile(apks[0], apk)
           tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0'
           manifest = subprocess.check_output([str(tools / 'aapt2'), 'dump', 'badging', str(apk)], text=True)
+          configurations = subprocess.check_output([str(tools / 'aapt2'), 'dump', 'configurations', str(apk)], text=True).splitlines()
+          for locale in ('ru-rRU', 'uk-rUA'):
+              if not any(config.strip() == locale or config.strip().startswith(locale + '-') for config in configurations):
+                  raise SystemExit('Bundled UI translations were stripped: ' + locale)
           expected_package = 'com.exteraless.app.personal'
           if f"package: name='{expected_package}'" not in manifest:
               raise SystemExit('APK does not use the stable personal package.')
