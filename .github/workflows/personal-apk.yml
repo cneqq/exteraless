@@ -88,7 +88,9 @@ jobs:
           import os
           import subprocess
           from pathlib import Path
-          digest = hashlib.sha256(b'native-v1-arm64-ndk27.2.12479018-cmake3.31.6-python3.11')
+          digest = hashlib.sha256(b'native-v2-arm64-ndk27.2.12479018-cmake3.31.6-python3.11')
+          # CMake caches contain absolute paths: repository renames require a new entry.
+          digest.update(os.environ['GITHUB_WORKSPACE'].encode('utf-8'))
           for path in ('TMessagesProj/jni', 'TMessagesProj/chaquopy'):
               digest.update(subprocess.check_output(['git', 'rev-parse', 'HEAD:' + path]).strip())
           for path in ('TMessagesProj/build.gradle', 'build.gradle', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties'):
