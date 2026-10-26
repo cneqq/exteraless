@@ -97,5 +97,6 @@
     <string name="OEProfileJoinDateUnknown">Join date is unavailable</string>
     <string name="FreezgramForkInfo">Freezgram is a fork of exteraless.</string>
     <string name="FreezgramUpstream">Original project</string>
-    <string name="AppIconFreezgramWhite">Freezgram · White</string>
+    <string name="AppIconFreezgramWhite">Freezgram · Mono Light</string>
+    <string name="AppIconFreezgramMonoDark">Freezgram · Mono Dark</string>
 </resources>

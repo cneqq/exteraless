@@ -70,5 +70,6 @@
     <string name="AppIconsKeep">Оставить эту</string>
     <string name="FreezgramForkInfo">Freezgram — форк exteraless.</string>
     <string name="FreezgramUpstream">Исходный проект</string>
-    <string name="AppIconFreezgramWhite">Freezgram · Белая</string>
+    <string name="AppIconFreezgramWhite">Freezgram · Ч/б светлая</string>
+    <string name="AppIconFreezgramMonoDark">Freezgram · Ч/б тёмная</string>
 </resources>
