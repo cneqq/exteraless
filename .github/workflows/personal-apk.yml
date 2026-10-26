@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       telegram_credentials:
-        description: Include TG_API_ID and TG_API_HASH from this repository Secrets
+        description: Use personal TG_API_ID and TG_API_HASH Secrets instead of upstream API defaults
         type: boolean
-        default: true
+        default: false
       personal_signing:
         description: Use personal RELEASE_KEYSTORE and signing Secrets (otherwise temporary test signature)
         type: boolean
@@ -117,8 +117,7 @@ jobs:
           def property_value(value):
               encoded = value.encode('utf-16-be')
               return ''.join('\\u' + encoded[i:i+2].hex() for i in range(0, len(encoded), 2))
-          props = {'sdk.dir': os.environ['ANDROID_HOME'],
-                   'TELEGRAM_APP_ID': '0', 'TELEGRAM_APP_HASH': '0' * 32}
+          props = {'sdk.dir': os.environ['ANDROID_HOME']}
           if os.environ['USE_TELEGRAM'] == 'true':
               api_id = os.environ.get('TG_API_ID', '')
               api_hash = os.environ.get('TG_API_HASH', '')
@@ -127,6 +126,14 @@ jobs:
               if not re.fullmatch(r'[0-9a-fA-F]{32}', api_hash):
                   raise SystemExit('Set TG_API_HASH in this repository Actions Secrets.')
               props.update(TELEGRAM_APP_ID=api_id, TELEGRAM_APP_HASH=api_hash)
+          else:
+              # Keep the Telegram API defaults already defined by upstream.
+              source = Path('TMessagesProj/build.gradle').read_text()
+              api_id = re.search(r"def appId = '([0-9]+)'", source)
+              api_hash = re.search(r"def appHash = '([0-9a-fA-F]{32})'", source)
+              if not api_id or int(api_id.group(1)) <= 0 or not api_hash:
+                  raise SystemExit('Upstream Telegram API defaults are missing or invalid.')
+              print('Using Telegram application API defaults from upstream source.')
           if os.environ['USE_SIGNING'] == 'true':
               for key in ('RELEASE_KEYSTORE', 'KEYSTORE_PASS', 'ALIAS_NAME', 'ALIAS_PASS'):
                   if not os.environ.get(key):
@@ -165,8 +172,7 @@ jobs:
           apks = list(Path('TMessagesProj/build/outputs/apk/release').glob('*.apk'))
           if len(apks) != 1:
               raise SystemExit('Expected exactly one ARM64 release APK.')
-          suffix = '' if '${{ inputs.telegram_credentials }}' == 'true' else '-NO-LOGIN'
-          apk = Path(f'artifact/exteraless-arm64-release{suffix}.apk')
+          apk = Path('artifact/exteraless-arm64-release.apk')
           shutil.copyfile(apks[0], apk)
           tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0'
           manifest = subprocess.check_output([str(tools / 'aapt2'), 'dump', 'badging', str(apk)], text=True)
@@ -182,11 +188,11 @@ jobs:
           Path('artifact/SHA256SUMS.txt').write_text(f'{checksum}  {apk.name}\n')
           Path('artifact/build-info.json').write_text(json.dumps({
               'commit': os.environ['GITHUB_SHA'], 'build_type': 'release', 'abi': 'arm64-v8a',
-              'telegram_credentials': '${{ inputs.telegram_credentials }}',
+              'api_source': 'personal' if '${{ inputs.telegram_credentials }}' == 'true' else 'upstream',
               'personal_signing': '${{ inputs.personal_signing }}', 'sha256': checksum}, indent=2))
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
               f.write('ARM64 release APK built. Download artifact and verify SHA256SUMS.\n\n')
-              f.write('Personal signing and Telegram credentials are controlled by workflow inputs.\n\n')
+              f.write('Telegram API source: personal Secrets if selected, otherwise upstream defaults. Signing is controlled separately.\n\n')
               f.write('Plugins/updater/GramWallet are present. Login, transfers and wallet key security were not tested.\n')
           PY
           ccache --show-stats
@@ -194,7 +200,7 @@ jobs:
       - name: Upload APK only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: exteraless-arm64-login-${{ inputs.telegram_credentials }}-${{ github.run_id }}
+          name: exteraless-arm64-personal-api-${{ inputs.telegram_credentials }}-${{ github.run_id }}
           path: artifact/
           if-no-files-found: error
           retention-days: 3

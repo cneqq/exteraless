@@ -1,13 +1,15 @@
 # Личная ARM64 сборка
 
 Actions → Personal release APK → Run workflow → main.
-Для APK с авторизацией включить telegram_credentials и настроить два Secrets ниже.
-Проверка их наличия выполняется до скачивания исходников. Для проверки одной
-компиляции можно выключить telegram_credentials: такой APK получает суффикс NO-LOGIN,
-тестовые API ID=0/hash=0 и не поддерживает вход. Без personal_signing используется
-временный Android debug signing key. Это не debug
-build type: debug-логирование future_auth_token по условию BuildVars выключено.
-Вход в аккаунт и работа кошелька сборкой не проверяются.
+По умолчанию используются стандартные Telegram API ID/hash из исходного
+TMessagesProj/build.gradle (API ID 6). Их не заменяют нулями. Настройка
+telegram_credentials включает вместо них личные TG_API_ID/TG_API_HASH из Secrets.
+Старые сборки с API ID=0 были только проверкой компиляции и не поддерживали вход;
+их нужно заменить новой сборкой.
+
+Собирается release build type: debug-логирование future_auth_token по условию
+BuildVars выключено. Без personal_signing подпись остаётся временной, хотя режим
+сборки release. Сам вход в аккаунт и работа кошелька CI-сборкой не проверяются.
 
 Для установки нужен телефон Android 7+ с ARM64. Кошелёк GramWallet включён в исходниках;
 нативный wallet engine входит в libtmessages.49.so. Проверка этого пути не является
@@ -17,7 +19,8 @@ build type: debug-логирование future_auth_token по условию B
 
 В этом форке отдельно создать Actions Secrets TG_API_ID и TG_API_HASH.
 Workflow запишет их как TELEGRAM_APP_ID/TELEGRAM_APP_HASH в приватный local.properties.
-Включать telegram_credentials только после настройки Secrets.
+Оставить telegram_credentials выключенным для стандартных API-реквизитов upstream.
+Включать его только для собственных Secrets после их настройки.
 Не писать их в код, issues, поля запуска или сообщения CI. При компиляции эти
 значения встраиваются в APK и доступны скачавшему его человеку. В публичном форке
 Actions-артефакты могут скачать другие авторизованные пользователи GitHub.
