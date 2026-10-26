@@ -6,7 +6,7 @@ on:
       telegram_credentials:
         description: Include TG_API_ID and TG_API_HASH from this repository Secrets
         type: boolean
-        default: false
+        default: true
       personal_signing:
         description: Use personal RELEASE_KEYSTORE and signing Secrets (otherwise temporary test signature)
         type: boolean
@@ -31,6 +31,25 @@ jobs:
       CCACHE_COMPILERCHECK: content
       CCACHE_BASEDIR: ${{ github.workspace }}
     steps:
+      - name: Check Telegram credentials before downloading sources
+        if: ${{ inputs.telegram_credentials }}
+        shell: bash
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+        run: |
+          python3 - <<'PYCODE'
+          import os
+          import re
+          api_id = os.environ.get('TG_API_ID', '')
+          api_hash = os.environ.get('TG_API_HASH', '')
+          if not re.fullmatch(r'[1-9][0-9]{0,9}', api_id) or int(api_id) > 2147483647:
+              raise SystemExit('Missing or invalid TG_API_ID. Add it at Settings > Secrets and variables > Actions in cneqq/exteraless.')
+          if not re.fullmatch(r'[0-9a-fA-F]{32}', api_hash):
+              raise SystemExit('Missing or invalid TG_API_HASH. Add it at Settings > Secrets and variables > Actions in cneqq/exteraless.')
+          print('Telegram application credentials are configured; their values are hidden.')
+          PYCODE
+
       - name: Checkout with pinned submodules
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -146,7 +165,8 @@ jobs:
           apks = list(Path('TMessagesProj/build/outputs/apk/release').glob('*.apk'))
           if len(apks) != 1:
               raise SystemExit('Expected exactly one ARM64 release APK.')
-          apk = Path('artifact/exteraless-arm64-release.apk')
+          suffix = '' if '${{ inputs.telegram_credentials }}' == 'true' else '-NO-LOGIN'
+          apk = Path(f'artifact/exteraless-arm64-release{suffix}.apk')
           shutil.copyfile(apks[0], apk)
           tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0'
           manifest = subprocess.check_output([str(tools / 'aapt2'), 'dump', 'badging', str(apk)], text=True)
@@ -174,7 +194,7 @@ jobs:
       - name: Upload APK only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: exteraless-arm64-${{ github.sha }}
+          name: exteraless-arm64-login-${{ inputs.telegram_credentials }}-${{ github.run_id }}
           path: artifact/
           if-no-files-found: error
           retention-days: 3

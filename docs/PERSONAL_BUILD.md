@@ -1,8 +1,11 @@
 # Личная ARM64 сборка
 
 Actions → Personal release APK → Run workflow → main.
-Первую проверку запускать с обеими опциями выключенными. Она собирает release APK
-с тестовыми API ID=0/hash=0 и временным Android debug signing key. Это не debug
+Для APK с авторизацией включить telegram_credentials и настроить два Secrets ниже.
+Проверка их наличия выполняется до скачивания исходников. Для проверки одной
+компиляции можно выключить telegram_credentials: такой APK получает суффикс NO-LOGIN,
+тестовые API ID=0/hash=0 и не поддерживает вход. Без personal_signing используется
+временный Android debug signing key. Это не debug
 build type: debug-логирование future_auth_token по условию BuildVars выключено.
 Вход в аккаунт и работа кошелька сборкой не проверяются.
 
