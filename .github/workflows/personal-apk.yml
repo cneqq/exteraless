@@ -18,7 +18,7 @@ jobs:
     env:
       NATIVE_TARGET: arm64-v8a
       PERSONAL_BUILD_ID: personal
-      PERSONAL_APPLICATION_ID: com.exteraless.app.personal
+      PERSONAL_APPLICATION_ID: com.freezgram.app
       PERSONAL_BUILD_LABEL: Freezgram
       OPTIMIZATION_MODE: release
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -222,7 +222,7 @@ jobs:
           for locale in ('ru-rRU', 'uk-rUA'):
               if not any(config.strip() == locale or config.strip().startswith(locale + '-') for config in configurations):
                   raise SystemExit('Bundled UI translations were stripped: ' + locale)
-          expected_package = 'com.exteraless.app.personal'
+          expected_package = 'com.freezgram.app'
           if f"package: name='{expected_package}'" not in manifest:
               raise SystemExit('APK does not use the stable personal package.')
           if os.environ['PERSONAL_BUILD_LABEL'] not in manifest:
