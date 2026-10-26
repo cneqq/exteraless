@@ -3,11 +3,24 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
+    id 'com.google.gms.google-services' apply false
+    id 'com.google.firebase.crashlytics' apply false
     id 'com.chaquo.python'
     id 'org.telegram.lottie-meta'
     id 'idea'
+}
+
+// Every CI run can install beside previous versions. Java/JNI namespaces stay stable.
+def personalBuildId = System.getenv('PERSONAL_BUILD_ID') ?: ''
+if (!personalBuildId.isBlank() && !(personalBuildId ==~ /b[0-9]+a[0-9]+/)) {
+    throw new GradleException('Invalid PERSONAL_BUILD_ID')
+}
+def isolatedBuild = !personalBuildId.isBlank()
+def personalPackage = isolatedBuild ? "${APP_PACKAGE}.${personalBuildId}" : APP_PACKAGE
+def personalLabel = System.getenv('PERSONAL_BUILD_LABEL') ?: "exteraless ${personalBuildId}"
+if (!isolatedBuild) {
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
 }
 
 idea {
@@ -72,7 +85,18 @@ if (nativeTarget == 'SKIP') {
 }
 
 android {
-    defaultConfig.applicationId = APP_PACKAGE
+    defaultConfig.applicationId = personalPackage
+    defaultConfig {
+        buildConfigField 'boolean', 'ISOLATED_BUILD', isolatedBuild.toString()
+        resValue 'string', 'personal_application_id', personalPackage
+        resValue 'string', 'personal_contact_profile_mime', "vnd.android.cursor.item/vnd.${personalPackage}.android.profile"
+        resValue 'string', 'personal_contact_call_mime', "vnd.android.cursor.item/vnd.${personalPackage}.android.call"
+        resValue 'string', 'personal_contact_video_mime', "vnd.android.cursor.item/vnd.${personalPackage}.android.call.video"
+        if (isolatedBuild) {
+            resValue 'string', 'personal_app_name', personalLabel
+        }
+        manifestPlaceholders.appLabel = isolatedBuild ? '@string/personal_app_name' : '@string/NagramX'
+    }
 
     androidResources {
         localeFilters += [
@@ -311,6 +335,12 @@ def chaquopyRuntimeTasks = chaquopyAbis.collect { String abi ->
         }).withPathSensitivity(PathSensitivity.RELATIVE)
         inputs.files(targetZip).withPathSensitivity(PathSensitivity.NAME_ONLY)
         outputs.dir(outputDir)
+        // Only an exact native-input cache hit may reuse these two outputs.
+        onlyIf {
+            System.getenv('EXTERALESS_NATIVE_CACHE_HIT') != 'true' ||
+                !new File(outputDir, 'chaquopy.so').isFile() ||
+                !new File(outputDir, 'libchaquopy_java.so').isFile()
+        }
         commandLine 'bash', new File(chaquopySourceDir, 'exteraless/build.sh').path
         environment('ABI', abi)
         environment('OUT', outputDir.path)

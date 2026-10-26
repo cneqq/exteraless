@@ -1,5 +1,7 @@
 package app.exteraless.settings;
 
+import org.telegram.messenger.BuildConfig;
+
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.app.Activity;
@@ -129,7 +131,7 @@ public class OpenExteraOtherActivity extends BaseNekoSettingsActivity {
         // мёртвым. На его месте вход в настройки NagramX, выключенный по
         // умолчанию.
         googleHeaderRow = addRow("googleHeader");
-        crashReportsRow = addRow("crashReports");
+        crashReportsRow = BuildConfig.ISOLATED_BUILD ? -1 : addRow("crashReports");
         contentCaptureRow = addRow("contentCapture");
         googleDividerRow = addRow();
 
@@ -191,7 +193,7 @@ public class OpenExteraOtherActivity extends BaseNekoSettingsActivity {
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == crashReportsRow) {
+        if (crashReportsRow >= 0 && position == crashReportsRow) {
             boolean enabled = GeneralConfig.crashReports.toggleConfigBool();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(enabled);
@@ -515,7 +517,7 @@ public class OpenExteraOtherActivity extends BaseNekoSettingsActivity {
                 case TYPE_CHECK: {
                     TextCheckCell cell = (TextCheckCell) holder.itemView;
                     cell.setEnabled(true, null);
-                    if (position == crashReportsRow) {
+                    if (crashReportsRow >= 0 && position == crashReportsRow) {
                         cell.setTextAndCheck(getString(R.string.OEGeneralCrashReports),
                                 GeneralConfig.crashReports(), true);
                         cell.setIcon(R.drawable.msg_report);

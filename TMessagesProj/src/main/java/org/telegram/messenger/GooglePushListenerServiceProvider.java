@@ -28,6 +28,9 @@ public class GooglePushListenerServiceProvider implements PushListenerController
 
     @Override
     public void onRequestPushToken() {
+        if (BuildConfig.ISOLATED_BUILD) {
+            return;
+        }
         String currentPushString = SharedConfig.pushString;
         if (!TextUtils.isEmpty(currentPushString)) {
             if (BuildVars.DEBUG_PRIVATE_VERSION) {
@@ -66,6 +69,10 @@ public class GooglePushListenerServiceProvider implements PushListenerController
 
     @Override
     public boolean hasServices() {
+        // An upstream Firebase Android app cannot represent a new CI package.
+        if (BuildConfig.ISOLATED_BUILD) {
+            return false;
+        }
         if (hasServices == null) {
             try {
                 int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(ApplicationLoader.applicationContext);
