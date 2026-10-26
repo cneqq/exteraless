@@ -2,14 +2,6 @@ name: Personal release APK
 
 on:
   workflow_dispatch:
-    inputs:
-      optimization:
-        description: Quick development APK or optimized release APK
-        type: choice
-        options:
-          - quick
-          - release
-        default: quick
 
 permissions:
   contents: read
@@ -27,8 +19,7 @@ jobs:
       NATIVE_TARGET: arm64-v8a
       PERSONAL_BUILD_ID: personal
       PERSONAL_BUILD_LABEL: Freezgram
-      OPTIMIZATION_MODE: ${{ inputs.optimization || 'release' }}
-      PERSONAL_FAST_BUILD: ${{ inputs.optimization == 'quick' && 'true' || 'false' }}
+      OPTIMIZATION_MODE: release
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 2G
       CCACHE_COMPILERCHECK: content
@@ -45,8 +36,6 @@ jobs:
           python3 - <<'PYCODE'
           import os
           import re
-          if os.environ['OPTIMIZATION_MODE'] not in ('quick', 'release'):
-              raise SystemExit('Choose optimization=quick or optimization=release.')
           api_id = os.environ.get('API_ID', '')
           api_hash = os.environ.get('API_HASH', '')
           if not re.fullmatch(r'[1-9][0-9]{0,9}', api_id) or int(api_id) > 2147483647:
@@ -254,7 +243,7 @@ jobs:
           Path('artifact/SHA256SUMS.txt').write_text(f'{checksum}  {apk.name}\n')
           Path('artifact/build-info.json').write_text(json.dumps({
               'commit': os.environ['GITHUB_SHA'], 'build_type': 'release', 'abi': 'arm64-v8a',
-              'optimization': os.environ['OPTIMIZATION_MODE'], 'minified': os.environ['PERSONAL_FAST_BUILD'] != 'true',
+              'optimization': os.environ['OPTIMIZATION_MODE'], 'minified': True,
               'application_id': expected_package, 'app_label': os.environ['PERSONAL_BUILD_LABEL'],
               'firebase': False,
               'api_source': 'personal', 'version_code': int(os.environ['PERSONAL_VERSION_CODE']),
@@ -271,7 +260,7 @@ jobs:
       - name: Upload APK only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: freezgram-arm64-${{ inputs.optimization }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: freezgram-arm64-release-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifact/
           if-no-files-found: error
           retention-days: 3
