@@ -8,6 +8,8 @@
 
 package org.telegram.ui;
 
+import app.freezgram.badges.FreezgramBadges;
+
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.dpf2;
 import static org.telegram.messenger.AndroidUtilities.ilerp;
@@ -11629,6 +11631,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         return emojiStatusDrawable[a];
     }
 
+    private void setFreezgramBadge(int index) {
+        nameTextView[index].setRightDrawable2(FreezgramBadges.getDrawable(getContext()));
+        nameTextView[index].setRightDrawable2OnClick(v -> FreezgramBadges.showInfo(this));
+        nameTextViewRightDrawable2ContentDescription = FreezgramBadges.getTitle();
+    }
+
     private Drawable getBadgeDrawable(BadgeDTO badge, boolean animated, int a) {
         if (badgeDrawable[a] == null) {
             badgeDrawable[a] = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(nameTextView[a], AndroidUtilities.dp(24), a == 0 ? AnimatedEmojiDrawable.CACHE_TYPE_EMOJI_STATUS : AnimatedEmojiDrawable.CACHE_TYPE_KEYBOARD);
@@ -11910,6 +11918,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     nameTextView[a].setText(titleTextView.getText());
                     nameTextView[a].setRightDrawable(titleTextView.getRightDrawable());
                     nameTextView[a].setRightDrawable2(titleTextView.getRightDrawable2());
+                    if (FreezgramBadges.hasBadge(user)) {
+                        setFreezgramBadge(a);
+                    }
                 } else if (a == 0 && user.id != getUserConfig().getClientUserId() && !MessagesController.isSupportUser(user) && user.phone != null && user.phone.length() != 0 && getContactsController().contactsDict.get(user.id) == null &&
                         (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                     nameTextView[a].setText(PhoneFormat.getInstance().format("+" + user.phone));
@@ -11950,6 +11961,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (user.verified) {
                         nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                         nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                    } else if (FreezgramBadges.hasBadge(user)) {
+                        setFreezgramBadge(a);
                     } else if (userBadge != null) {
                         nameTextView[a].setRightDrawable2(getBadgeDrawable(userBadge, false, a));
                         nameTextView[a].setRightDrawable2OnClick(v -> BadgesController.INSTANCE.showBadgeBulletin(this, userBadge, user, resourcesProvider, currentAccount));
@@ -11989,6 +12002,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
                     } else if (user.verified) {
                         nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                    } else if (FreezgramBadges.hasBadge(user)) {
+                        setFreezgramBadge(a);
                     } else if (userBadge != null) {
                         nameTextView[a].setRightDrawable2(getBadgeDrawable(userBadge, true, a));
                         nameTextView[a].setRightDrawable2OnClick(v -> BadgesController.INSTANCE.showBadgeBulletin(this, userBadge, user, resourcesProvider, currentAccount));
