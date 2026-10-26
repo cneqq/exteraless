@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="OpenExteraInfo">Настройте клиент под себя</string>
+    <string name="OpenExteraInfo">Freezgram — форк exteraless.</string>
 
 
     <string name="OpenExteraChats">Чаты</string>
@@ -68,4 +68,6 @@
     <string name="OEProfileJoinDateUnknown">Дата вступления недоступна</string>
     <string name="AppIconsSelect">Выбрать</string>
     <string name="AppIconsKeep">Оставить эту</string>
+    <string name="FreezgramForkInfo">Freezgram — форк exteraless.</string>
+    <string name="FreezgramUpstream">Исходный проект</string>
 </resources>

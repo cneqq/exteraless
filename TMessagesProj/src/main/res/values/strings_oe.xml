@@ -2,7 +2,7 @@
 <!-- Строки фич, перенесённых из exteraGram. -->
 <resources>
     <string name="OpenExtera" translatable="false">Freezgram</string>
-    <string name="OpenExteraInfo">Make the client truly yours</string>
+    <string name="OpenExteraInfo">Freezgram is a fork of exteraless.</string>
 
 
     <string name="OpenExteraChats">Chats</string>
@@ -95,4 +95,6 @@
     <string name="OEProfileJoinedChannel">You subscribed to **%1$s** on %2$s</string>
     <string name="OEProfileChatCreated">**%1$s** was created on %2$s</string>
     <string name="OEProfileJoinDateUnknown">Join date is unavailable</string>
+    <string name="FreezgramForkInfo">Freezgram is a fork of exteraless.</string>
+    <string name="FreezgramUpstream">Original project</string>
 </resources>
