@@ -4497,15 +4497,7 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
                 if (selectedPattern != null) {
                     backgroundImage.setImage(ImageLocation.getForDocument(selectedPattern.document), imageFilter, null, null, "jpg", selectedPattern.document.size, 1, selectedPattern);
                 } else if (Theme.DEFAULT_BACKGROUND_SLUG.equals(wallPaper.slug)) {
-                    int w = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y);
-                    int h = Math.max(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y);
-                    int patternColor;
-                    if (Build.VERSION.SDK_INT >= 29) {
-                        patternColor = 0x57000000;
-                    } else {
-                        patternColor = MotionBackgroundDrawable.getPatternColor(wallPaper.color, wallPaper.gradientColor1, wallPaper.gradientColor2, wallPaper.gradientColor3);
-                    }
-                    backgroundImage.setImageBitmap(SvgHelper.getBitmap(R.raw.default_pattern, w, h, patternColor));
+                    backgroundImage.setImageBitmap((Bitmap) null);
                 }
             } else if (currentWallpaper instanceof WallpapersListActivity.FileWallpaper) {
                 if (currentWallpaperBitmap != null) {

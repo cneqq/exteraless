@@ -80,7 +80,6 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -678,12 +677,7 @@ public class QrActivity extends BaseFragment {
                 }
             });
         } else {
-            Utilities.themeQueue.postRunnable(() -> {
-                final Bitmap bitmap = SvgHelper.getBitmap(R.raw.default_pattern, backgroundView.getWidth(), backgroundView.getHeight(), Color.BLACK);
-                AndroidUtilities.runOnUIThread(() -> {
-                    onPatternLoaded(bitmap, 34, true);
-                });
-            }, 35);
+            currMotionDrawable.setPatternBitmap(0, null);
         }
         currMotionDrawable.setPatternColorFilter(currMotionDrawable.getPatternColor());
 

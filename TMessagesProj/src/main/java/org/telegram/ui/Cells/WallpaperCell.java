@@ -33,7 +33,6 @@ import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SvgHelper;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackupImageView;
@@ -181,11 +180,7 @@ public class WallpaperCell extends FrameLayout {
                         patternColor = AndroidUtilities.getPatternColor(wallPaper.color);
                     }
                     if (Theme.DEFAULT_BACKGROUND_SLUG.equals(wallPaper.slug)) {
-                        if (wallPaper.defaultCache == null) {
-                            wallPaper.defaultCache = SvgHelper.getBitmap(R.raw.default_pattern, 100, 180, Color.BLACK);
-                        }
-                        imageView.setImageBitmap(wallPaper.defaultCache);
-                        imageView.getImageReceiver().setAlpha(Math.abs(wallPaper.intensity));
+                        imageView.setImageBitmap((android.graphics.Bitmap) null);
                     } else if (wallPaper.path != null) {
                         imageView.setImage(wallPaper.path.getAbsolutePath(), imageFilter, null);
                     } else {

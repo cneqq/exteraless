@@ -301,7 +301,6 @@ public class WallpapersListActivity extends BaseFragment implements Notification
         public boolean motion;
         public boolean isGradient;
         public TLRPC.WallPaper parentWallpaper;
-        public Bitmap defaultCache;
 
         public String getHash() {
             String string = String.valueOf(color) +
@@ -1179,8 +1178,7 @@ public class WallpapersListActivity extends BaseFragment implements Notification
         }
         if (catsWallpaper == null) {
             catsWallpaper = new ColorWallpaper(Theme.DEFAULT_BACKGROUND_SLUG, 0xffdbddbb, 0xff6ba587, 0xffd5d88d, 0xff88b884);
-            catsWallpaper.intensity = 0.34f;
-            //catsWallpaper.slug = "fqv01SQemVIBAAAApND8LDRUhRU";
+            catsWallpaper.intensity = 0f;
         } else {
             wallPapers.remove(catsWallpaper);
         }

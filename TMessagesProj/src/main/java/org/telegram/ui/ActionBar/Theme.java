@@ -9660,8 +9660,6 @@ public class Theme {
                         if (wallpaperDocument != null) {
                             File f = FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(wallpaperDocument, true);
                             patternBitmap = SvgHelper.getBitmap(f, w, h, false, SvgHelper.ScaleMode.ByWidth);
-                        } else {
-                            patternBitmap = SvgHelper.getBitmap(R.raw.default_pattern, w, h, Color.WHITE, 1f, SvgHelper.ScaleMode.ByWidth);
                         }
                         if (patternBitmap != null) {
                             FileOutputStream stream = null;
@@ -9830,14 +9828,7 @@ public class Theme {
     }
 
     public static Drawable createDefaultWallpaper(int w, int h) {
-        MotionBackgroundDrawable motionBackgroundDrawable = new MotionBackgroundDrawable(0xffdbddbb, 0xff6ba587, 0xffd5d88d, 0xff88b884, w != 0);
-        if (w <= 0 || h <= 0) {
-            w = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y);
-            h = Math.max(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y);
-        }
-        motionBackgroundDrawable.setPatternBitmap(34, SvgHelper.getBitmap(R.raw.default_pattern, w, h, Color.BLACK, 1f, SvgHelper.ScaleMode.ByWidth));
-        motionBackgroundDrawable.setPatternColorFilter(motionBackgroundDrawable.getPatternColor());
-        return motionBackgroundDrawable;
+        return new MotionBackgroundDrawable(0xffdbddbb, 0xff6ba587, 0xffd5d88d, 0xff88b884, w != 0);
     }
 
     private static Bitmap loadScreenSizedBitmap(FileInputStream stream, int offset) {
