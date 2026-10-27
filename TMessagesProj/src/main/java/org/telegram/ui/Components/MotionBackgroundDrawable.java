@@ -20,7 +20,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.SystemClock;
 import android.view.View;
-import app.freezgram.WallpaperDebugConfig;
 
 import androidx.core.graphics.ColorUtils;
 
@@ -509,7 +508,6 @@ public class MotionBackgroundDrawable extends Drawable {
         }
 
         final boolean isUseFastRender = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-            && !WallpaperDebugConfig.enabled(WallpaperDebugConfig.NO_FAST_RENDER)
             && motionBackgroundPaint != null
             && currentBitmap != null
             && patternBitmap != null;
@@ -643,16 +641,6 @@ public class MotionBackgroundDrawable extends Drawable {
         canvas.restore();
 
         updateAnimation();
-    }
-
-    public void drawInLocalCoordinates(Canvas canvas) {
-        int previousTranslationY = translationY;
-        translationY = 0;
-        try {
-            draw(canvas);
-        } finally {
-            translationY = previousTranslationY;
-        }
     }
 
     public void setAnimationProgressProvider(GenericProvider<MotionBackgroundDrawable, Float> animationProgressProvider) {

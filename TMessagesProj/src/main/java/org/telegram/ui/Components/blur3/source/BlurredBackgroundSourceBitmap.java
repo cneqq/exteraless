@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
-import app.freezgram.WallpaperDebugConfig;
 
 import androidx.annotation.Nullable;
 
@@ -83,9 +82,8 @@ public class BlurredBackgroundSourceBitmap implements BlurredBackgroundSource {
 
     public Canvas beginRecording(int width, int height, float scale) {
         final int bitmapWidth = Math.round(width / scale);
-        final boolean fixSize = WallpaperDebugConfig.enabled(WallpaperDebugConfig.BITMAP_SIZE);
-        final int bitmapHeight = Math.round((fixSize ? height : width) / scale);
-        if (bitmapInternal == null || bitmapInternal.isRecycled() || bitmapInternal.getWidth() != (fixSize ? bitmapWidth : bitmapHeight) || bitmapInternal.getHeight() != bitmapHeight) {
+        final int bitmapHeight = Math.round(width / scale);
+        if (bitmapInternal == null || bitmapInternal.isRecycled() || bitmapInternal.getWidth() != bitmapHeight || bitmapInternal.getHeight() != bitmapHeight) {
             bitmapInternal = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         } else {
             bitmapInternal.eraseColor(0);
