@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="24dp" android:height="24dp" android:gravity="center"
+        android:drawable="@drawable/freezgram_channel_seal" />
+    <item android:width="18dp" android:height="18dp" android:gravity="center">
+        <bitmap android:src="@drawable/freezgram_settings_icon" android:gravity="fill" />
+    </item>
+</layer-list>

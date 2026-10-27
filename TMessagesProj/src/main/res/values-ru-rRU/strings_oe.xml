@@ -72,5 +72,6 @@
     <string name="AppIconFreezgramWhite">Freezgram · Ч/б светлая</string>
     <string name="AppIconFreezgramMonoDark">Freezgram · Ч/б тёмная</string>
     <string name="FreezgramBadgeFounder">Основатель Freezgram</string>
+    <string name="FreezgramBadgeOfficialChannel">Официальный канал Freezgram</string>
     <string name="FreezgramBadgeLocalInfo">Значок сообщества. Виден только в Freezgram.</string>
 </resources>

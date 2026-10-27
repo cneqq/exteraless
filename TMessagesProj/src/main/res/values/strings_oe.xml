@@ -99,5 +99,6 @@
     <string name="AppIconFreezgramWhite">Freezgram · Mono Light</string>
     <string name="AppIconFreezgramMonoDark">Freezgram · Mono Dark</string>
     <string name="FreezgramBadgeFounder">Freezgram founder</string>
+    <string name="FreezgramBadgeOfficialChannel">Official Freezgram channel</string>
     <string name="FreezgramBadgeLocalInfo">Community badge. Visible only in Freezgram.</string>
 </resources>

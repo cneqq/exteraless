@@ -33,18 +33,44 @@ class BadgeCheck {
   FreezgramBadges.showInfo(new BaseFragment(new Context()));check(BulletinFactory.shown==1);
   check("Founder".equals(BulletinFactory.title)&&"Local community".equals(BulletinFactory.info));
   check(ContextCompat.lastResource==R.drawable.freezgram_community_badge);
+  TLRPC.TL_channel channel=new TLRPC.TL_channel();
+  channel.id=-(-1004480543290L)-1000000000000L;
+  check(FreezgramBadges.hasChannelBadge(channel));
+  check(!FreezgramBadges.hasChannelBadge(null));
+  TLRPC.Chat group=new TLRPC.Chat();group.id=channel.id;
+  check(!FreezgramBadges.hasChannelBadge(group));
+  TLRPC.User channelIdUser=new TLRPC.User();channelIdUser.id=channel.id;
+  check(!FreezgramBadges.hasBadge(channelIdUser));
+  for(long id:new long[]{-1004480543290L,-4480543290L,4480543289L,4480543291L,966442694L}){
+   channel.id=id;check(!FreezgramBadges.hasChannelBadge(channel));
+  }
+  channel.id=4480543290L;
+  channel.megagroup=true;check(!FreezgramBadges.hasChannelBadge(channel));channel.megagroup=false;
+  channel.verified=true;check(!FreezgramBadges.hasChannelBadge(channel));check(channel.verified);channel.verified=false;
+  channel.scam=true;check(!FreezgramBadges.hasChannelBadge(channel));check(channel.scam);channel.scam=false;
+  channel.fake=true;check(!FreezgramBadges.hasChannelBadge(channel));check(channel.fake);channel.fake=false;
+  FreezgramBadges.showChannelInfo(null);
+  FreezgramBadges.showChannelInfo(new BaseFragment(null));check(BulletinFactory.shown==1);
+  FreezgramBadges.showChannelInfo(new BaseFragment(new Context()));check(BulletinFactory.shown==2);
+  check("Official channel".equals(BulletinFactory.title)&&"Local community".equals(BulletinFactory.info));
+  check(ContextCompat.lastResource==R.drawable.freezgram_channel_badge);
  }
 }
-class TLRPC {static class User {long id;boolean verified,scam,fake;}}
+class TLRPC {
+ static class User {long id;boolean verified,scam,fake;}
+ static class Chat {long id;boolean verified,scam,fake,megagroup;}
+ static class TL_channel extends Chat {}
+}
+class ChatObject {static boolean isChannel(TLRPC.Chat chat){return chat instanceof TLRPC.TL_channel;}}
 class Context {}
 class Drawable {Drawable mutate(){return this;}}
 class FreezgramBadgeDrawable extends Drawable {FreezgramBadgeDrawable(Drawable seal){}}
 class ContextCompat {static int lastResource;static Drawable getDrawable(Context c,int id){lastResource=id;return new Drawable();}}
 class R {
- static class drawable {static int freezgram_community_badge=1;}
- static class string {static int FreezgramBadgeFounder=2,FreezgramBadgeLocalInfo=3;}
+ static class drawable {static int freezgram_community_badge=1,freezgram_channel_badge=4;}
+ static class string {static int FreezgramBadgeFounder=2,FreezgramBadgeLocalInfo=3,FreezgramBadgeOfficialChannel=5;}
 }
-class LocaleController {static String getString(int id){return id==2?"Founder":"Local community";}}
+class LocaleController {static String getString(int id){return id==2?"Founder":id==5?"Official channel":"Local community";}}
 class BaseFragment {Context c;BaseFragment(Context c){this.c=c;}Context getContext(){return c;}}
 class BulletinFactory {
  static int shown;static String title,info;
