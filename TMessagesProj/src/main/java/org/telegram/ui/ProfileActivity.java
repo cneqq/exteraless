@@ -500,8 +500,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private ActionBarMenuItem videoCallItem;
     private ActionBarMenuItem editItem;
     private ActionBarMenuItem otherItem;
-    // exteraless plugins: подменю PROFILE_ACTION_MENU в меню «⋮».
-    private app.exteraless.plugins.menus.MenuInjector.SwipeBackMenu pluginsMenu;
     private ActionBarMenuItem searchItem;
     private ActionBarMenuSubItem editColorItem;
     private ActionBarMenuSubItem linkItem;
@@ -2325,8 +2323,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         getNotificationCenter().addObserver(this, NotificationCenter.profileMusicUpdated);
         getNotificationCenter().addObserver(this, NotificationCenter.updatedChatRanks);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
-        // exteraless plugins: реестр пунктов меняется, когда плагин включают/выключают.
-        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.pluginMenuItemsUpdated);
         updateRowsIds();
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
@@ -2476,7 +2472,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         getNotificationCenter().removeObserver(this, NotificationCenter.profileMusicUpdated);
         getNotificationCenter().removeObserver(this, NotificationCenter.updatedChatRanks);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
-        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.pluginMenuItemsUpdated);
         if (avatarsViewPager != null) {
             avatarsViewPager.onDestroy();
         }
@@ -9352,13 +9347,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     @SuppressWarnings("unchecked")
     @Override
     public void didReceivedNotification(int id, int account, final Object... args) {
-        if (id == NotificationCenter.pluginMenuItemsUpdated) {
-            // exteraless plugins: пересобрать подменю PROFILE_ACTION_MENU.
-            if (pluginsMenu != null) {
-                pluginsMenu.refresh();
-            }
-            return;
-        }
         if (id == NotificationCenter.uploadStoryEnd || id == NotificationCenter.chatWasBoostedByUser) {
             checkCanSendStoryForPosting();
         } else if (id == NotificationCenter.updateInterfaces) {
@@ -12955,28 +12943,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             actionsView.commitActions();
         }
 
-        // exteraless plugins: подменю PROFILE_ACTION_MENU в конце меню «⋮».
-        if (otherItem != null) {
-            java.util.Map<String, Object> pluginMenuContext = new java.util.HashMap<>();
-            pluginMenuContext.put("account", currentAccount);
-            pluginMenuContext.put("dialog_id", getDialogId());
-            pluginMenuContext.put("fragment", this);
-            if (getParentActivity() != null) {
-                pluginMenuContext.put("context", getParentActivity());
-            }
-            if (userId != 0) {
-                pluginMenuContext.put("user", getMessagesController().getUser(userId));
-                pluginMenuContext.put("userId", userId);
-            }
-            if (chatId != 0) {
-                pluginMenuContext.put("chat", getMessagesController().getChat(chatId));
-                pluginMenuContext.put("chatId", chatId);
-            }
-            pluginsMenu = app.exteraless.plugins.menus.MenuInjector.attachSwipeBackMenu(
-                    otherItem,
-                    app.exteraless.plugins.MenuItemRecord.MenuType.PROFILE_ACTION_MENU,
-                    pluginMenuContext, resourcesProvider, pluginsMenu);
-        }
 
         if (!mediaHeaderVisible) {
             if (callItemVisible) {
@@ -13672,7 +13638,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 ArrayList<File> files = new ArrayList<>();
 
                 files.addAll(Arrays.asList(dir.listFiles()));
-                files.addAll(Arrays.asList(app.exteraless.plugins.PluginLog.files()));
 
                 File filesDir = ApplicationLoader.getFilesDirFixed();
                 filesDir = new File(filesDir, "malformed_database/");

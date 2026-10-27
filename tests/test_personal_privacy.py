@@ -77,7 +77,9 @@ class PrivacyCheck {
         self.assertIn('public static final boolean DEBUG_VERSION', debug)
         toggle = (JAVA / 'tw/nekomimi/nekogram/utils/AndroidUtil.java').read_text()
         self.assertNotRegex(toggle, r'BuildVars.DEBUG_VERSION\s*=')
-        self.assertNotIn('_log(f"token:', (MAIN / 'python/dev_server.py').read_text())
+        dev_server = MAIN / 'python/dev_server.py'
+        if dev_server.is_file():
+            self.assertNotIn('_log(f"token:', dev_server.read_text())
 
     @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
     def test_actual_ai_url_policy(self):

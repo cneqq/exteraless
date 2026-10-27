@@ -27,7 +27,6 @@ import app.exteraless.pillstack.pills.weather.WeatherSettingsActivity;
 import app.exteraless.settings.OpenExteraCloudActivity;
 import app.exteraless.settings.OpenExteraGlyphActivity;
 import app.exteraless.pillstack.PillStackSettingsActivity;
-import app.exteraless.plugins.ui.PluginsActivity;
 import app.exteraless.settings.OpenExteraAppNavigationActivity;
 import app.exteraless.settings.OpenExteraAppearanceActivity;
 import app.exteraless.settings.OpenExteraAyuMomentsActivity;
@@ -142,7 +141,7 @@ public class SettingsHelper {
     }
 
     private static final Set<String> EXTERALESS_SCREENS = new HashSet<>(Arrays.asList(
-            "settings", "general", "appearance", "chats", "plugins", "pillstack", "other",
+            "settings", "general", "appearance", "chats", "pillstack", "other",
             "ayumoments", "navigation", "menus", "media", "hiding"));
 
     public static boolean isDeepLink(String path) {
@@ -267,9 +266,6 @@ public class SettingsHelper {
                     break;
                 case "pillstack":
                     fragment = neko_fragment = new PillStackSettingsActivity();
-                    break;
-                case "plugins":
-                    fragment = new PluginsActivity();
                     break;
                 case "navigation":
                     fragment = navigation_fragment = new OpenExteraAppNavigationActivity();

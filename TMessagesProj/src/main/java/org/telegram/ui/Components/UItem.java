@@ -49,7 +49,6 @@ public class UItem extends AdapterWithDiffUtils.Item implements Cloneable {
     public int parentSpanCount;
 
     /** Модель строки настроек плагина, если строку собрал плагин через SDK exteraGram. */
-    public app.exteraless.plugins.models.SettingItem settingItem;
 
     public boolean include;
     public long dialogId;

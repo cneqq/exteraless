@@ -36,7 +36,6 @@ public class OpenExteraSettingsActivity extends BaseNekoSettingsActivity {
     private int generalRow;
     private int appearanceRow;
     private int chatsRow;
-    private int pluginsRow;
     private int otherRow;
     private int categoriesDividerRow;
 
@@ -56,7 +55,6 @@ public class OpenExteraSettingsActivity extends BaseNekoSettingsActivity {
         generalRow = addRow("general");
         appearanceRow = addRow("appearance");
         chatsRow = addRow("chats");
-        pluginsRow = addRow("plugins");
         otherRow = addRow("other");
         categoriesDividerRow = addRow();
 
@@ -178,8 +176,6 @@ public class OpenExteraSettingsActivity extends BaseNekoSettingsActivity {
             presentFragment(new OpenExteraAppearanceActivity());
         } else if (position == chatsRow) {
             presentFragment(new OpenExteraChatsActivity());
-        } else if (position == pluginsRow) {
-            presentFragment(new app.exteraless.plugins.ui.PluginsActivity());
         } else if (position == otherRow) {
             presentFragment(new OpenExteraOtherActivity());
         } else if (position == channelRow) {
@@ -232,8 +228,6 @@ public class OpenExteraSettingsActivity extends BaseNekoSettingsActivity {
                         cell.setTextAndIcon(getString(R.string.OpenExteraAppearance), R.drawable.msg_theme, true);
                     } else if (position == chatsRow) {
                         cell.setTextAndIcon(getString(R.string.OpenExteraChats), R.drawable.msg_discussion, true);
-                    } else if (position == pluginsRow) {
-                        cell.setTextAndIcon(getString(R.string.OpenExteraPlugins), R.drawable.msg_plugins, true);
                     } else if (position == otherRow) {
                         cell.setTextAndIcon(getString(R.string.OpenExteraOther), R.drawable.msg_fave, false);
                     } else if (position == channelRow) {

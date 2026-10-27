@@ -221,7 +221,6 @@ public abstract class BaseFragment {
     }
 
     public BaseFragment(Bundle args) {
-        org.telegram.ui.Wallet.WalletPluginFreeze.enterIfWallet(this);
         arguments = args;
         classGuid = ConnectionsManager.generateClassGuid();
         if (BuildConfig.DEBUG) {
@@ -527,7 +526,6 @@ public abstract class BaseFragment {
 
     @CallSuper
     public void onFragmentDestroy() {
-        org.telegram.ui.Wallet.WalletPluginFreeze.leave(this);
         getConnectionsManager().cancelRequestsForGuid(classGuid);
         getMessagesStorage().cancelTasksForGuid(classGuid);
         isFinished = true;

@@ -4,7 +4,7 @@
 
 # exteraless
 
-Открытая версия exteraGram — с моделью разрешений для плагинов
+Freezgram / exteraless — редакция без плагинов (`no-plugins`)
 
 [![Канал](https://img.shields.io/badge/Telegram-@exteraless-2CA5E0?logo=telegram&logoColor=white)](https://t.me/exteraless)
 
@@ -17,16 +17,18 @@
 exteraless — форк [NagramX](https://github.com/risin42/NagramX), в котором возможности
 exteraGram реализованы с открытым исходным кодом.
 
-Отдельный упор — **безопасность плагинов**. В exteraGram плагин не ограничен ни в чём;
-здесь у него есть модель разрешений: плагин объявляет, что ему нужно, это
-видно на экране установки, и получает он только заявленное.
+Ветка `no-plugins` полностью исключает движок плагинов, Python runtime,
+установку плагинов и их пункты интерфейса. Редакция с плагинами остаётся в `main`.
+Обе редакции сохраняют общий пакет и схему подписи. Для личных APK из CI
+используется `com.exteraless.app.personal`; переход между ветками выполняется
+новой сборкой с общим возрастающим versionCode и тем же ключом.
 
 Проект **в бете**: часть возможностей exteraGram ещё не перенесена. Если заметили, что
 каких-то функций не хватает, — откройте issue или напишите в [канал](https://t.me/exteraless?direct).
 
 * Имя пакета: `com.exteraless.app`
 * Что перенесено: экраны настроек, оформление и параметры чатов, иконпаки, полоса
-  пилюль (Pill Stack), боковое меню, движок Python-плагинов
+  пилюль (Pill Stack), боковое меню
 
 ### Ссылки
 
@@ -38,7 +40,7 @@ exteraGram реализованы с открытым исходным кодо�
 1. Склонировать репозиторий вместе с подмодулями:
 
     ```bash
-    git clone --recursive --shallow-submodules https://github.com/exteraless/exteraless.git exteraless
+    git clone --branch no-plugins --recursive --shallow-submodules https://github.com/cneqq/freezgram.git freezgram
     ```
 
     Если репозиторий уже склонирован без подмодулей:
@@ -76,10 +78,12 @@ exteraGram реализованы с открытым исходным кодо�
 
 6. Собрать: `./gradlew :TMessagesProj:assembleDebug` или открыть проект в Android Studio.
 
-**Про ABI.** Собираются только 64-битные `arm64-v8a` и `x86_64`: Chaquopy собирает
-Python 3.12 лишь под них, и на `armeabi-v7a` конфигурация обрывается. Переменная
+**Про ABI.** Сохранены цели `arm64-v8a` и `x86_64`. Переменная
 `NATIVE_TARGET` задаёт цель: `arm64-v8a` (один ABI, быстрее), `universal` (оба),
-`SKIP` (без нативной части — только Java и ресурсы).
+`SKIP` (без нативной части — только Java и ресурсы; это не полноценный APK).
+Для ARM64 debug в PowerShell: `$env:NATIVE_TARGET='arm64-v8a'`, затем
+`.\gradlew.bat :TMessagesProj:assembleDebug`. Нужны Java 21, Android platform 37.0,
+Build Tools 36.0.0, NDK 27.2.12479018, CMake 3.31.6 и остальные подмодули.
 
 ### Сборка через GitHub Actions
 
@@ -130,9 +134,10 @@ Python 3.12 лишь под них, и на `armeabi-v7a` конфигураци
 exteraless is a fork of [NagramX](https://github.com/risin42/NagramX) that implements
 exteraGram's features open-source.
 
-The special focus is **plugin security**. In exteraGram a plugin is not restricted in
-any way; here it comes with a permission model and isolation: a plugin declares what it
-needs, you see that on the install sheet, and it gets only what was declared.
+The `no-plugins` branch removes the plugin engine, Python runtime and plugin UI.
+The plugin edition remains on `main`. Both editions keep the same package and signing
+policy; a newly built APK with a higher shared versionCode can update either edition
+when signed with the same key. See the personal build guide for the CI package.
 
 The project is **in beta**: some exteraGram features have not been ported yet. If you
 notice a missing feature, open an issue or write to the [channel](https://t.me/exteraless?direct).
@@ -150,7 +155,7 @@ studio. Rights to those materials belong to their authors.
 1. Clone with submodules:
 
     ```bash
-    git clone --recursive --shallow-submodules https://github.com/exteraless/exteraless.git exteraless
+    git clone --branch no-plugins --recursive --shallow-submodules https://github.com/cneqq/freezgram.git freezgram
     ```
 
 2. Get `TELEGRAM_APP_ID` and `TELEGRAM_APP_HASH` from [my.telegram.org](https://my.telegram.org/auth)
@@ -165,9 +170,8 @@ studio. Rights to those materials belong to their authors.
 
 5. Build with `./gradlew :TMessagesProj:assembleDebug` or from Android Studio.
 
-Only 64-bit ABIs are built (`arm64-v8a`, `x86_64`): Chaquopy ships Python 3.12 for those
-only, and `armeabi-v7a` fails at configuration time. `NATIVE_TARGET` selects the target:
-`arm64-v8a`, `universal` (both) or `SKIP` (no native part).
+The existing 64-bit targets (`arm64-v8a`, `x86_64`) are retained. `NATIVE_TARGET`
+selects `arm64-v8a`, `universal` (both) or `SKIP` (no native part; not a complete APK).
 
 For CI, set two repository secrets — `LOCAL_PROPERTIES` and `RELEASE_KEYSTORE`, both
 base64-encoded — and run the **Release Build** workflow. The APK ends up in the run

@@ -129,6 +129,14 @@ public final class MainMenuLayout {
             final String[] sections = raw.split(SECTION_SEPARATOR, -1);
             readIds(sections.length > 0 ? sections[0] : "", visible, true);
             readIds(sections.length > 1 ? sections[1] : "", hidden, false);
+            // An older edition could store only the removed entry (102).
+            // Keep the menu usable without rewriting the persisted layout.
+            if (visible.stream().allMatch(id -> id == MainMenuItem.DIVIDER.getId())
+                    && containsRemovedEntry(sections[0])) {
+                visible.clear();
+                visible.addAll(getDefaultLayout());
+                hidden.removeAll(visible);
+            }
         }
 
         // Пункты, которых нет ни там, ни там, — скрыты.
@@ -171,6 +179,15 @@ public final class MainMenuLayout {
                 out.add(id);
             }
         }
+    }
+
+    private static boolean containsRemovedEntry(String section) {
+        for (String part : section.split(ID_SEPARATOR)) {
+            if ("102".equals(part.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void ensureSettingsVisibility(List<Integer> visible, List<Integer> hidden) {

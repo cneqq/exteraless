@@ -111,8 +111,6 @@ public class DrawerMenuView extends ScrollView {
             }
             hasAnyItem = true;
         }
-        // exteraless plugins: пункты плагинов (DRAWER_MENU) в конце шторки.
-        app.exteraless.plugins.menus.MenuInjector.appendDrawerItems(container, currentAccount, onItemClick);
     }
 
     public void updateColors() {
