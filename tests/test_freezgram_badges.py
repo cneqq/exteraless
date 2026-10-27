@@ -38,6 +38,7 @@ class BadgeCheck {
 class TLRPC {static class User {long id;boolean verified,scam,fake;}}
 class Context {}
 class Drawable {Drawable mutate(){return this;}}
+class FreezgramBadgeDrawable extends Drawable {FreezgramBadgeDrawable(Drawable seal){}}
 class ContextCompat {static int lastResource;static Drawable getDrawable(Context c,int id){lastResource=id;return new Drawable();}}
 class R {
  static class drawable {static int freezgram_community_badge=1;}

@@ -24,7 +24,7 @@ public final class FreezgramBadges {
 
     public static Drawable getDrawable(Context context) {
         Drawable drawable = ContextCompat.getDrawable(context, R.drawable.freezgram_community_badge);
-        return drawable == null ? null : drawable.mutate();
+        return drawable == null ? null : new FreezgramBadgeDrawable(drawable.mutate());
     }
 
     public static String getTitle() {
