@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import app.freezgram.WallpaperDebugConfig;
+import app.freezgram.WallpaperViewport;
 
 import androidx.annotation.NonNull;
 
@@ -238,7 +239,10 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
                     translationX = 0;
                     translationY = 0;
                 }
-                if (drawable instanceof MotionBackgroundDrawable) {
+                if (WallpaperDebugConfig.enabled(WallpaperDebugConfig.LOCAL_VIEWPORT)) {
+                    WallpaperViewport.draw(canvas, drawable, getWidth(), getHeight());
+                    checkSnowflake(canvas);
+                } else if (drawable instanceof MotionBackgroundDrawable) {
                     MotionBackgroundDrawable motionBackgroundDrawable = (MotionBackgroundDrawable) drawable;
                     if (motionBackgroundDrawable.hasPattern()) {
                         int actionBarHeight = (isActionBarVisible() ? ActionBar.getCurrentActionBarHeight() : 0) + (isStatusBarVisible() && occupyStatusBar ? AndroidUtilities.statusBarHeight : 0);

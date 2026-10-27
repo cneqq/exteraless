@@ -107,6 +107,7 @@
     <string name="FreezgramWallpaperNoFast">Disable fast wallpaper shader</string>
     <string name="FreezgramWallpaperNoMotion">Disable wallpaper parallax</string>
     <string name="FreezgramWallpaperOpaque">Solid base behind wallpaper</string>
+    <string name="FreezgramWallpaperViewport">Fit wallpaper to the chat window</string>
     <string name="FreezgramWallpaperReset">Turn off all experiments</string>
     <string name="FreezgramWallpaperDebugInfo">Temporary options for checking wallpaper offset and drawing trails. Start with every switch off. Enable one option, fully close and reopen the app, then test the same wallpaper. Turn it off before trying the next option and restart again. Your selected theme and wallpaper are preserved.</string>
 </resources>

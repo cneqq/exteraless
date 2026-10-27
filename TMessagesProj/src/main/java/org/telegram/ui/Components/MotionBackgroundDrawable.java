@@ -645,6 +645,16 @@ public class MotionBackgroundDrawable extends Drawable {
         updateAnimation();
     }
 
+    public void drawInLocalCoordinates(Canvas canvas) {
+        int previousTranslationY = translationY;
+        translationY = 0;
+        try {
+            draw(canvas);
+        } finally {
+            translationY = previousTranslationY;
+        }
+    }
+
     public void setAnimationProgressProvider(GenericProvider<MotionBackgroundDrawable, Float> animationProgressProvider) {
         this.animationProgressProvider = animationProgressProvider;
         updateAnimation();

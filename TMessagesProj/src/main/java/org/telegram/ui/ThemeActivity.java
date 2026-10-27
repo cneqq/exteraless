@@ -208,7 +208,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
     private static final int[] WALLPAPER_DEBUG_LABELS = {
             R.string.FreezgramWallpaperSize, R.string.FreezgramWallpaperLifecycle,
             R.string.FreezgramWallpaperNoFast, R.string.FreezgramWallpaperNoMotion,
-            R.string.FreezgramWallpaperOpaque
+            R.string.FreezgramWallpaperOpaque, R.string.FreezgramWallpaperViewport
     };
 
     private int wallpaperDebugOption(int position) {

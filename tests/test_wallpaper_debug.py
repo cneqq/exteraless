@@ -9,6 +9,66 @@ JAVA = Path(__file__).resolve().parents[1] / 'TMessagesProj/src/main/java'
 
 @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
 class WallpaperDebugTests(unittest.TestCase):
+    def test_local_viewport_covers_window_and_restores_shared_drawable(self):
+        source = (JAVA / 'app/freezgram/WallpaperViewport.java').read_text()
+        source = source[source.index('public final class'):].replace('public final class', 'final class', 1)
+        run_java('''
+class PrivacyCheck {
+  public static void main(String[] args) {
+    for (int[] size : new int[][]{{60,80},{1800,600},{600,2400},{-1,-1}}) {
+      Drawable drawable = new Drawable(size[0],size[1]);
+      Canvas canvas = new Canvas();
+      WallpaperViewport.draw(canvas,drawable,1080,2400);
+      if (drawable.drawn.left != 0 || drawable.drawn.top != 0 ||
+          drawable.drawn.right < 1080 || drawable.drawn.bottom < 2400)
+        throw new AssertionError("Uncovered viewport");
+      if (Math.abs(canvas.tx*2 + drawable.drawn.right - 1080) > .01 ||
+          Math.abs(canvas.ty*2 + drawable.drawn.bottom - 2400) > .01)
+        throw new AssertionError("Wallpaper not centered");
+      checkRestored(drawable,canvas);
+    }
+    Drawable broken = new Drawable(60,80); broken.fail=true;
+    Canvas canvas = new Canvas();
+    try { WallpaperViewport.draw(canvas,broken,1080,2400); throw new AssertionError("Exception swallowed"); }
+    catch (IllegalStateException expected) { checkRestored(broken,canvas); }
+    MotionBackgroundDrawable motion = new MotionBackgroundDrawable();
+    WallpaperViewport.draw(new Canvas(),motion,1080,2400);
+    if (!motion.local) throw new AssertionError("Motion translation not isolated");
+  }
+  static void checkRestored(Drawable d, Canvas c) {
+    Rect b=d.getBounds();
+    if(b.left!=7 || b.top!=9 || b.right!=127 || b.bottom!=169 || c.depth!=0)
+      throw new AssertionError("Leaked drawable bounds or canvas state");
+  }
+}
+class Rect {
+  int left,top,right,bottom;
+  Rect(int l,int t,int r,int b){left=l;top=t;right=r;bottom=b;}
+  Rect(Rect r){this(r.left,r.top,r.right,r.bottom);}
+}
+class Canvas {
+  int depth; float tx,ty;
+  int save(){return depth++;}
+  void clipRect(int l,int t,int r,int b){}
+  void translate(float x,float y){tx=x;ty=y;}
+  void restoreToCount(int count){depth=count;}
+}
+class Drawable {
+  int width,height; boolean fail; Rect bounds=new Rect(7,9,127,169),drawn;
+  Drawable(int w,int h){width=w;height=h;}
+  int getIntrinsicWidth(){return width;} int getIntrinsicHeight(){return height;}
+  Rect getBounds(){return bounds;}
+  void setBounds(int l,int t,int r,int b){bounds=new Rect(l,t,r,b);}
+  void setBounds(Rect rect){bounds=new Rect(rect);}
+  void draw(Canvas canvas){drawn=new Rect(bounds);if(fail)throw new IllegalStateException();}
+}
+class MotionBackgroundDrawable extends Drawable {
+  boolean local;
+  MotionBackgroundDrawable(){super(60,80);}
+  void drawInLocalCoordinates(Canvas canvas){local=true;draw(canvas);}
+}
+''' + source)
+
     def test_flags_are_independent_persistent_and_resettable(self):
         source = (JAVA / 'app/freezgram/WallpaperDebugConfig.java').read_text()
         source = source[source.index('public final class'):].replace('public final class', 'final class', 1)

@@ -80,6 +80,7 @@
     <string name="FreezgramWallpaperNoFast">Отключить ускоренный шейдер обоев</string>
     <string name="FreezgramWallpaperNoMotion">Отключить параллакс обоев</string>
     <string name="FreezgramWallpaperOpaque">Сплошная подложка под обоями</string>
+    <string name="FreezgramWallpaperViewport">Размер обоев по окну чата</string>
     <string name="FreezgramWallpaperReset">Выключить все эксперименты</string>
     <string name="FreezgramWallpaperDebugInfo">Временные параметры для проверки смещения обоев и следов при прокрутке. Начните со всех выключенных переключателей. Включите один, полностью закройте и заново откройте приложение, затем проверьте те же обои. Перед следующим вариантом выключите предыдущий и снова перезапустите приложение. Выбранные тема и обои сохраняются.</string>
 </resources>

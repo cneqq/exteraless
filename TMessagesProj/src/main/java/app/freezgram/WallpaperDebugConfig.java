@@ -10,7 +10,8 @@ public final class WallpaperDebugConfig {
     public static final int NO_FAST_RENDER = 4;
     public static final int NO_MOTION = 8;
     public static final int OPAQUE_BASE = 16;
-    public static final int[] OPTIONS = {BITMAP_SIZE, LIFECYCLE, NO_FAST_RENDER, NO_MOTION, OPAQUE_BASE};
+    public static final int LOCAL_VIEWPORT = 32;
+    public static final int[] OPTIONS = {BITMAP_SIZE, LIFECYCLE, NO_FAST_RENDER, NO_MOTION, OPAQUE_BASE, LOCAL_VIEWPORT};
     private static volatile int flags = -1;
 
     private WallpaperDebugConfig() {}
