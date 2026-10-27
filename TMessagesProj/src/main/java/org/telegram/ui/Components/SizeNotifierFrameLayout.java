@@ -39,6 +39,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import app.freezgram.WallpaperDebugConfig;
 
 import androidx.annotation.NonNull;
 
@@ -186,6 +187,14 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
                     MotionBackgroundDrawable motionBackgroundDrawable = (MotionBackgroundDrawable) newDrawable;
                     motionBackgroundDrawable.setParentView(backgroundView);
                 }
+                if (WallpaperDebugConfig.enabled(WallpaperDebugConfig.LIFECYCLE)
+                        && attached && oldBackgroundDrawable != backgroundDrawable) {
+                    if (backgroundDrawable instanceof MotionBackgroundDrawable) {
+                        ((MotionBackgroundDrawable) backgroundDrawable).onDetachedFromWindow();
+                    } else if (backgroundDrawable instanceof ChatBackgroundDrawable) {
+                        ((ChatBackgroundDrawable) backgroundDrawable).onDetachedFromWindow(this);
+                    }
+                }
                 backgroundDrawable = newDrawable;
                 if (attached && backgroundDrawable instanceof ChatBackgroundDrawable) {
                     ((ChatBackgroundDrawable) backgroundDrawable).onAttachedToWindow(this);
@@ -202,6 +211,9 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
                 checkMotion();
             }
             themeAnimationValue = Utilities.clamp(themeAnimationValue + AndroidUtilities.screenRefreshTime / 200, 1f, 0);
+            if (WallpaperDebugConfig.enabled(WallpaperDebugConfig.OPAQUE_BASE)) {
+                canvas.drawColor(Theme.getColor(Theme.key_windowBackgroundWhite) | 0xff000000);
+            }
             for (int a = 0; a < 2; a++) {
                 Drawable drawable = a == 0 ? oldBackgroundDrawable : backgroundDrawable;
                 if (drawable == null) {
@@ -215,7 +227,8 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
                 float parallaxScale;
                 float translationX;
                 float translationY;
-                boolean drawMotion = a == 0 ? oldBackgroundMotion : backgroundMotion;
+                boolean drawMotion = !WallpaperDebugConfig.enabled(WallpaperDebugConfig.NO_MOTION)
+                        && (a == 0 ? oldBackgroundMotion : backgroundMotion);
                 if (drawMotion) {
                     parallaxScale = SizeNotifierFrameLayout.this.parallaxScale;
                     translationX = SizeNotifierFrameLayout.this.translationX;
@@ -364,6 +377,10 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
 
     public void setBackgroundImage(Drawable bitmap, boolean motion) {
         if (backgroundDrawable == bitmap) {
+            if (WallpaperDebugConfig.enabled(WallpaperDebugConfig.LIFECYCLE)) {
+                backgroundMotion = motion;
+                checkMotion();
+            }
             return;
         }
         if (backgroundView == null) {
@@ -377,11 +394,18 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
         if (attached && backgroundDrawable instanceof ChatBackgroundDrawable) {
             ((ChatBackgroundDrawable) backgroundDrawable).onDetachedFromWindow(backgroundView);
         }
+        boolean fixLifecycle = WallpaperDebugConfig.enabled(WallpaperDebugConfig.LIFECYCLE);
+        if (fixLifecycle && attached && backgroundDrawable instanceof MotionBackgroundDrawable) {
+            ((MotionBackgroundDrawable) backgroundDrawable).onDetachedFromWindow();
+        }
         backgroundDrawable = bitmap;
+        if (fixLifecycle) {
+            backgroundMotion = motion;
+        }
         if (attached && backgroundDrawable instanceof ChatBackgroundDrawable) {
             ((ChatBackgroundDrawable) backgroundDrawable).onAttachedToWindow(backgroundView);
         }
-        if (attached && backgroundDrawable instanceof MotionBackgroundDrawable) {
+        if (!fixLifecycle && attached && backgroundDrawable instanceof MotionBackgroundDrawable) {
             ((MotionBackgroundDrawable) backgroundDrawable).onDetachedFromWindow();
         }
         if (attached && backgroundDrawable instanceof MotionBackgroundDrawable) {
@@ -394,7 +418,8 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
     }
 
     private void checkMotion() {
-        boolean motion = oldBackgroundMotion || backgroundMotion;
+        boolean motion = !WallpaperDebugConfig.enabled(WallpaperDebugConfig.NO_MOTION)
+                && (oldBackgroundMotion || backgroundMotion);
         if (motion) {
             if (parallaxEffect == null) {
                 parallaxEffect = new WallpaperParallaxEffect(getContext());

@@ -86,6 +86,7 @@ import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Components.ItemOptions;
 import app.exteraless.appicons.AppIconEntryCell;
 import app.exteraless.appearance.AppearanceConfig;
+import app.freezgram.WallpaperDebugConfig;
 import org.telegram.ui.Cells.NotificationsCheckCell;
 import org.telegram.ui.Cells.RadioButtonCell;
 import org.telegram.ui.Cells.RadioColorCell;
@@ -200,6 +201,20 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
     private int preferedHeaderRow;
     private int newThemeInfoRow;
     private int themeHeaderRow;
+    private int wallpaperDebugHeaderRow = -1;
+    private int wallpaperDebugStartRow = -1;
+    private int wallpaperDebugResetRow = -1;
+    private int wallpaperDebugInfoRow = -1;
+    private static final int[] WALLPAPER_DEBUG_LABELS = {
+            R.string.FreezgramWallpaperSize, R.string.FreezgramWallpaperLifecycle,
+            R.string.FreezgramWallpaperNoFast, R.string.FreezgramWallpaperNoMotion,
+            R.string.FreezgramWallpaperOpaque
+    };
+
+    private int wallpaperDebugOption(int position) {
+        int index = position - wallpaperDebugStartRow;
+        return wallpaperDebugStartRow >= 0 && index >= 0 && index < WallpaperDebugConfig.OPTIONS.length ? index : -1;
+    }
     private int bubbleRadiusHeaderRow;
     @Keep
     private int bubbleRadiusRow;
@@ -577,6 +592,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         int prevRaiseToSpeakRow = raiseToSpeakRow;
 
         rowCount = 0;
+        wallpaperDebugHeaderRow = wallpaperDebugStartRow = wallpaperDebugResetRow = wallpaperDebugInfoRow = -1;
         contactsReimportRow = -1;
         contactsSortRow = -1;
         scheduleLocationRow = -1;
@@ -711,6 +727,12 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
 
             themeListRow2 = rowCount++;
             themeInfoRow = rowCount++;
+
+            wallpaperDebugHeaderRow = rowCount++;
+            wallpaperDebugStartRow = rowCount;
+            rowCount += WallpaperDebugConfig.OPTIONS.length;
+            wallpaperDebugResetRow = rowCount++;
+            wallpaperDebugInfoRow = rowCount++;
 
             bubbleRadiusHeaderRow = rowCount++;
             bubbleRadiusRow = rowCount++;
@@ -1157,6 +1179,19 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         actionBar.setAdaptiveBackground(listView);
         listView.setOnItemClickListener((view, position, x, y) -> {
+            int wallpaperOption = wallpaperDebugOption(position);
+            if (wallpaperOption >= 0) {
+                int option = WallpaperDebugConfig.OPTIONS[wallpaperOption];
+                WallpaperDebugConfig.toggle(option);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(WallpaperDebugConfig.enabled(option));
+                }
+                return;
+            } else if (position == wallpaperDebugResetRow) {
+                WallpaperDebugConfig.reset();
+                listAdapter.notifyItemRangeChanged(wallpaperDebugStartRow, WallpaperDebugConfig.OPTIONS.length);
+                return;
+            }
             if (position == monetStyleRow) {
                 showMonetStyleOptions(view);
             } else if (position == enableAnimationsRow) {
@@ -2580,7 +2615,9 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 case TYPE_TEXT_INFO_PRIVACY: {
                     TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
                     cell.setFixedSize(0);
-                    if (position == automaticBrightnessInfoRow) {
+                    if (position == wallpaperDebugInfoRow) {
+                        cell.setText(getString(R.string.FreezgramWallpaperDebugInfo));
+                    } else if (position == automaticBrightnessInfoRow) {
                         cell.setText(LocaleController.formatString("AutoNightBrightnessInfo", R.string.AutoNightBrightnessInfo, (int) (100 * Theme.autoNightBrighnessThreshold)));
                     } else if (position == scheduleLocationInfoRow) {
                         cell.setText(getLocationSunString());
@@ -2612,7 +2649,9 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 }
                 case TYPE_HEADER: {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
-                    if (position == scheduleHeaderRow) {
+                    if (position == wallpaperDebugHeaderRow) {
+                        headerCell.setText(getString(R.string.FreezgramWallpaperDebug));
+                    } else if (position == scheduleHeaderRow) {
                         headerCell.setText(getString("AutoNightSchedule", R.string.AutoNightSchedule));
                     } else if (position == automaticHeaderRow) {
                         headerCell.setText(getString("AutoNightBrightness", R.string.AutoNightBrightness));
@@ -2652,7 +2691,11 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 }
                 case TYPE_TEXT_CHECK: {
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
-                    if (position == scheduleLocationRow) {
+                    int wallpaperOption = wallpaperDebugOption(position);
+                    if (wallpaperOption >= 0) {
+                        textCheckCell.setTextAndCheck(getString(WALLPAPER_DEBUG_LABELS[wallpaperOption]),
+                                WallpaperDebugConfig.enabled(WallpaperDebugConfig.OPTIONS[wallpaperOption]), true);
+                    } else if (position == scheduleLocationRow) {
                         textCheckCell.setTextAndCheck(getString("AutoNightLocation", R.string.AutoNightLocation), Theme.autoNightScheduleByLocation, true);
                     } else if (position == enableAnimationsRow) {
                         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
@@ -2724,7 +2767,11 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 case TYPE_TEXT_PREFERENCE: {
                     TextCell cell = (TextCell) holder.itemView;
                     cell.heightDp = 48;
-                    if (position == monetStyleRow) {
+                    if (position == wallpaperDebugResetRow) {
+                        cell.setSubtitle(null);
+                        cell.setColors(Theme.key_windowBackgroundWhiteBlueText4, Theme.key_windowBackgroundWhiteBlueText4);
+                        cell.setText(getString(R.string.FreezgramWallpaperReset), false);
+                    } else if (position == monetStyleRow) {
                         cell.setSubtitle(null);
                         cell.setColors(Theme.key_windowBackgroundWhiteGrayIcon,
                                 Theme.key_windowBackgroundWhiteBlackText);
@@ -2791,6 +2838,10 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
 
         @Override
         public int getItemViewType(int position) {
+            if (position == wallpaperDebugHeaderRow) return TYPE_HEADER;
+            if (position == wallpaperDebugInfoRow) return TYPE_TEXT_INFO_PRIVACY;
+            if (position == wallpaperDebugResetRow) return TYPE_TEXT_PREFERENCE;
+            if (wallpaperDebugOption(position) >= 0) return TYPE_TEXT_CHECK;
             if (position == scheduleFromRow || position == distanceRow ||
                     position == scheduleToRow || position == scheduleUpdateLocationRow ||
                     position == contactsReimportRow || position == contactsSortRow ||

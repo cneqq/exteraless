@@ -74,4 +74,12 @@
     <string name="AppIconFreezgramMonoDark">Freezgram · Ч/б тёмная</string>
     <string name="FreezgramBadgeFounder">Основатель Freezgram</string>
     <string name="FreezgramBadgeLocalInfo">Значок сообщества. Виден только в Freezgram.</string>
+    <string name="FreezgramWallpaperDebug">Проверка обоев</string>
+    <string name="FreezgramWallpaperSize">Исправлять пропорции размытого фона</string>
+    <string name="FreezgramWallpaperLifecycle">Исправлять переключение обоев</string>
+    <string name="FreezgramWallpaperNoFast">Отключить ускоренный шейдер обоев</string>
+    <string name="FreezgramWallpaperNoMotion">Отключить параллакс обоев</string>
+    <string name="FreezgramWallpaperOpaque">Сплошная подложка под обоями</string>
+    <string name="FreezgramWallpaperReset">Выключить все эксперименты</string>
+    <string name="FreezgramWallpaperDebugInfo">Временные параметры для проверки смещения обоев и следов при прокрутке. Начните со всех выключенных переключателей. Включите один, полностью закройте и заново откройте приложение, затем проверьте те же обои. Перед следующим вариантом выключите предыдущий и снова перезапустите приложение. Выбранные тема и обои сохраняются.</string>
 </resources>
