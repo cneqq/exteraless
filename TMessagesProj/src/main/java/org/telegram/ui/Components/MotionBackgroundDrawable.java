@@ -157,10 +157,7 @@ public class MotionBackgroundDrawable extends Drawable {
     }
 
     public void setFastRenderAllowed() {
-        // Compatibility trial for wallpaper displacement and trails reported on Android 16.
-        // Keep the existing bitmap/ComposeShader path until the fast path is validated there.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && Build.VERSION.SDK_INT < 36
-                && motionBackgroundPaint == null && !SharedConfig.fastWallpaperDisabled) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && motionBackgroundPaint == null && !SharedConfig.fastWallpaperDisabled) {
             motionBackgroundPaint = new MotionBackgroundPaint();
         }
     }

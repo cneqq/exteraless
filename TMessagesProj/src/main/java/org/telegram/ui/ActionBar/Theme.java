@@ -4165,12 +4165,6 @@ public class Theme {
 
         ThemeInfo applyingTheme = null;
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        if (!preferences.contains("theme") && !preferences.contains("nighttheme")
-                && !preferences.contains("selectedAutoNightType")) {
-            // Seed a dark default once; preserve every existing theme/auto-night choice.
-            preferences.edit().putString("theme", "Night").putString("nighttheme", "Night")
-                    .putInt("selectedAutoNightType", AUTO_NIGHT_TYPE_NONE).apply();
-        }
         try {
             final ThemeInfo themeDarkBlue = themesDict.get("Night");
 
