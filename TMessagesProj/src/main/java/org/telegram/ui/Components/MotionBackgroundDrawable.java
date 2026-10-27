@@ -20,6 +20,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.SystemClock;
 import android.view.View;
+import app.freezgram.WallpaperDiagnostics;
 
 import androidx.core.graphics.ColorUtils;
 
@@ -112,6 +113,7 @@ public class MotionBackgroundDrawable extends Drawable {
     private int bitmapHeight = 80;
 
     private MotionBackgroundPaint motionBackgroundPaint;
+    private boolean wallpaperDiagnosticsLogged;
 
     public MotionBackgroundDrawable() {
         super();
@@ -438,6 +440,7 @@ public class MotionBackgroundDrawable extends Drawable {
     }
 
     public void setPatternBitmap(int intensity, Bitmap bitmap, boolean doNotScale) {
+        wallpaperDiagnosticsLogged = false;
         this.intensity = intensity;
         patternBitmap = bitmap;
         if (patternBitmap == null) {
@@ -491,6 +494,10 @@ public class MotionBackgroundDrawable extends Drawable {
         canvas.save();
 
         final Bitmap patternBitmap = getOrBuildPatternWithGiftBitmap();
+        if (!wallpaperDiagnosticsLogged) {
+            wallpaperDiagnosticsLogged = WallpaperDiagnostics.record(patternBitmap, currentBitmap, bounds,
+                    intensity, isPreview, canvas.isHardwareAccelerated());
+        }
         float tr = patternBitmap != null ? bounds.top : translationY;
         int bitmapWidth = currentBitmap.getWidth();
         int bitmapHeight = currentBitmap.getHeight();

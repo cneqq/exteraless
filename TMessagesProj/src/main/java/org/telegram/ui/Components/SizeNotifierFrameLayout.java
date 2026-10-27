@@ -39,6 +39,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import app.freezgram.WallpaperDiagnostics;
 
 import androidx.annotation.NonNull;
 
@@ -166,6 +167,7 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
     }
 
     private class BackgroundView extends View {
+        private boolean wallpaperDiagnosticsLogged;
         public BackgroundView(Context context) {
             super(context);
         }
@@ -174,6 +176,11 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
         protected void onDraw(Canvas canvas) {
             if (backgroundDrawable == null || skipBackgroundDrawing) {
                 return;
+            }
+            if (!wallpaperDiagnosticsLogged && WallpaperDiagnostics.enabled()) {
+                WallpaperDiagnostics.window(getWidth(), getHeight(), getRootView().getMeasuredHeight(),
+                        backgroundTranslationY, bottomClip, backgroundDrawable.getClass().getSimpleName());
+                wallpaperDiagnosticsLogged = true;
             }
             Drawable newDrawable = getNewDrawable();
             boolean newMotion = getNewDrawableMotion();
