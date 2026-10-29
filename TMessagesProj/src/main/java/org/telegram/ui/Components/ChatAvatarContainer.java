@@ -975,7 +975,8 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
         final float avatarSizeDiff = avatarSizeInDp - 42f;
         final int actionBarHeight = ActionBar.getCurrentActionBarHeight();
         final int viewTop = (actionBarHeight - avatarImageView.getMeasuredHeight() - avatarInsetPx * 2) / 2 + (occupyStatusBar ? AndroidUtilities.statusBarHeight : 0);
-        final int subtitleTop = viewTop + dp(material3 ? (glassMode ? 26.66f : 27f) : (glassMode ? 23.66f : 24f));
+        final int iosTextOffset = isCentered() && app.exteraless.appearance.AppearanceConfig.iosChatHeader() ? dp(1) : 0;
+        final int subtitleTop = viewTop - iosTextOffset + dp(material3 ? (glassMode ? 26.66f : 27f) : (glassMode ? 23.66f : 24f));
 
         int avatarLeft = avatarInsetPx + leftPadding;
         if (isCentered()) {
@@ -1000,9 +1001,9 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
         }
         SimpleTextView titleTextLargerCopyView = this.titleTextLargerCopyView.get();
         if (getSubtitleTextView().getVisibility() != GONE) {
-            titleTextView.layout(l, viewTop + dp(1.66f) - titleTextView.getPaddingTop(), l + titleTextView.getMeasuredWidth(), viewTop + titleTextView.getTextHeight() + dp(1.66f) - titleTextView.getPaddingTop() + titleTextView.getPaddingBottom());
+            titleTextView.layout(l, viewTop + iosTextOffset + dp(1.66f) - titleTextView.getPaddingTop(), l + titleTextView.getMeasuredWidth(), viewTop + iosTextOffset + titleTextView.getTextHeight() + dp(1.66f) - titleTextView.getPaddingTop() + titleTextView.getPaddingBottom());
             if (titleTextLargerCopyView != null) {
-                titleTextLargerCopyView.layout(l, viewTop + dp(1.66f), l + titleTextLargerCopyView.getMeasuredWidth(), viewTop + titleTextLargerCopyView.getTextHeight() + dp(1.66f));
+                titleTextLargerCopyView.layout(l, viewTop + iosTextOffset + dp(1.66f), l + titleTextLargerCopyView.getMeasuredWidth(), viewTop + iosTextOffset + titleTextLargerCopyView.getTextHeight() + dp(1.66f));
             }
         } else {
             titleTextView.layout(l, viewTop + dp(11) - titleTextView.getPaddingTop(), l + titleTextView.getMeasuredWidth(), viewTop + titleTextView.getTextHeight() + dp(11) - titleTextView.getPaddingTop() + titleTextView.getPaddingBottom());
