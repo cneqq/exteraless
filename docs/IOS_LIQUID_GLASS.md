@@ -119,3 +119,12 @@ the raw image. A wrapped source composites black over only the wallpaper capture
 bounds before foreground messages or glass refraction. The source bitmap is not
 modified. System-bar color estimates also include that dim amount. No additional
 user-facing dim slider or arbitrary global dark overlay is introduced.
+
+The shared editor provides **Apply wallpaper dimming** (enabled by default,
+backed up with other settings). It switches the wallpaper backdrop between the
+actual rendered wallpaper-only view (preserving all drawable filters/dimming)
+and the raw image source. Foreground messages are captured separately. The
+rendered path is clipped to the capture rectangle and falls back to the image
+until the wallpaper view is measured. It does not add another dark layer over
+the already-rendered wallpaper. Switching increments the shared style revision
+so cached glass is refreshed; default reset re-enables it.

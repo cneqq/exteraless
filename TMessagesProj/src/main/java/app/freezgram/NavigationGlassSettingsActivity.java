@@ -33,7 +33,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
     private GlassPreview preview;
     private AvatarCornersSeekBar blur, intensity, transparency, width, lift, composerLift, composerSide;
     private boolean geometryChanged;
-    private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors;
+    private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors, wallpaperDim;
 
     private String text(int id) { return LocaleController.getString(id); }
 
@@ -79,6 +79,13 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 enhanceColors.setChecked(LiquidGlassStyle.enhanceColors()); geometryChanged = true; preview.invalidate();
             });
             content.addView(enhanceColors);
+            wallpaperDim = new org.telegram.ui.Cells.TextCheckCell(context);
+            wallpaperDim.setTextAndCheck(text(R.string.FreezgramGlassWallpaperDim), AppearanceConfig.glassWallpaperDim(), false);
+            wallpaperDim.setOnClickListener(v -> {
+                AppearanceConfig.glassWallpaperDim.setConfigBool(!AppearanceConfig.glassWallpaperDim());
+                wallpaperDim.setChecked(AppearanceConfig.glassWallpaperDim()); geometryChanged = true; preview.invalidate();
+            });
+            content.addView(wallpaperDim);
             blur = slider(context, content, R.string.FreezgramPanelBlur, 30,
                     AppearanceConfig.navigationGlassBlur(), value -> {
                         AppearanceConfig.navigationGlassBlur.setConfigInt(value); geometryChanged = true; preview.invalidate();
@@ -154,6 +161,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         reset.setPadding(dp(22), dp(20), dp(22), dp(24));
         reset.setOnClickListener(v -> {
             if (mode == 1) {
+                AppearanceConfig.glassWallpaperDim.setConfigBool(true);
+                wallpaperDim.setChecked(true);
                 AppearanceConfig.glassEnhanceColors.setConfigBool(true);
                 enhanceColors.setChecked(true);
                 AppearanceConfig.navigationGlassBlur.setConfigInt(6);

@@ -366,6 +366,13 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
 
     }
 
+    /** Capture only the displayed wallpaper, including its filters and dimming. */
+    public boolean drawWallpaperForGlass(Canvas canvas) {
+        if (backgroundView == null || backgroundView.getMeasuredWidth() <= 0 || backgroundView.getMeasuredHeight() <= 0) return false;
+        backgroundView.draw(canvas);
+        return true;
+    }
+
     public void onUpdateBackgroundDrawable(Drawable drawable) {
 
     }

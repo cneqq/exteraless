@@ -18680,7 +18680,7 @@ public class ChatActivity extends BaseFragment implements
             shouldHaveLightStatusBarIcons = statusBarBrightness <= 0.721f;
             shouldHaveLightNavigationBarIcons = navigationBarBrightness <= 0.9f;
 
-            navbarContentSourceWallpaper.setSource(source);
+            navbarContentSourceWallpaper.setSource(wallpaperBitmapProvider.withRenderedWallpaper(source, this::drawWallpaperForGlass));
             if (chatActivityFadeView != null) {
                 chatActivityFadeView.invalidate();
             }

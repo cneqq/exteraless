@@ -71,10 +71,29 @@ public class WallpaperBitmapProvider {
         return sourceBitmap;
     }
 
+    public BlurredBackgroundSource withRenderedWallpaper(BlurredBackgroundSource source,
+            java.util.function.Predicate<Canvas> renderWallpaper) {
+        BlurredBackgroundSourceWrapped wrapped = new BlurredBackgroundSourceWrapped() {
+            @Override public void draw(Canvas canvas, float left, float top, float right, float bottom) {
+                canvas.save();
+                try {
+                    canvas.clipRect(left, top, right, bottom);
+                    if (!app.exteraless.appearance.AppearanceConfig.glassWallpaperDim() || !renderWallpaper.test(canvas)) {
+                        super.draw(canvas, left, top, right, bottom);
+                    }
+                } finally {
+                    canvas.restore();
+                }
+            }
+        };
+        wrapped.setSource(source);
+        return wrapped;
+    }
+
     public int getNavigationBarColor(BlurredBackgroundSource source) {
         if (source instanceof DimmedWallpaperSource) {
             DimmedWallpaperSource dimmed = (DimmedWallpaperSource) source;
-            return ColorUtils.compositeColors(dimmed.paint.getColor(), getNavigationBarColor(dimmed.getSource()));
+            return ColorUtils.compositeColors(dimmed.getDimColor(), getNavigationBarColor(dimmed.getSource()));
         }
 
         if (source instanceof BlurredBackgroundSourceColor) {
@@ -96,7 +115,7 @@ public class WallpaperBitmapProvider {
     public int getStatusBarColor(BlurredBackgroundSource source) {
         if (source instanceof DimmedWallpaperSource) {
             DimmedWallpaperSource dimmed = (DimmedWallpaperSource) source;
-            return ColorUtils.compositeColors(dimmed.paint.getColor(), getStatusBarColor(dimmed.getSource()));
+            return ColorUtils.compositeColors(dimmed.getDimColor(), getStatusBarColor(dimmed.getSource()));
         }
 
         if (source instanceof BlurredBackgroundSourceColor) {
@@ -118,16 +137,24 @@ public class WallpaperBitmapProvider {
     /** Apply wallpaper dim before glass captures/composites messages, without mutating bitmaps. */
     private static final class DimmedWallpaperSource extends BlurredBackgroundSourceWrapped {
         private final Paint paint = new Paint();
+        private final float dim;
 
         DimmedWallpaperSource(BlurredBackgroundSource source, float dim) {
             setSource(source);
+            this.dim = Math.max(0, Math.min(1, dim));
+            getDimColor();
+        }
+
+        int getDimColor() {
             paint.setColor(Color.BLACK);
-            paint.setAlpha((int) (255 * Math.max(0, Math.min(1, dim))));
+            paint.setAlpha(app.exteraless.appearance.AppearanceConfig.glassWallpaperDim() ? (int) (255 * dim) : 0);
+            return paint.getColor();
         }
 
         @Override
         public void draw(Canvas canvas, float left, float top, float right, float bottom) {
             super.draw(canvas, left, top, right, bottom);
+            getDimColor();
             canvas.drawRect(left, top, right, bottom, paint);
         }
     }

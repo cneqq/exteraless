@@ -18,8 +18,8 @@ public final class LiquidGlassStyle {
     public static int blurRadiusDp() { return AppearanceConfig.navigationGlassBlur(); }
     public static boolean enhanceColors() { return AppearanceConfig.glassEnhanceColors(); }
     public static int revision() {
-        return ((blurRadiusDp() * 101 + AppearanceConfig.navigationGlassIntensity()) * 102
-                + AppearanceConfig.navigationGlassTransparency() + 1) * 2 + (enhanceColors() ? 1 : 0);
+        return (((blurRadiusDp() * 101 + AppearanceConfig.navigationGlassIntensity()) * 102
+                + AppearanceConfig.navigationGlassTransparency() + 1) * 2 + (enhanceColors() ? 1 : 0)) * 2 + (AppearanceConfig.glassWallpaperDim() ? 1 : 0);
     }
     public static void configure(BlurredBackgroundDrawable drawable) {
         drawable.setThickness(AndroidUtilities.dp(12));
