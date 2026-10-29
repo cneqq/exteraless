@@ -7,6 +7,51 @@ from test_personal_privacy import method, run_java
 
 class IosGlassTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
+    def test_ios_lift_keeps_visual_height_but_moves_capture_and_reserves_content(self):
+        path=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java/app/exteraless/appearance/MainTabsUiHelper.java'
+        text=path.read_text()
+        methods='\n'.join(method(text, signature) for signature in (
+            '    public static int getTabsViewHeightDp()',
+            '    public static int getTabsBottomLiftDp()',
+            '    public static int getTabsBottomOccupiedHeightDp()',
+            '    public static int getTabsFabOffsetDp()',
+            '    public static void applyTabsBottomInset(MainTabsLayout layout, View wrapper,',
+            '    public static void setBlurBounds('))
+        run_java('''
+class PrivacyCheck{
+ static boolean ios,material;
+ static boolean isIosNavigationBar(){return ios&&!material;}
+ static boolean isMaterial3NavigationBar(){return material;}
+ static int getWrapperSideInset(){return 0;}
+ static void applyTabsBottomInset(MainTabsLayout layout,int inset){}
+ METHODS
+ public static void main(String[] args){
+  View window=new View(),wrapper=new View();RectF rect=new RectF();
+  applyTabsBottomInset(new MainTabsLayout(),wrapper,20,0,0);
+  if(wrapper.bottom!=20||getTabsBottomOccupiedHeightDp()!=76)throw new AssertionError("Legacy changed");
+  setBlurBounds(rect,window,20);float oldBottom=rect.bottom;
+  ios=true;applyTabsBottomInset(new MainTabsLayout(),wrapper,20,0,0);
+  setBlurBounds(rect,window,20);
+  if(wrapper.bottom!=32||getTabsBottomOccupiedHeightDp()!=88||getTabsViewHeightDp()!=76)
+   throw new AssertionError("Panel height and occupied space confused");
+  if(rect.bottom!=oldBottom-12||rect.bottom-rect.top!=60||getTabsFabOffsetDp()!=80)
+   throw new AssertionError("Capture or FAB not lifted");
+  material=true;applyTabsBottomInset(new MainTabsLayout(),wrapper,20,0,0);
+  if(wrapper.bottom!=0||getTabsBottomLiftDp()!=0||getTabsBottomOccupiedHeightDp()!=64||getTabsFabOffsetDp()!=64)
+   throw new AssertionError("Material navigation changed");
+ }
+}
+class MainTabsHelper{
+ static int getMainTabsHeightWithMargins(){return 76;}
+ static int getMainTabsHeight(){return 60;}static int getMainTabsMargin(){return 8;}
+}
+class AndroidUtilities{static int dp(int value){return value;}}
+class View{int bottom;void setPadding(int l,int t,int r,int b){bottom=b;}int getMeasuredHeight(){return 1000;}int getMeasuredWidth(){return 500;}}
+class MainTabsLayout extends View{}
+class RectF{float top,bottom;void set(int l,int t,int r,int b){top=t;bottom=b;}}
+'''.replace('METHODS',methods))
+
+    @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
     def test_disabling_glass_releases_effect_and_repeated_updates_are_idempotent(self):
         path=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawableRenderNode.java'
         toggle=method(path.read_text(), '    public void setLiquidGlassEffectAllowed(boolean allowed)')
@@ -49,7 +94,7 @@ class PrivacyCheck {
    if(renderNode.enabled!=expected)throw new AssertionError("Shader state not refreshed");
    BlurredBackgroundProvider provider=IosLiquidGlassNavigation.colors(null);
    int alpha=provider.background.getColor(null,false)>>>24;
-   if(expected ? alpha>100||alpha<40 : alpha<200)throw new AssertionError("Unreadable fallback");
+   if(expected ? alpha>80||alpha<20 : alpha<200)throw new AssertionError("Unreadable fallback");
   }
   BlurredBackgroundDrawable drawable=new BlurredBackgroundDrawable();
   IosLiquidGlassNavigation.configure(drawable);

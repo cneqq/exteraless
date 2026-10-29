@@ -781,7 +781,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         contentLayout.addView(viewPagerFixed, LayoutHelper.createFrameMatchParent());
         contentLayout.addView(actionBar);
         if (showTabs) {
-            contentLayout.addView(tabsView, LayoutHelper.createFrame(app.exteraless.appearance.MainTabsUiHelper.getTabsViewWidth(), app.exteraless.appearance.MainTabsUiHelper.getTabsViewHeightDp(), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL));
+            contentLayout.addView(tabsView, LayoutHelper.createFrame(app.exteraless.appearance.MainTabsUiHelper.getTabsViewWidth(), app.exteraless.appearance.MainTabsUiHelper.getTabsViewHeightDp(), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0, 0, app.exteraless.appearance.MainTabsUiHelper.getTabsBottomLiftDp()));
             Bulletin.addDelegate(this, new Bulletin.Delegate() {
                 @Override
                 public int getBottomOffset(int tag) {
@@ -3577,7 +3577,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         }
 
         final int pt = ActionBar.getCurrentActionBarHeight() + statusbar;
-        final int pb = (showTabs ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsViewHeightDp()) : 0) + navbar;
+        final int pb = (showTabs ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsBottomOccupiedHeightDp()) : 0) + navbar;
 
         if (recyclerListView != null) {
             recyclerListView.setPadding(0, pt, 0, pb);

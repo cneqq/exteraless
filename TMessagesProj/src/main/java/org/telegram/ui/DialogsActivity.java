@@ -3058,7 +3058,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         BirthdayController.getInstance(currentAccount).check();
-        additionNavigationBarHeight = hasMainTabs && MainTabsLayout.isBottomNavigationVisible() && !MainTabsLayout.isBottomNavigationFloating() ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsViewHeightDp()) : 0;
+        additionNavigationBarHeight = hasMainTabs && MainTabsLayout.isBottomNavigationVisible() && !MainTabsLayout.isBottomNavigationFloating() ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsBottomOccupiedHeightDp()) : 0;
         additionFloatingButtonOffset = hasMainTabs && MainTabsLayout.isBottomNavigationVisible() ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsFabOffsetDp()) : 0;
 
         LastSeenHelper.preload();
@@ -3345,7 +3345,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         filterTabsView = null;
         selectedDialogs.clear();
 
-        additionNavigationBarHeight = hasMainTabs && MainTabsLayout.isBottomNavigationVisible() && !MainTabsLayout.isBottomNavigationFloating() ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsViewHeightDp()) : 0;
+        additionNavigationBarHeight = hasMainTabs && MainTabsLayout.isBottomNavigationVisible() && !MainTabsLayout.isBottomNavigationFloating() ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsBottomOccupiedHeightDp()) : 0;
         additionFloatingButtonOffset = hasMainTabs && MainTabsLayout.isBottomNavigationVisible() ? dp(app.exteraless.appearance.MainTabsUiHelper.getTabsFabOffsetDp()) : 0;
 
         maximumVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
@@ -14681,7 +14681,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (fragmentView.getGlobalVisibleRect(bounds)) {
                 final int y = ((int) ev.getRawY()) - bounds.top;
                 final int bottom = fragmentView.getMeasuredHeight() - navigationBarHeight;
-                if (y >= bottom - dp(app.exteraless.appearance.MainTabsUiHelper.getTabsViewHeightDp()) && y <= bottom) {
+                if (y >= bottom - dp(app.exteraless.appearance.MainTabsUiHelper.getTabsBottomOccupiedHeightDp()) && y <= bottom) {
                     return false;
                 }
             }
@@ -14872,7 +14872,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (commentView != null || !hasMainTabs || !MainTabsLayout.isBottomNavigationFloating()) {
             return 0;
         }
-        return dp(app.exteraless.appearance.MainTabsUiHelper.getTabsViewHeightDp());
+        return dp(app.exteraless.appearance.MainTabsUiHelper.getTabsBottomOccupiedHeightDp());
     }
 
     @Override

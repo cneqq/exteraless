@@ -54,6 +54,15 @@ public final class MainTabsUiHelper {
         return isMaterial3NavigationBar() ? 64 : MainTabsHelper.getMainTabsHeightWithMargins();
     }
 
+    public static int getTabsBottomLiftDp() {
+        return isIosNavigationBar() ? 12 : 0;
+    }
+
+    /** Space occupied above the system inset, including the iOS floating gap. */
+    public static int getTabsBottomOccupiedHeightDp() {
+        return getTabsViewHeightDp() + getTabsBottomLiftDp();
+    }
+
     /** M3 — dp(64) плюс системный отступ снизу, иначе высота из MainTabsHelper. */
     public static int getTabsViewHeight(int bottomInset) {
         return isMaterial3NavigationBar()
@@ -90,7 +99,7 @@ public final class MainTabsUiHelper {
 
     /** Сдвиг кнопки «написать» над панелью: в M3 всегда 64. */
     public static int getTabsFabOffsetDp() {
-        return isMaterial3NavigationBar() ? 64 : MainTabsHelper.getMainTabsHeight() + MainTabsHelper.getMainTabsMargin();
+        return isMaterial3NavigationBar() ? 64 : MainTabsHelper.getMainTabsHeight() + MainTabsHelper.getMainTabsMargin() + getTabsBottomLiftDp();
     }
 
     /** В M3 и iOS-стиле панель во всю ширину (в M3 ещё и без внутренних отступов). */
@@ -108,7 +117,8 @@ public final class MainTabsUiHelper {
     public static void applyTabsBottomInset(MainTabsLayout layout, View wrapper, int bottomInset, int leftInset, int rightInset) {
         applyTabsBottomInset(layout, bottomInset);
         final int side = getWrapperSideInset();
-        wrapper.setPadding(leftInset + side, 0, rightInset + side, isMaterial3NavigationBar() ? 0 : bottomInset);
+        wrapper.setPadding(leftInset + side, 0, rightInset + side,
+                isMaterial3NavigationBar() ? 0 : bottomInset + AndroidUtilities.dp(getTabsBottomLiftDp()));
     }
 
     public static void applyTabsBottomInset(MainTabsLayout layout, int bottomInset) {
@@ -145,7 +155,8 @@ public final class MainTabsUiHelper {
             bottom = view.getMeasuredHeight();
             top = bottom - AndroidUtilities.dp(64) - bottomInset;
         } else {
-            bottom = view.getMeasuredHeight() - bottomInset - AndroidUtilities.dp(MainTabsHelper.getMainTabsMargin());
+            bottom = view.getMeasuredHeight() - bottomInset
+                    - AndroidUtilities.dp(MainTabsHelper.getMainTabsMargin() + getTabsBottomLiftDp());
             top = bottom - AndroidUtilities.dp(MainTabsHelper.getMainTabsHeight());
         }
         rectF.set(0, top, view.getMeasuredWidth(), bottom);

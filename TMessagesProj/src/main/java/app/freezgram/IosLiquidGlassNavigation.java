@@ -29,7 +29,7 @@ public final class IosLiquidGlassNavigation {
         return new BlurredBackgroundProviderBuilder(resourcesProvider)
                 .setBackgroundColor((r, dark) -> Theme.multAlpha(
                         Theme.getColor(Theme.key_windowBackgroundWhite, r),
-                        isEnabled() ? (dark ? .38f : .24f) : .82f))
+                        isEnabled() ? (dark ? .20f : .12f) : .82f))
                 .setStrokeColorTop(0xb3ffffff, 0x80ffffff)
                 .setStrokeColorBottom(0x24000000, 0x26ffffff)
                 .setStrokeWidth(AndroidUtilities.dpf2(.9f), AndroidUtilities.dpf2(.5f))

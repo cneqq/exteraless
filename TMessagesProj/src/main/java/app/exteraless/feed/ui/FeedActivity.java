@@ -224,7 +224,7 @@ public class FeedActivity extends BaseFragment implements NotificationCenter.Not
 
     private WindowInsetsCompat extendInsetsByTabsHeight(WindowInsetsCompat windowInsets) {
         lastWindowInsets = windowInsets;
-        final int tabsHeight = AndroidUtilities.dp(MainTabsUiHelper.getTabsViewHeightDp()) + miniPlayerPadding;
+        final int tabsHeight = AndroidUtilities.dp(MainTabsUiHelper.getTabsBottomOccupiedHeightDp()) + miniPlayerPadding;
         if (tabsHeight == 0) {
             return windowInsets;
         }
