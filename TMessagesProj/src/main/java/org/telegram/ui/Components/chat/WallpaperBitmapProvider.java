@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.Paint;
+import androidx.core.graphics.ColorUtils;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -51,7 +53,9 @@ public class WallpaperBitmapProvider {
 
         if (drawable instanceof ChatBackgroundDrawable) {
             ChatBackgroundDrawable chatDrawable = (ChatBackgroundDrawable) drawable;
-            return updateSourceFromBackgroundViewDrawable(chatDrawable.getDrawable(false));
+            BlurredBackgroundSource source = updateSourceFromBackgroundViewDrawable(chatDrawable.getDrawable(false));
+            float dim = Math.max(0, Math.min(1, chatDrawable.getDimAmount()));
+            return dim > 0 ? new DimmedWallpaperSource(source, dim) : source;
         }
 
         if (drawable != null) {
@@ -68,6 +72,11 @@ public class WallpaperBitmapProvider {
     }
 
     public int getNavigationBarColor(BlurredBackgroundSource source) {
+        if (source instanceof DimmedWallpaperSource) {
+            DimmedWallpaperSource dimmed = (DimmedWallpaperSource) source;
+            return ColorUtils.compositeColors(dimmed.paint.getColor(), getNavigationBarColor(dimmed.getSource()));
+        }
+
         if (source instanceof BlurredBackgroundSourceColor) {
             return ((BlurredBackgroundSourceColor) source).getColor();
         }
@@ -85,6 +94,11 @@ public class WallpaperBitmapProvider {
     }
 
     public int getStatusBarColor(BlurredBackgroundSource source) {
+        if (source instanceof DimmedWallpaperSource) {
+            DimmedWallpaperSource dimmed = (DimmedWallpaperSource) source;
+            return ColorUtils.compositeColors(dimmed.paint.getColor(), getStatusBarColor(dimmed.getSource()));
+        }
+
         if (source instanceof BlurredBackgroundSourceColor) {
             return ((BlurredBackgroundSourceColor) source).getColor();
         }
@@ -99,6 +113,23 @@ public class WallpaperBitmapProvider {
         }
 
         return 0;
+    }
+
+    /** Apply wallpaper dim before glass captures/composites messages, without mutating bitmaps. */
+    private static final class DimmedWallpaperSource extends BlurredBackgroundSourceWrapped {
+        private final Paint paint = new Paint();
+
+        DimmedWallpaperSource(BlurredBackgroundSource source, float dim) {
+            setSource(source);
+            paint.setColor(Color.BLACK);
+            paint.setAlpha((int) (255 * Math.max(0, Math.min(1, dim))));
+        }
+
+        @Override
+        public void draw(Canvas canvas, float left, float top, float right, float bottom) {
+            super.draw(canvas, left, top, right, bottom);
+            canvas.drawRect(left, top, right, bottom, paint);
+        }
     }
 
     private final BitmapMemoizedMetadata<Bitmap> blurredFromBitmap = new BitmapMemoizedMetadata<>(WallpaperBitmapProvider::blurBitmap);

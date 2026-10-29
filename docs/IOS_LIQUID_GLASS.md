@@ -113,3 +113,9 @@ translation and chat information notices. It uses the same independent capture,
 colors and power-saving behavior as the header, with cached effect updates.
 The default chat-list title is Freezgram in the shared title helper; explicit
 custom titles remain unchanged.
+
+Wallpaper capture preserves ChatBackgroundDrawable's dim amount when unwrapping
+the raw image. A wrapped source composites black over only the wallpaper capture
+bounds before foreground messages or glass refraction. The source bitmap is not
+modified. System-bar color estimates also include that dim amount. No additional
+user-facing dim slider or arbitrary global dark overlay is introduced.
