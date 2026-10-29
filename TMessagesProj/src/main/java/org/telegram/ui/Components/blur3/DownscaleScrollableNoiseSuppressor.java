@@ -31,6 +31,7 @@ public class DownscaleScrollableNoiseSuppressor {
     private final boolean simpleMode;
     private final boolean navigationGlassEnabled;
     private final int k;
+    private float navigationBlurRadius = dpf2(6f);
 
     public DownscaleScrollableNoiseSuppressor() {
         this(true, false);
@@ -78,8 +79,15 @@ public class DownscaleScrollableNoiseSuppressor {
     }
 
     /** Replace only the navigation capture area; other surfaces retain their old blur. */
-    public void drawNavigationGlass(Canvas canvas, RectF bounds) {
+    public void drawNavigationGlass(Canvas canvas, RectF bounds, float radius) {
         if (!navigationGlassEnabled || bounds.isEmpty()) return;
+        radius = Math.max(0, radius);
+        if (navigationBlurRadius != radius) {
+            navigationBlurRadius = radius;
+            for (SourcePart part : rectRenderNodes) {
+                part.renderNodesForNavigation.setPrimaryEffectBlur(radius, RenderNodeEffects.getSaturationX3RenderEffect());
+            }
+        }
         canvas.save();
         canvas.clipRect(bounds);
         canvas.drawRenderNode(resultRenderNodes[2]);
@@ -159,6 +167,7 @@ public class DownscaleScrollableNoiseSuppressor {
         }
 
         public void setPrimaryEffectBlur(float radius, RenderEffect secondEffect) {
+            if (radius <= 0) { setPrimaryEffect(secondEffect); return; }
             final float downsampledRadiusX = downscaleRadius(radius, scaleX);
             final float downsampledRadiusY = downscaleRadius(radius, scaleY);
 
@@ -300,6 +309,7 @@ public class DownscaleScrollableNoiseSuppressor {
             if (sourcePart.renderNodesForGlass != null) {
                 sourcePart.renderNodesForGlass.onScrolled(dx, dy);
             }
+            if (sourcePart.renderNodesForNavigation != null) sourcePart.renderNodesForNavigation.onScrolled(dx, dy);
         }
     }
 
@@ -367,8 +377,11 @@ public class DownscaleScrollableNoiseSuppressor {
 
     private RenderNode getRenderNode(int a, int b) {
         final SourcePart sourcePart = rectRenderNodes.get(b);
-        if ((isLiquidGlassEnabled || a == 2) && sourcePart.renderNodesForGlass != null) {
-            if (a == 0 || a == 2) {
+        if (a == 2 && sourcePart.renderNodesForNavigation != null) {
+            return sourcePart.renderNodesForNavigation.renderNodeRestored[0];
+        }
+        if (isLiquidGlassEnabled && sourcePart.renderNodesForGlass != null) {
+            if (a == 0) {
                 return (sourcePart.renderNodesForGlass.renderNodeRestored[0]);
             } else {
                 return (sourcePart.renderNodesForBlur.renderNodeRestored[0]);
@@ -416,6 +429,7 @@ public class DownscaleScrollableNoiseSuppressor {
     }
 
     private class SourcePart {
+        final DownscaledRenderNode renderNodesForNavigation;
         final RenderNode renderNode = new RenderNode(null);
         final DownscaledRenderNode renderNodesForBlur;
         final @Nullable DownscaledRenderNode renderNodesForGlass;
@@ -423,7 +437,14 @@ public class DownscaleScrollableNoiseSuppressor {
         long lastHash;
 
         private SourcePart() {
-            if (isLiquidGlassEnabled || navigationGlassEnabled) {
+            if (navigationGlassEnabled) {
+                renderNodesForNavigation = new DownscaledRenderNode("navigation", 0, true);
+                renderNodesForNavigation.setScale(4, 4);
+                renderNodesForNavigation.setPrimaryEffectBlur(navigationBlurRadius, RenderNodeEffects.getSaturationX3RenderEffect());
+            } else {
+                renderNodesForNavigation = null;
+            }
+            if (isLiquidGlassEnabled) {
                 renderNodesForGlass = new DownscaledRenderNode("glass", 0, true);
                 renderNodesForGlass.setScale(4, 4);
                 renderNodesForGlass.setPrimaryEffectBlur(dpf2(6f), RenderNodeEffects.getSaturationX3RenderEffect());
@@ -455,6 +476,7 @@ public class DownscaleScrollableNoiseSuppressor {
         }
 
         public void invalidate() {
+            if (renderNodesForNavigation != null) renderNodesForNavigation.invalidateRenderNodes(renderNode);
             if (renderNodesForGlass != null) {
                 renderNodesForGlass.invalidateRenderNodes(renderNode);
             }

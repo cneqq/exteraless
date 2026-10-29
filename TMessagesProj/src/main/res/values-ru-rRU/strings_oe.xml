@@ -76,4 +76,11 @@
     <string name="FreezgramIosLiquidGlassNavigationInfo">Преломление фона и полупрозрачные края. Нужны Android 13+ и включённое размытие. На старых версиях Android и в энергосбережении — матовое стекло.</string>
     <string name="FreezgramBadgeOfficialChannel">Официальный канал Freezgram</string>
     <string name="FreezgramBadgeLocalInfo">Значок сообщества. Виден только в Freezgram.</string>
+    <string name="FreezgramPanelSettings">Нижняя панель</string>
+    <string name="FreezgramPanelSettingsInfo">Предпросмотр и настройка Liquid Glass</string>
+    <string name="FreezgramPanelBlur">Размытие фона</string>
+    <string name="FreezgramPanelIntensity">Сила преломления</string>
+    <string name="FreezgramPanelTransparency">Прозрачность заливки</string>
+    <string name="FreezgramPanelReset">Сбросить оформление</string>
+    <string name="FreezgramPanelPreviewInfo">Используется при включённом Liquid Glass. Пример содержимого. Изменения применяются к панели при возвращении. Liquid Glass требует Android 13+, включённого размытия и отключённого энергосбережения.</string>
 </resources>

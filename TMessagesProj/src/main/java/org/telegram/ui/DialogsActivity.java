@@ -2791,6 +2791,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     hash.add(getThemedColor(Theme.key_windowBackgroundWhite));
                     hash.add(SharedConfig.chatBlurEnabled());
                     hash.add(app.freezgram.IosLiquidGlassNavigation.isEnabled());
+                    hash.add(app.freezgram.IosLiquidGlassNavigation.blurRadiusDp());
 
                     if (SharedConfig.chatBlurEnabled()) {
                         TopicsFragment topicsFragment = null;
@@ -2840,6 +2841,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     hash.add(getThemedColor(Theme.key_windowBackgroundWhite));
                     hash.add(SharedConfig.chatBlurEnabled());
                     hash.add(app.freezgram.IosLiquidGlassNavigation.isEnabled());
+                    hash.add(app.freezgram.IosLiquidGlassNavigation.blurRadiusDp());
 
                     if (SharedConfig.chatBlurEnabled()) {
                         TopicsFragment topicsFragment = null;
@@ -2880,7 +2882,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
                         scrollableViewNoiseSuppressor.draw(canvas, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
                         if (app.freezgram.IosLiquidGlassNavigation.isEnabled()) {
-                            scrollableViewNoiseSuppressor.drawNavigationGlass(canvas, iBlur3PositionMainTabs);
+                            scrollableViewNoiseSuppressor.drawNavigationGlass(canvas, iBlur3PositionMainTabs, AndroidUtilities.dpf2(app.freezgram.IosLiquidGlassNavigation.blurRadiusDp()));
                         }
                     }
                 }

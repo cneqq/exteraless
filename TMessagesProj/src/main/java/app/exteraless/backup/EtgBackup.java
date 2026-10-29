@@ -329,6 +329,9 @@ public final class EtgBackup {
         bool(list, "newNavigationBarStyle", AppearanceConfig.newNavigationBarStyle);
         bool(list, "iosNavigationBarStyle", AppearanceConfig.iosNavigationBarStyle);
         bool(list, "iosLiquidGlassNavigation", AppearanceConfig.iosLiquidGlassNavigation);
+        integer(list, "navigationGlassBlur", AppearanceConfig.navigationGlassBlur, 0, 30);
+        integer(list, "navigationGlassIntensity", AppearanceConfig.navigationGlassIntensity, 0, 100);
+        integer(list, "navigationGlassTransparency", AppearanceConfig.navigationGlassTransparency, -1, 100);
         bool(list, "iosChatHeader", AppearanceConfig.iosChatHeader);
         bool(list, "profileMusicCard", AppearanceConfig.profileMusicCard);
         bool(list, "useSystemFonts", NekoConfig.typeface);

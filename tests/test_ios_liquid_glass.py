@@ -26,31 +26,37 @@ class PrivacyCheck {
    LiteMode.enabled=global;
    var s=new DownscaleScrollableNoiseSuppressor(simple,false,nav);
    var part=s.new SourcePart();s.rectRenderNodes.add(part);part.invalidate();
-   if((part.renderNodesForGlass!=null)!=(global||nav))throw new AssertionError("Weak output allocation");
+   if((part.renderNodesForGlass!=null)!=global)throw new AssertionError("Weak output allocation");
    if(part.renderNodesForGlass!=null&&part.renderNodesForGlass.radius!=6)throw new AssertionError("Weak radius");
    if(part.renderNodesForBlur.radius<38)throw new AssertionError("Frosted blur changed");
    if(s.getRenderNode(0,0)!=(global?part.renderNodesForGlass.renderNodeRestored[0]:part.renderNodesForBlur.renderNodeRestored[0]))
     throw new AssertionError("Legacy glass selection changed");
    if(part.renderNodesForBlur.input!=(global?part.renderNodesForGlass.renderNodeRestored[0]:part.renderNode))
     throw new AssertionError("Legacy blur input changed");
-   if(nav&&s.getRenderNode(2,0)!=part.renderNodesForGlass.renderNodeRestored[0])throw new AssertionError("Navigation still strongly blurred");
-   Canvas c=new Canvas();RectF area=new RectF();s.drawNavigationGlass(c,area);
+   if(nav&&s.getRenderNode(2,0)!=part.renderNodesForNavigation.renderNodeRestored[0])throw new AssertionError("Navigation still strongly blurred");
+   Canvas c=new Canvas();RectF area=new RectF();s.drawNavigationGlass(c,area,6);
+   if(nav) {
+    s.drawNavigationGlass(c,area,20);
+    if(part.renderNodesForNavigation.radius!=20||part.renderNodesForBlur.radius<38)throw new AssertionError("Blur adjustment isolation");
+    s.drawNavigationGlass(c,area,0);
+    if(part.renderNodesForNavigation.radius!=0)throw new AssertionError("Zero blur");
+   }
    if(nav?(c.node!=s.resultRenderNodes[2]||c.clip!=area||c.depth!=0):c.node!=null)throw new AssertionError("Navigation capture isolation");
-   area.empty=true;c.node=null;s.drawNavigationGlass(c,area);
+   area.empty=true;c.node=null;s.drawNavigationGlass(c,area,6);
    if(c.node!=null)throw new AssertionError("Empty bounds drawn");
   }
  }
 }
 class DownscaleScrollableNoiseSuppressor {
  boolean isLiquidGlassEnabled,simpleMode,navigationGlassEnabled,allowNoiseSuppress;int k;
- RenderNode[] resultRenderNodes;
+ RenderNode[] resultRenderNodes;float navigationBlurRadius=6;
  java.util.ArrayList<SourcePart> rectRenderNodes=new java.util.ArrayList<>();
  CONSTRUCTOR
  SELECTOR
  DRAW
  static float dpf2(float value){return value;}
  class SourcePart {
-  RenderNode renderNode=new RenderNode(null);DownscaledRenderNode renderNodesForGlass,renderNodesForBlur;
+  RenderNode renderNode=new RenderNode(null);DownscaledRenderNode renderNodesForGlass,renderNodesForBlur,renderNodesForNavigation;
   SOURCE_CONSTRUCTOR
   INVALIDATE
  }
@@ -173,11 +179,23 @@ class PrivacyCheck {
   BlurredBackgroundDrawable drawable=new BlurredBackgroundDrawable();
   IosLiquidGlassNavigation.configure(drawable);
   if(drawable.thickness!=12||drawable.intensity!=.55f)throw new AssertionError("Refraction settings");
+  for(int value:new int[]{0,25,90,100}){
+   AppearanceConfig.transparency=value;AppearanceConfig.intensity=value;AppearanceConfig.blur=value%31;
+   if(Math.abs(IosLiquidGlassNavigation.overlayAlpha(false)-(100-value)/100f)>.0001f)throw new AssertionError("Transparency direction");
+   IosLiquidGlassNavigation.configure(drawable);
+   if(drawable.intensity!=value/100f||IosLiquidGlassNavigation.blurRadiusDp()!=value%31)throw new AssertionError("Saved values ignored");
+  }
  }
 }
 class Build{static class VERSION{static int SDK_INT;}}
 class MainTabsUiHelper{static boolean ios;static boolean isIosNavigationBar(){return ios;}}
-class AppearanceConfig{static boolean glass;static boolean iosLiquidGlassNavigation(){return glass;}}
+class AppearanceConfig{
+ static boolean glass;static int blur=6,intensity=55,transparency=-1;
+ static boolean iosLiquidGlassNavigation(){return glass;}
+ static int navigationGlassBlur(){return blur;}
+ static int navigationGlassIntensity(){return intensity;}
+ static int navigationGlassTransparency(){return transparency;}
+}
 class SharedConfig{static boolean blur;static boolean chatBlurEnabled(){return blur;}}
 class LiteMode{static boolean saver;static boolean isPowerSaverApplied(){return saver;}}
 class AndroidUtilities{static int dp(int value){return value;}static float dpf2(float value){return value;}}

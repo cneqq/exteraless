@@ -122,6 +122,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
     private int iosGroupRow;
     private int iosNavBarRow;
     private int iosLiquidGlassRow;
+    private int iosPanelSettingsRow;
     private int iosChatHeaderRow;
     private boolean iosExpanded;
     private int senderMiniAvatarsRow;
@@ -228,9 +229,10 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         if (iosExpanded) {
             iosNavBarRow = addRow("iosNavBar");
             iosLiquidGlassRow = AppearanceConfig.iosNavigationBarStyle.Bool() ? addRow("iosLiquidGlass") : -1;
+            iosPanelSettingsRow = AppearanceConfig.iosNavigationBarStyle.Bool() ? addRow("iosPanelSettings") : -1;
             iosChatHeaderRow = addRow("iosChatHeader");
         } else {
-            iosNavBarRow = iosLiquidGlassRow = iosChatHeaderRow = -1;
+            iosNavBarRow = iosLiquidGlassRow = iosPanelSettingsRow = iosChatHeaderRow = -1;
         }
         gooeyAvatarRow = addRow("gooeyAvatar");
         customThemesRow = addRow("customThemes");
@@ -630,6 +632,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
             }
             rebuildAllAndSelf(view, enable);
             rebuildRowsAndNotify();
+            return;
+        } else if (position == iosPanelSettingsRow) {
+            presentFragment(new app.freezgram.NavigationGlassSettingsActivity());
             return;
         } else if (position == iosLiquidGlassRow) {
             boolean enable = !AppearanceConfig.iosLiquidGlassNavigation.Bool();
@@ -1034,7 +1039,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 case TYPE_DETAIL_SETTINGS: {
                     // Иконка слева, подпись под заголовком.
                     TextDetailSettingsCell cell = (TextDetailSettingsCell) holder.itemView;
-                    if (position == appNavigationRow) {
+                    if (position == iosPanelSettingsRow) {
+                        cell.setTextAndValueAndIcon(getString(R.string.FreezgramPanelSettings), getString(R.string.FreezgramPanelSettingsInfo), R.drawable.msg_newphone, true);
+                    } else if (position == appNavigationRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.OEAppearanceNavigation), getString(R.string.OEAppearanceNavigationSub), R.drawable.msg_newphone, true);
                     } else if (position == iconPacksRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.OEAppearanceIconPacks), getString(R.string.OEAppearanceIconPacksInfo), R.drawable.msg_sticker, true);
@@ -1114,7 +1121,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 return TYPE_INFO_PRIVACY;
             } else if (position == fabShapeRow) {
                 return TYPE_FAB_SHAPE;
-            } else if (position == appNavigationRow || position == iconPacksRow
+            } else if (position == iosPanelSettingsRow || position == appNavigationRow || position == iconPacksRow
                     || position == emojiSetsRow || position == pillStackRow || position == playerStyleRow || position == hidingRow) {
                 return TYPE_DETAIL_SETTINGS;
             } else if (position == md3GroupRow || position == iosGroupRow) {

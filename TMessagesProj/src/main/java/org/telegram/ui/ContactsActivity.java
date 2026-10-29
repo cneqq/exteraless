@@ -488,7 +488,7 @@ public class ContactsActivity extends BaseFragment implements FactorAnimator.Tar
                         if (SharedConfig.chatBlurEnabled()) {
                             scrollableViewNoiseSuppressor.draw(c, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
                             if (app.freezgram.IosLiquidGlassNavigation.isEnabled()) {
-                                scrollableViewNoiseSuppressor.drawNavigationGlass(c, iBlur3PositionMainTabs);
+                                scrollableViewNoiseSuppressor.drawNavigationGlass(c, iBlur3PositionMainTabs, AndroidUtilities.dpf2(app.freezgram.IosLiquidGlassNavigation.blurRadiusDp()));
                             }
                         }
                         iBlur3SourceGlass.endRecording();

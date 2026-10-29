@@ -76,7 +76,7 @@ public class LiquidGlassEffect {
             Math.abs(this.radiusRightBottom - radiusRightBottom) > 0.1f ||
             Math.abs(this.radiusLeftBottom - radiusLeftBottom) > 0.1f ||
             Math.abs(this.thickness - thickness) > 0.1f ||
-            Math.abs(this.intensity - intensity) > 0.1f ||
+            Math.abs(this.intensity - intensity) > 0.0001f ||
             Math.abs(this.index - index) > 0.1f ||
             this.foregroundColor != foregroundColor
         ) {

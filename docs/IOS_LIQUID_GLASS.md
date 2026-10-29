@@ -31,3 +31,14 @@ that output; existing frosted surfaces keep the previous strong-blur output.
 The color overlay is 10% in dark themes and 7% in light themes; unsupported or
 power-saving configurations retain the 82% fallback. The visible upper edge is
 also softer. These are overlay alpha values, not the final composited opacity.
+
+An additional **Bottom panel** entry in the expanded iOS Design group opens a
+synthetic-content preview using the same AGSL renderer. Sliders persist blur
+(0–30dp), refraction intensity (0–100%), and fill transparency (0–100%). They
+apply to the live panel when returning to the main tabs. Reset restores 6dp,
+55%, and the theme-dependent default transparency. Values are included in
+settings backup and clamped when read. The Android/power-saving fallback keeps
+its fixed opacity. The optional Feed tab delegates capture to ChatActivity and
+retains its existing background blur; tint/refraction still use the new values.
+Device checks should include that limitation, restore/reset, theme changes,
+and both the old global glass toggle states.

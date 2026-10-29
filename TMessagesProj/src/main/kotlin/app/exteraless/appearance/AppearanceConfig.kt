@@ -396,6 +396,21 @@ object AppearanceConfig {
     }
 
     @JvmField
+    val navigationGlassBlur = addConfig("FreezgramNavigationGlassBlur", ConfigItem.configTypeInt, 6)
+    @JvmField
+    val navigationGlassIntensity = addConfig("FreezgramNavigationGlassIntensity", ConfigItem.configTypeInt, 55)
+    // -1 preserves the existing theme-dependent defaults (90% dark, 93% light).
+    @JvmField
+    val navigationGlassTransparency = addConfig("FreezgramNavigationGlassTransparency", ConfigItem.configTypeInt, -1)
+
+    @JvmStatic
+    fun navigationGlassBlur(): Int { ensureLoaded(); return navigationGlassBlur.Int().coerceIn(0, 30) }
+    @JvmStatic
+    fun navigationGlassIntensity(): Int { ensureLoaded(); return navigationGlassIntensity.Int().coerceIn(0, 100) }
+    @JvmStatic
+    fun navigationGlassTransparency(): Int { ensureLoaded(); return navigationGlassTransparency.Int().coerceIn(-1, 100) }
+
+    @JvmField
     val profileMusicCard =
         addConfig("OEAppearanceProfileMusicCard", ConfigItem.configTypeBool, true)
 

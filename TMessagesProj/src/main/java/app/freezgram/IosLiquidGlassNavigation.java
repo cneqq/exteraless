@@ -29,7 +29,7 @@ public final class IosLiquidGlassNavigation {
         return new BlurredBackgroundProviderBuilder(resourcesProvider)
                 .setBackgroundColor((r, dark) -> Theme.multAlpha(
                         Theme.getColor(Theme.key_windowBackgroundWhite, r),
-                        isEnabled() ? (dark ? .10f : .07f) : .82f))
+                        isEnabled() ? overlayAlpha(dark) : .82f))
                 .setStrokeColorTop(0x66ffffff, 0x4dffffff)
                 .setStrokeColorBottom(0x24000000, 0x26ffffff)
                 .setStrokeWidth(AndroidUtilities.dpf2(.9f), AndroidUtilities.dpf2(.5f))
@@ -38,12 +38,20 @@ public final class IosLiquidGlassNavigation {
                 .build();
     }
 
+    public static float overlayAlpha(boolean dark) {
+        int transparency = AppearanceConfig.navigationGlassTransparency();
+        return transparency < 0 ? (dark ? .10f : .07f) : (100 - transparency) / 100f;
+    }
+
+    public static int blurRadiusDp() { return AppearanceConfig.navigationGlassBlur(); }
+
     public static void configure(BlurredBackgroundDrawable drawable) {
         drawable.setThickness(AndroidUtilities.dp(12));
-        drawable.setIntensity(.55f);
+        drawable.setIntensity(AppearanceConfig.navigationGlassIntensity() / 100f);
     }
 
     public static void refresh(BlurredBackgroundDrawable drawable) {
+        if (isRequested()) configure(drawable);
         if (Build.VERSION.SDK_INT >= 33 && isRequested()
                 && drawable instanceof BlurredBackgroundDrawableRenderNode) {
             ((BlurredBackgroundDrawableRenderNode) drawable).setLiquidGlassEffectAllowed(isEnabled());

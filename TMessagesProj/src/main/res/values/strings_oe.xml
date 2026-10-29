@@ -103,4 +103,11 @@
     <string name="FreezgramIosLiquidGlassNavigationInfo">Refracted backdrop with translucent edges. Requires Android 13+ and enabled blur. Uses frosted glass on older Android versions or while power saving is active.</string>
     <string name="FreezgramBadgeOfficialChannel">Official Freezgram channel</string>
     <string name="FreezgramBadgeLocalInfo">Community badge. Visible only in Freezgram.</string>
+    <string name="FreezgramPanelSettings">Bottom panel</string>
+    <string name="FreezgramPanelSettingsInfo">Preview and Liquid Glass adjustments</string>
+    <string name="FreezgramPanelBlur">Background blur</string>
+    <string name="FreezgramPanelIntensity">Refraction intensity</string>
+    <string name="FreezgramPanelTransparency">Fill transparency</string>
+    <string name="FreezgramPanelReset">Reset appearance</string>
+    <string name="FreezgramPanelPreviewInfo">Used when Liquid Glass is enabled. Sample content. Changes apply to the panel when you return. Liquid Glass needs Android 13+, blur enabled and power saving off.</string>
 </resources>
