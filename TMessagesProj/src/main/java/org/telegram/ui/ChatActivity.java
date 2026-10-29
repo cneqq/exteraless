@@ -51284,8 +51284,10 @@ public class ChatActivity extends BaseFragment implements
     private float inputIslandHeightCurrent;
     private float inputIslandHeightTarget;
 
-    public float getInputIslandHeightTarget() {
-        return inputIslandHeightCurrent;
+    /** Only the field's collapsible height belongs to the send animation, not its permanent bottom gap. */
+    public float getInputHeightChangeOnSend() {
+        final int gap = chatInputViewsContainer != null ? chatInputViewsContainer.getInputLiftPx() : 0;
+        return Math.max(0, inputIslandHeightCurrent - gap - dp(44));
     }
 
     private void checkUi_inputIslandHeight() {

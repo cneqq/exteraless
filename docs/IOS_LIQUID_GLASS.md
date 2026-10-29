@@ -128,3 +128,8 @@ rendered path is clipped to the capture rectangle and falls back to the image
 until the wallpaper view is measured. It does not add another dark layer over
 the already-rendered wallpaper. Switching increments the shared style revision
 so cached glass is refreshed; default reset re-enables it.
+
+Text-send transition endpoints subtract only the input field's collapsible
+height above 44dp. The fixed iOS bottom gap remains in the target list padding;
+it is not part of the height change animated away after sending. The regression
+covers single/multiline fields and 0/16/64dp gaps at 2× density.

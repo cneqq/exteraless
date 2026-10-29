@@ -101,6 +101,30 @@ class View{LayoutParams params=new LayoutParams();Object getLayoutParams(){retur
 class AppearanceConfig{static int style,side;static int chatComposerStyle(){return style;}static int composerSideInset(){return side;}}
 '''.replace('APPLY',apply))
 
+    def test_send_transition_keeps_permanent_panel_gap(self):
+        source=(JAVA / 'org/telegram/ui/ChatActivity.java').read_text()
+        collapse=method(source,'    public float getInputHeightChangeOnSend()')
+        run_java('''
+class PrivacyCheck {
+ float inputIslandHeightCurrent;Container chatInputViewsContainer=new Container();
+ static int dp(int value){return value*2;}
+ COLLAPSE
+ public static void main(String[] args){
+  var p=new PrivacyCheck();
+  for(int gap:new int[]{0,16,64})for(int height:new int[]{44,88,180}){
+   p.chatInputViewsContainer.gap=dp(gap);p.inputIslandHeightCurrent=dp(height+gap);
+   float delta=p.getInputHeightChangeOnSend();
+   if(delta!=dp(height-44))throw new AssertionError("Permanent gap leaked into transition endpoint");
+   float oldListPadding=dp(30+height+gap);
+   if(oldListPadding-delta!=dp(30+44+gap))throw new AssertionError("Final padding must preserve the gap");
+  }
+  p.chatInputViewsContainer=null;p.inputIslandHeightCurrent=dp(44);
+  if(p.getInputHeightChangeOnSend()!=0)throw new AssertionError("Legacy baseline changed");
+ }
+}
+class Container{int gap;int getInputLiftPx(){return gap;}}
+'''.replace('COLLAPSE',collapse))
+
     def test_policy_and_surface_bounds(self):
         source = (JAVA / "app/freezgram/ChatComposerGlass.java").read_text()
         methods = "\n".join(method(source, sig) for sig in (

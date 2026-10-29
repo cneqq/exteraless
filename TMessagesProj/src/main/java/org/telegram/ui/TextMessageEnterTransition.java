@@ -358,7 +358,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         }
 
         listViewTargetBottomPadding = listView.getPaddingBottom()
-            - (chatActivity.getInputIslandHeightTarget() - dp(44));
+            - chatActivity.getInputHeightChangeOnSend();
 
         gradientMatrix = new Matrix();
         gradientPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
