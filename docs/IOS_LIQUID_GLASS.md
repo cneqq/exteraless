@@ -1,6 +1,11 @@
 # Freezgram Liquid Glass
 
-Settings live under **Freezgram settings → Appearance → iOS Design**:
+The **iOS Design** group contains only two switches (0/2): chat header and
+input panel. An enabled input switch exposes a Configure row. The separate
+**Liquid Glass settings** entry opens shared optics, navigation settings and a
+chat-folder glass switch. The navigation style does not count toward iOS 0/2.
+
+Available editors:
 
 - **Navigation panel** opens its own editor with iOS/Liquid Glass switches,
   width (80–100%), bottom gap (0–64dp) and contact visibility.
@@ -85,3 +90,11 @@ Reference projects reviewed for the original renderer choice:
 - [QmDeve/AndroidLiquidGlassView](https://github.com/QmDeve/AndroidLiquidGlassView), MIT.
 
 No source code from these projects was copied.
+
+Folder glass uses the independent capture output and shared color/refraction
+policy, including saturation and power-saving fallback. Channel action/search/
+gift controls use the composer capture factory when the glass input style is
+selected. This covers the separate controls around the subscribe/mute action,
+not just the central input island. Visual/device validation remains necessary.
+Visible upstream branding is replaced by Freezgram; attribution, upstream links,
+namespace identifiers and import compatibility descriptions are retained.

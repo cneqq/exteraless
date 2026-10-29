@@ -52,7 +52,7 @@
     <string name="OEGeneralImportEtgDone">Zaimportowane ustawienia: %1$d</string>
     <string name="OEGeneralResetSettings">Zresetuj ustawienia</string>
     <string name="OEGeneralResetSettingsInfo">Wszystkie ustawienia zostaną przywrócone do wartości domyślnych, a aplikacja uruchomi się ponownie.</string>
-    <string name="OEGeneralResetSettingsDone">Ustawienia exteraless zostały zresetowane.</string>
+    <string name="OEGeneralResetSettingsDone">Ustawienia Freezgram zostały zresetowane.</string>
     <string name="OEGeneralDeleteAccount">Usuń konto</string>
     <string name="DeepLFormalityDefault">Ton: jak w oryginale</string>
     <string name="DeepLFormalityInformal">Ton: nieformalny</string>
@@ -94,7 +94,7 @@
     <string name="OEGeneralMapProvider">Dostawca map</string>
     <string name="OEGeneralMapPreview">Podglądy lokalizacji</string>
     <string name="OEGeneralMapDriftingFix">Popraw przesunięcie mapy</string>
-    <string name="OECrashTitle">exteraless uległ awarii</string>
+    <string name="OECrashTitle">Freezgram uległ awarii</string>
     <string name="OEGeneralNetworkHeader">Sieć</string>
     <string name="OEPrivacyFalseBottom">Podwójne dno</string>
     <string name="OEPrivacyFalseBottomShowIn">Pokazuj w sekcji „%1$s”</string>
@@ -129,7 +129,7 @@
     <string name="OEAyuSaveInArchivedInfo">Usunięte i edytowane wiadomości z zarchiwizowanych czatów też są zapisywane.</string>
     <string name="OEAyuDatabaseExport">Eksportuj bazę danych</string>
     <string name="OEAyuDatabaseImport">Importuj bazę danych</string>
-    <string name="OEAyuDatabaseImportInfo">Usunięte i edytowane wiadomości z tego pliku zostaną dodane do już zapisanych. Obsługiwane są eksporty z exteraless i AyuGram. Multimedia z innej aplikacji mogą być niedostępne.</string>
+    <string name="OEAyuDatabaseImportInfo">Usunięte i edytowane wiadomości z tego pliku zostaną dodane do już zapisanych. Obsługiwane są eksporty z Freezgram i AyuGram. Multimedia z innej aplikacji mogą być niedostępne.</string>
     <string name="OEAyuDatabaseImportDone">Dodano wiadomości: %1$d</string>
     <string name="OEAyuDatabaseImportFailed">Nie udało się zaimportować pliku</string>
     <string name="OEAyuRegexReversed">Odwrócony</string>

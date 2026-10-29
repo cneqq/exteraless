@@ -2783,7 +2783,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         iBlur3SourceColor = new BlurredBackgroundSourceColor();
         iBlur3SourceColor.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(true, false, app.freezgram.IosLiquidGlassNavigation.isRequested());
+            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(true, false, true);
             iBlur3SourceGlassFrosted = new BlurredBackgroundSourceRenderNode(null);
             iBlur3SourceGlassFrosted.setupRenderer(new RenderNodeWithHash.Renderer() {
                 @Override
@@ -5389,7 +5389,20 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         if (filterTabsView != null) {
-            BlurredBackgroundDrawable filterTabsViewBackground = iBlur3FactoryLiquidGlass.create(filterTabsView, BlurredBackgroundProviderImpl.topPanel(resourceProvider));
+            BlurredBackgroundDrawableViewFactory foldersFactory = iBlur3FactoryLiquidGlass;
+            if (app.exteraless.appearance.AppearanceConfig.foldersLiquidGlass() && Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled()) {
+                BlurredBackgroundSourceRenderNode foldersSource = new BlurredBackgroundSourceRenderNode(iBlur3SourceColor);
+                foldersSource.setUnderSource(iBlur3SourceColor);
+                foldersSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
+                foldersFactory = new BlurredBackgroundDrawableViewFactory(foldersSource);
+                foldersFactory.setSourceRootView(viewPositionWatcher, contentView);
+                foldersFactory.setLiquidGlassEffectAllowed(!LiteMode.isPowerSaverApplied());
+            }
+            BlurredBackgroundDrawable filterTabsViewBackground = foldersFactory.create(filterTabsView,
+                    app.exteraless.appearance.AppearanceConfig.foldersLiquidGlass()
+                            ? app.freezgram.LiquidGlassStyle.colors(resourceProvider, () -> Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isPowerSaverApplied())
+                            : BlurredBackgroundProviderImpl.topPanel(resourceProvider));
+            foldersGlassDrawable = app.exteraless.appearance.AppearanceConfig.foldersLiquidGlass() ? filterTabsViewBackground : null;
             filterTabsViewBackground.setRadius(dp(18));
             filterTabsViewBackground.setPadding(dp(6.666f));
             filterTabsView.setPadding(0, dp(7), 0, dp(7));
@@ -14799,6 +14812,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     /* Blur */
 
     private ViewPositionWatcher viewPositionWatcher;
+    private BlurredBackgroundDrawable foldersGlassDrawable;
+    private int foldersGlassRevision = Integer.MIN_VALUE;
+    private Boolean foldersGlassEnabled;
 
     private final @Nullable DownscaleScrollableNoiseSuppressor scrollableViewNoiseSuppressor;
     private final @Nullable BlurredBackgroundSourceRenderNode iBlur3SourceGlassFrosted;
@@ -14855,6 +14871,18 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         scrollableViewNoiseSuppressor.setupRenderNodes(iBlur3Positions, hasBottomBlur ? 2 : 1);
+        if (foldersGlassDrawable != null) {
+            boolean enabled = Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isPowerSaverApplied();
+            if (foldersGlassEnabled == null || foldersGlassEnabled != enabled || foldersGlassRevision != app.freezgram.LiquidGlassStyle.revision()) {
+                foldersGlassEnabled = enabled; foldersGlassRevision = app.freezgram.LiquidGlassStyle.revision();
+                app.freezgram.LiquidGlassStyle.configure(foldersGlassDrawable);
+                if (Build.VERSION.SDK_INT >= 33 && foldersGlassDrawable instanceof org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawableRenderNode) {
+                    ((org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawableRenderNode) foldersGlassDrawable).setLiquidGlassEffectAllowed(enabled);
+                }
+                foldersGlassDrawable.updateColors();
+            }
+        }
+        scrollableViewNoiseSuppressor.setNavigationGlassBlur(AndroidUtilities.dpf2(app.freezgram.LiquidGlassStyle.blurRadiusDp()), app.freezgram.LiquidGlassStyle.enhanceColors());
         scrollableViewNoiseSuppressor.invalidateResultRenderNodes(iBlur3Capture, fragmentView.getMeasuredWidth(), fragmentView.getMeasuredHeight());
 
         if (iBlur3SourceGlassFrosted != null) {

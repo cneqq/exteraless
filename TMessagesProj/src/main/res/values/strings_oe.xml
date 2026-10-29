@@ -112,11 +112,12 @@
     <string name="FreezgramPanelPreviewInfo">Used when Liquid Glass is enabled. Sample content. Changes apply to the panel when you return. Liquid Glass needs Android 13+, blur enabled and power saving off.</string>
     <string name="FreezgramPanelWidth">Panel width</string>
     <string name="FreezgramPanelLift">Distance from bottom</string>
-    <string name="FreezgramSharedGlassSettings">Liquid Glass</string>
+    <string name="FreezgramSharedGlassSettings">Liquid Glass settings</string>
     <string name="FreezgramSharedGlassSettingsInfo">Shared appearance for navigation, chat header and input</string>
     <string name="FreezgramComposerSettings">Input panel</string>
-    <string name="FreezgramComposerSettingsInfo">Style and distance from the bottom edge</string>
+    <string name="FreezgramComposerSettingsInfo">Configure</string>
     <string name="FreezgramSharedGlassPreviewInfo">Sample header, input and navigation. Blur, refraction and fill transparency apply to all enabled glass panels. Requires Android 13+, blur and inactive power saving.</string>
     <string name="FreezgramComposerPreviewInfo">iOS text and emoji insets are fixed at 16dp. The slider lifts the whole panel above the bottom edge or keyboard. Glass appearance is in iOS Design → Liquid Glass.</string>
     <string name="FreezgramGlassEnhanceColors">Enhance colors</string>
+    <string name="FreezgramFoldersGlass">Chat folders: Liquid Glass</string>
 </resources>

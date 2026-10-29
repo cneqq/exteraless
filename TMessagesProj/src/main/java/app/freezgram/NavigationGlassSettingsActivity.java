@@ -59,6 +59,19 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         info.setPadding(dp(20), dp(12), dp(20), dp(12));
         content.addView(info);
         if (mode == 1) {
+            TextView navigation = new TextView(context);
+            navigation.setText(text(R.string.FreezgramPanelSettings)); navigation.setTextSize(16);
+            navigation.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueText));
+            navigation.setPadding(dp(22), dp(18), dp(22), dp(18));
+            navigation.setOnClickListener(v -> presentFragment(new NavigationGlassSettingsActivity()));
+            content.addView(navigation);
+            org.telegram.ui.Cells.TextCheckCell folders = new org.telegram.ui.Cells.TextCheckCell(context);
+            folders.setTextAndCheck(text(R.string.FreezgramFoldersGlass), AppearanceConfig.foldersLiquidGlass(), false);
+            folders.setOnClickListener(v -> {
+                AppearanceConfig.foldersLiquidGlass.setConfigBool(!AppearanceConfig.foldersLiquidGlass());
+                folders.setChecked(AppearanceConfig.foldersLiquidGlass()); geometryChanged = true; preview.invalidate();
+            });
+            content.addView(folders);
             enhanceColors = new org.telegram.ui.Cells.TextCheckCell(context);
             enhanceColors.setTextAndCheck(text(R.string.FreezgramGlassEnhanceColors), LiquidGlassStyle.enhanceColors(), false);
             enhanceColors.setOnClickListener(v -> {

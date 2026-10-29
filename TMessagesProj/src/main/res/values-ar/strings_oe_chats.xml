@@ -145,8 +145,8 @@
     <string name="OEChatsInlineMathCurrency">العملات عبر @calcmulabot</string>
     <string name="OEChatsInlineMathCurrencyInfo">تُرسل التعبيرات التي تحتوي على عملات مثل «10 usd to rub =» إلى @calcmulabot للحصول على سعر الصرف.</string>
     <string name="OEChatsInlineMathAnnouncement">النتيجة: %1$s</string>
-    <string name="OELocalPremiumInfo">تُرسل إيموجي Premium كروابط يعرضها exteraless والعملاء الآخرون الداعمون لذلك كإيموجي حقيقية. أما ميزات Premium الأخرى فتعمل على هذا الجهاز فقط.</string>
-    <string name="OELocalPremiumEmojiHint">ليس لديك **Telegram Premium**، لذا سيُرسل هذا الإيموجي كرابط: سيراه فقط مستخدمو **exteraless** والعملاء الداعمون لذلك.</string>
+    <string name="OELocalPremiumInfo">تُرسل إيموجي Premium كروابط يعرضها Freezgram والعملاء الآخرون الداعمون لذلك كإيموجي حقيقية. أما ميزات Premium الأخرى فتعمل على هذا الجهاز فقط.</string>
+    <string name="OELocalPremiumEmojiHint">ليس لديك **Telegram Premium**، لذا سيُرسل هذا الإيموجي كرابط: سيراه فقط مستخدمو **Freezgram** والعملاء الداعمون لذلك.</string>
     <string name="OEChatsSections">الأقسام</string>
     <string name="OEChatsMenus">القوائم والأزرار</string>
     <string name="OEChatsMenusInfo">قوائم المحادثة والرسائل وعارض الوسائط</string>

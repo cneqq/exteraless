@@ -52,7 +52,7 @@
     <string name="OEGeneralImportEtgDone">تم استيراد الإعدادات: %1$d</string>
     <string name="OEGeneralResetSettings">إعادة تعيين الإعدادات</string>
     <string name="OEGeneralResetSettingsInfo">ستُعاد جميع الإعدادات إلى قيمها الافتراضية وسيُعاد تشغيل التطبيق.</string>
-    <string name="OEGeneralResetSettingsDone">تمت إعادة تعيين تفضيلات exteraless.</string>
+    <string name="OEGeneralResetSettingsDone">تمت إعادة تعيين تفضيلات Freezgram.</string>
     <string name="OEGeneralDeleteAccount">حذف الحساب</string>
     <string name="DeepLFormalityDefault">النبرة: كما هي</string>
     <string name="DeepLFormalityInformal">النبرة: غير رسمية</string>
@@ -94,7 +94,7 @@
     <string name="OEGeneralMapProvider">مزوّد الخرائط</string>
     <string name="OEGeneralMapPreview">معاينات المواقع</string>
     <string name="OEGeneralMapDriftingFix">إصلاح انزياح الخريطة</string>
-    <string name="OECrashTitle">تعطّل exteraless</string>
+    <string name="OECrashTitle">تعطّل Freezgram</string>
     <string name="OEGeneralNetworkHeader">الشبكة</string>
     <string name="OEPrivacyFalseBottom">القاع الزائف</string>
     <string name="OEPrivacyFalseBottomShowIn">إظهار في %1$s</string>
@@ -109,7 +109,7 @@
     <string name="CloudConfigIncludeApiKeysDesc">تُرفع مفاتيح API لخدمات الذكاء الاصطناعي والترجمة إلى السحابة أيضًا.</string>
     <string name="OECloudTitle">السحابة</string>
     <string name="OECloudHeroTitle">الإعدادات في السحابة</string>
-    <string name="OECloudHeroText">احتفظ بإعدادات exteraless في Telegram واستعدها على أي جهاز مسجّل الدخول إلى هذا الحساب.</string>
+    <string name="OECloudHeroText">احتفظ بإعدادات Freezgram في Telegram واستعدها على أي جهاز مسجّل الدخول إلى هذا الحساب.</string>
     <string name="OECloudStatus">الحالة</string>
     <string name="OECloudLocal">هذا الجهاز</string>
     <string name="OECloudRemote">السحابة</string>
@@ -171,7 +171,7 @@
     <string name="OEAyuSaveInArchivedInfo">تُحفظ أيضًا الرسائل المحذوفة والمعدّلة من المحادثات المؤرشفة.</string>
     <string name="OEAyuDatabaseExport">تصدير قاعدة البيانات</string>
     <string name="OEAyuDatabaseImport">استيراد قاعدة البيانات</string>
-    <string name="OEAyuDatabaseImportInfo">ستُضاف الرسائل المحذوفة والمعدّلة من هذا الملف إلى الرسائل المحفوظة. ملفات التصدير من exteraless وAyuGram مدعومة. قد لا تتوفر الوسائط من تطبيق آخر.</string>
+    <string name="OEAyuDatabaseImportInfo">ستُضاف الرسائل المحذوفة والمعدّلة من هذا الملف إلى الرسائل المحفوظة. ملفات التصدير من Freezgram وAyuGram مدعومة. قد لا تتوفر الوسائط من تطبيق آخر.</string>
     <string name="OEAyuDatabaseImportDone">الرسائل المضافة: %1$d</string>
     <string name="OEAyuDatabaseImportFailed">تعذّر استيراد هذا الملف</string>
     <string name="OEAyuRegexReversed">عكسي</string>

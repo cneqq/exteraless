@@ -3114,7 +3114,14 @@ public class ChatActivity extends BaseFragment implements
         composerGlassFactory = new BlurredBackgroundDrawableViewFactory(
                 iosHeaderGlassSource != null ? iosHeaderGlassSource
                     : glassBackgroundSourceFrostedRenderNode != null ? glassBackgroundSourceFrostedRenderNode
-                    : navbarContentSourceWallpaper);
+                    : navbarContentSourceWallpaper) {
+            @Override public BlurredBackgroundDrawable create(View view,
+                    org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundColorProvider provider, boolean multiwindow) {
+                BlurredBackgroundDrawable drawable = super.create(view, provider, multiwindow);
+                app.freezgram.ChatComposerGlass.refresh(drawable);
+                return drawable;
+            }
+        };
         composerGlassFactory.setLiquidGlassEffectAllowed(app.freezgram.ChatComposerGlass.isEnabled());
         composerGlassFactory.setLinkedViewsRef(glassAttachedViews);
         composerGlassFactory.setLinkedDrawablesRef(glassAttachedDrawables);
@@ -9179,7 +9186,9 @@ public class ChatActivity extends BaseFragment implements
         bottomOverlay.addView(bottomOverlayText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER));
 
 
-        bottomChannelButtonsLayout = new ChatActivityChannelButtonsLayout(context, resourceProvider, blurredBackgroundColorProvider, glassBackgroundDrawableFactory) {
+        bottomChannelButtonsLayout = new ChatActivityChannelButtonsLayout(context, resourceProvider,
+                app.freezgram.ChatComposerGlass.isRequested() ? app.freezgram.ChatComposerGlass.colors(themeDelegate) : blurredBackgroundColorProvider,
+                app.freezgram.ChatComposerGlass.isRequested() ? composerGlassFactory : glassBackgroundDrawableFactory) {
             @Override
             public void setVisibility(int visibility) {
                 super.setVisibility(visibility);
