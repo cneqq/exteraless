@@ -114,17 +114,22 @@ class PrivacyCheck{
    throw new AssertionError("Panel height and occupied space confused");
   if(rect.bottom!=oldBottom-12||rect.bottom-rect.top!=60||getTabsFabOffsetDp()!=80)
    throw new AssertionError("Capture or FAB not lifted");
+  AppearanceConfig.lift=40;AppearanceConfig.width=80;
+  applyTabsBottomInset(new MainTabsLayout(),wrapper,20,0,0);setBlurBounds(rect,window,20);
+  if(wrapper.left!=50||wrapper.bottom!=60||getTabsBottomOccupiedHeightDp()!=116||getTabsFabOffsetDp()!=108)
+   throw new AssertionError("Custom gap not propagated");
   material=true;applyTabsBottomInset(new MainTabsLayout(),wrapper,20,0,0);
   if(wrapper.bottom!=0||getTabsBottomLiftDp()!=0||getTabsBottomOccupiedHeightDp()!=64||getTabsFabOffsetDp()!=64)
    throw new AssertionError("Material navigation changed");
  }
 }
+class AppearanceConfig{static int lift=12,width=100;static int navigationPanelLift(){return lift;}static int navigationPanelWidth(){return width;}}
 class MainTabsHelper{
  static int getMainTabsHeightWithMargins(){return 76;}
  static int getMainTabsHeight(){return 60;}static int getMainTabsMargin(){return 8;}
 }
 class AndroidUtilities{static int dp(int value){return value;}}
-class View{int bottom;void setPadding(int l,int t,int r,int b){bottom=b;}int getMeasuredHeight(){return 1000;}int getMeasuredWidth(){return 500;}}
+class View{int bottom,left;void setPadding(int l,int t,int r,int b){left=l;bottom=b;}int getMeasuredHeight(){return 1000;}int getMeasuredWidth(){return 500;}}
 class MainTabsLayout extends View{}
 class RectF{float top,bottom;void set(int l,int t,int r,int b){top=t;bottom=b;}}
 '''.replace('METHODS',methods))

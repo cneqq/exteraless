@@ -55,7 +55,7 @@ public final class MainTabsUiHelper {
     }
 
     public static int getTabsBottomLiftDp() {
-        return isIosNavigationBar() ? 12 : 0;
+        return isIosNavigationBar() ? AppearanceConfig.navigationPanelLift() : 0;
     }
 
     /** Space occupied above the system inset, including the iOS floating gap. */
@@ -116,7 +116,9 @@ public final class MainTabsUiHelper {
      */
     public static void applyTabsBottomInset(MainTabsLayout layout, View wrapper, int bottomInset, int leftInset, int rightInset) {
         applyTabsBottomInset(layout, bottomInset);
-        final int side = getWrapperSideInset();
+        final int availableWidth = Math.max(0, wrapper.getMeasuredWidth() - leftInset - rightInset);
+        final int side = getWrapperSideInset() + (isIosNavigationBar()
+                ? Math.round(availableWidth * (100 - AppearanceConfig.navigationPanelWidth()) / 200f) : 0);
         wrapper.setPadding(leftInset + side, 0, rightInset + side,
                 isMaterial3NavigationBar() ? 0 : bottomInset + AndroidUtilities.dp(getTabsBottomLiftDp()));
     }

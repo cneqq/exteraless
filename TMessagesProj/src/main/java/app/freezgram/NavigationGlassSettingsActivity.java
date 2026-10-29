@@ -27,7 +27,9 @@ import org.telegram.ui.Components.glass.GlassTabView;
 /** Local visual settings with sample background content and the actual navigation tabs. */
 public final class NavigationGlassSettingsActivity extends BaseFragment {
     private GlassPreview preview;
-    private AvatarCornersSeekBar blur, intensity, transparency;
+    private AvatarCornersSeekBar blur, intensity, transparency, width, lift;
+    private boolean geometryChanged;
+    private org.telegram.ui.Cells.TextCheckCell contacts;
 
     private String text(int id) { return LocaleController.getString(id); }
 
@@ -64,6 +66,24 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 effectiveTransparency(), value -> {
                     AppearanceConfig.navigationGlassTransparency.setConfigInt(value); preview.invalidate();
                 });
+        width = slider(context, content, R.string.FreezgramPanelWidth, 100,
+                AppearanceConfig.navigationPanelWidth(), value -> {
+                    AppearanceConfig.navigationPanelWidth.setConfigInt(Math.max(80, value));
+                    width.setValue(Math.max(80, value)); geometryChanged = true; preview.updateGeometry();
+                });
+        lift = slider(context, content, R.string.FreezgramPanelLift, 64,
+                AppearanceConfig.navigationPanelLift(), value -> {
+                    AppearanceConfig.navigationPanelLift.setConfigInt(value); geometryChanged = true; preview.updateGeometry();
+                });
+        contacts = new org.telegram.ui.Cells.TextCheckCell(context);
+        contacts.setTextAndCheck(text(R.string.MainTabsContacts), !xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().Bool(), false);
+        contacts.setOnClickListener(v -> {
+            boolean hidden = !xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().Bool();
+            xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().setConfigBool(hidden);
+            if (!hidden) AppearanceConfig.showFeedTab.setConfigBool(false);
+            contacts.setChecked(!hidden); geometryChanged = true; preview.updateGeometry();
+        });
+        content.addView(contacts);
         TextView reset = new TextView(context);
         reset.setText(text(R.string.FreezgramPanelReset));
         reset.setTextSize(16);
@@ -73,6 +93,9 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             AppearanceConfig.navigationGlassBlur.setConfigInt(6);
             AppearanceConfig.navigationGlassIntensity.setConfigInt(55);
             AppearanceConfig.navigationGlassTransparency.setConfigInt(-1);
+            AppearanceConfig.navigationPanelWidth.setConfigInt(100);
+            AppearanceConfig.navigationPanelLift.setConfigInt(12);
+            width.setValue(100); lift.setValue(12); geometryChanged = true; preview.updateGeometry();
             blur.setValue(6); intensity.setValue(55); transparency.setValue(effectiveTransparency());
             preview.invalidate();
         });
@@ -81,15 +104,23 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         return fragmentView;
     }
 
+    @Override public void onFragmentDestroy() {
+        android.app.Activity activity = getParentActivity();
+        super.onFragmentDestroy();
+        if (geometryChanged && activity instanceof org.telegram.ui.LaunchActivity) {
+            AndroidUtilities.runOnUIThread(() -> ((org.telegram.ui.LaunchActivity) activity).rebuildAllFragments(false));
+        }
+    }
+
     private int effectiveTransparency() {
         return Math.round(100 * (1 - IosLiquidGlassNavigation.overlayAlpha(Theme.isCurrentThemeDark())));
     }
 
     private AvatarCornersSeekBar slider(Context context, LinearLayout parent, int title, int max,
                                        int value, AvatarCornersSeekBar.OnDrag onDrag) {
-        AvatarCornersSeekBar slider = new AvatarCornersSeekBar(context, onDrag, 0, max,
-                text(title), "0", String.valueOf(max));
-        slider.setValueSuffix(max == 30 ? "dp" : "%");
+        AvatarCornersSeekBar slider = new AvatarCornersSeekBar(context, onDrag, title == R.string.FreezgramPanelWidth ? 80 : 0, max,
+                text(title), title == R.string.FreezgramPanelWidth ? "80" : "0", String.valueOf(max));
+        slider.setValueSuffix(max == 30 || max == 64 ? "dp" : "%");
         slider.setValue(value);
         parent.addView(slider, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 112));
         return slider;
@@ -103,10 +134,13 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         private BlurredBackgroundSourceRenderNode source;
         private BlurredBackgroundDrawable glass;
 
+        private LinearLayout tabs;
+        private GlassTabView contactTab;
+
         GlassPreview(Context context) {
             super(context);
             setWillNotDraw(false);
-            LinearLayout tabs = new LinearLayout(context);
+            tabs = new LinearLayout(context);
             tabs.setOrientation(LinearLayout.HORIZONTAL);
             GlassTabView[] buttons = {
                     GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CHATS, R.string.MainTabsChats),
@@ -121,9 +155,20 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 });
                 tabs.addView(button, new LinearLayout.LayoutParams(0, LayoutHelper.MATCH_PARENT, 1f));
             }
+            contactTab = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CONTACTS, R.string.MainTabsContacts);
+            contactTab.setOnClickListener(v -> {
+                for (GlassTabView tab : buttons) tab.setSelected(false, true);
+                contactTab.setSelected(true, true);
+            });
+            tabs.addView(contactTab, 1, new LinearLayout.LayoutParams(0, LayoutHelper.MATCH_PARENT, 1f));
+            for (GlassTabView button : buttons) button.setOnClickListener(v -> {
+                contactTab.setSelected(false, true);
+                for (GlassTabView tab : buttons) tab.setSelected(tab == v, true);
+            });
             FrameLayout.LayoutParams tabsLayout = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, dp(60));
             tabsLayout.setMargins(dp(12), dp(148), dp(12), 0);
             addView(tabs, tabsLayout);
+            updateGeometry();
             // The actual AGSL renderer; unsupported phones show the same opaque fallback.
             if (Build.VERSION.SDK_INT >= 33) {
                 source = new BlurredBackgroundSourceRenderNode(null);
@@ -132,6 +177,21 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 glass.setRadius(dp(30));
                 glass.setCallback(this);
             }
+        }
+
+        void updateGeometry() {
+            float side = dp(12) + Math.max(0, getWidth() - dp(24)) * (100 - AppearanceConfig.navigationPanelWidth()) / 200f;
+            float top = dp(160 - AppearanceConfig.navigationPanelLift());
+            panel.set(side, top, getWidth() - side, top + dp(60));
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) tabs.getLayoutParams();
+            lp.setMargins(Math.round(side), Math.round(top), Math.round(side), 0);
+            tabs.setLayoutParams(lp);
+            contactTab.setVisibility(xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().Bool() ? GONE : VISIBLE);
+            invalidate();
+        }
+
+        @Override protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            super.onSizeChanged(w, h, oldw, oldh); updateGeometry();
         }
 
         @Override protected boolean verifyDrawable(android.graphics.drawable.Drawable who) {
@@ -155,7 +215,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
 
         @Override protected void onDraw(Canvas canvas) {
             background(canvas);
-            panel.set(dp(12), dp(148), getWidth() - dp(12), dp(208));
+
             if (glass != null && canvas.isHardwareAccelerated()) {
                 Canvas capture = source.beginRecording(getWidth(), getHeight());
                 background(capture);

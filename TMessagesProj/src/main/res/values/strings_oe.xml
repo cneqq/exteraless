@@ -110,4 +110,6 @@
     <string name="FreezgramPanelTransparency">Fill transparency</string>
     <string name="FreezgramPanelReset">Reset appearance</string>
     <string name="FreezgramPanelPreviewInfo">Used when Liquid Glass is enabled. Sample content. Changes apply to the panel when you return. Liquid Glass needs Android 13+, blur enabled and power saving off.</string>
+    <string name="FreezgramPanelWidth">Panel width</string>
+    <string name="FreezgramPanelLift">Distance from bottom</string>
 </resources>

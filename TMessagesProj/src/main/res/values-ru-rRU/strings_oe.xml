@@ -83,4 +83,6 @@
     <string name="FreezgramPanelTransparency">Прозрачность заливки</string>
     <string name="FreezgramPanelReset">Сбросить оформление</string>
     <string name="FreezgramPanelPreviewInfo">Используется при включённом Liquid Glass. Пример содержимого. Изменения применяются к панели при возвращении. Liquid Glass требует Android 13+, включённого размытия и отключённого энергосбережения.</string>
+    <string name="FreezgramPanelWidth">Ширина панели</string>
+    <string name="FreezgramPanelLift">Отступ от нижнего края</string>
 </resources>

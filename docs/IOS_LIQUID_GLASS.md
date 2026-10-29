@@ -42,3 +42,11 @@ its fixed opacity. The optional Feed tab delegates capture to ChatActivity and
 retains its existing background blur; tint/refraction still use the new values.
 Device checks should include that limitation, restore/reset, theme changes,
 and both the old global glass toggle states.
+
+Panel geometry controls set width (80–100% of the available width before the
+existing side margins) and distance above the system bottom inset (0–64dp).
+The contact switch reuses the existing hide-contacts preference. Enabling it
+turns off Feed because these tabs share one slot. Geometry/tab changes rebuild
+underlying fragments when leaving the editor so content padding, FAB clearance,
+and cached pager positions stay in sync. Preview tabs use the same components
+as the real panel. Phone layout checks are still needed.

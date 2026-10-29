@@ -396,6 +396,15 @@ object AppearanceConfig {
     }
 
     @JvmField
+    val navigationPanelWidth = addConfig("FreezgramNavigationPanelWidth", ConfigItem.configTypeInt, 100)
+    @JvmField
+    val navigationPanelLift = addConfig("FreezgramNavigationPanelLift", ConfigItem.configTypeInt, 12)
+    @JvmStatic
+    fun navigationPanelWidth(): Int { ensureLoaded(); return navigationPanelWidth.Int().coerceIn(80, 100) }
+    @JvmStatic
+    fun navigationPanelLift(): Int { ensureLoaded(); return navigationPanelLift.Int().coerceIn(0, 64) }
+
+    @JvmField
     val navigationGlassBlur = addConfig("FreezgramNavigationGlassBlur", ConfigItem.configTypeInt, 6)
     @JvmField
     val navigationGlassIntensity = addConfig("FreezgramNavigationGlassIntensity", ConfigItem.configTypeInt, 55)
