@@ -24,6 +24,8 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import app.freezgram.badges.FreezgramBadges;
+import app.freezgram.badges.FreezgramBadgeDrawable;
 import android.os.Bundle;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -1182,6 +1184,12 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
         titleTextView.setText(value);
         titleTextView.setScrollNonFitText(scrollable || isCentered());
         rightDrawableIsScam = false;
+        titleTextView.setRightDrawable2OnClick(null);
+        if (titleTextView.getRightDrawable2() instanceof FreezgramBadgeDrawable) {
+            titleTextView.setRightDrawable2(null);
+            rightDrawableIsScamOrVerified = false;
+            rightDrawable2ContentDescription = null;
+        }
         if (scam || fake) {
             rightDrawableIsScam = true;
             if (!(titleTextView.getRightDrawable() instanceof ScamDrawable)) {
@@ -1201,6 +1209,17 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
             titleTextView.setRightDrawable2(verifiedDrawable);
             rightDrawableIsScamOrVerified = true;
             rightDrawable2ContentDescription = getString(R.string.AccDescrVerified);
+        } else if (parentFragment != null && (FreezgramBadges.hasBadge(parentFragment.getCurrentUser())
+                || FreezgramBadges.hasChannelBadge(parentFragment.getCurrentChat()))) {
+            boolean channel = FreezgramBadges.hasChannelBadge(parentFragment.getCurrentChat());
+            titleTextView.setRightDrawable2(channel ? FreezgramBadges.getChannelDrawable(getContext())
+                    : FreezgramBadges.getDrawable(getContext()));
+            titleTextView.setRightDrawable2OnClick(v -> {
+                if (channel) FreezgramBadges.showChannelInfo(parentFragment);
+                else FreezgramBadges.showInfo(parentFragment);
+            });
+            rightDrawableIsScamOrVerified = true;
+            rightDrawable2ContentDescription = channel ? FreezgramBadges.getChannelTitle() : FreezgramBadges.getTitle();
         } else if (titleTextView.getRightDrawable() instanceof ScamDrawable) {
             titleTextView.setRightDrawable2(null);
             rightDrawableIsScamOrVerified = false;

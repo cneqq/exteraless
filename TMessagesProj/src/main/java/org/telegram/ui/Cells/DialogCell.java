@@ -30,6 +30,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import app.freezgram.badges.FreezgramBadges;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
@@ -520,6 +521,28 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     protected PullForegroundDrawable archivedChatsDrawable;
 
     private TLRPC.User user;
+    private Drawable communityBadge;
+    private int communityBadgeType;
+    private float communityBadgeLeft;
+
+    private void updateCommunityBadge() {
+        int type = 0;
+        if (customDialog == null && !isFolderCell() && !isForumCell() && !isDialogFolder() && !isTopic) {
+            if (FreezgramBadges.hasChannelBadge(chat)) type = 2;
+            else if (!UserObject.isUserSelf(user) && FreezgramBadges.hasBadge(user)) type = 1;
+        }
+        if (type == communityBadgeType) return;
+        if (communityBadge != null) communityBadge.setCallback(null);
+        communityBadgeType = type;
+        communityBadge = type == 2 ? FreezgramBadges.getChannelDrawable(getContext())
+                : type == 1 ? FreezgramBadges.getDrawable(getContext()) : null;
+        if (communityBadge != null) communityBadge.setCallback(this);
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return who == communityBadge || super.verifyDrawable(who);
+    }
     private TLRPC.Chat chat;
     private TLRPC.EncryptedChat encryptedChat;
     private CharSequence lastPrintString;
@@ -973,6 +996,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (communityBadge != null) communityBadge.setCallback(null);
         isSliding = false;
         drawRevealBackground = false;
         currentRevealProgress = 0.0f;
@@ -1009,6 +1033,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (communityBadge != null) communityBadge.setCallback(this);
         avatarImage.onAttachedToWindow();
         for (int i = 0; i < thumbImage.length; ++i) {
             thumbImage[i].onAttachedToWindow();
@@ -2415,6 +2440,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
 
         nameAdditionalsForChannelSubscriber = 0;
+        updateCommunityBadge();
         final boolean reserveMuteSlot = (dialogMuted || isHiddenInCommunity || drawUnmute || dialogMutedProgress > 0) && !drawVerified && drawScam == 0;
         if (drawPremium && emojiStatus.getDrawable() != null) {
             int w = dp(6 + 24 + 6);
@@ -2457,6 +2483,12 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             if (LocaleController.isRTL) {
                 nameLeft += w;
             }
+        }
+        if (communityBadge != null) {
+            int w = dp(28);
+            nameWidth -= w;
+            nameAdditionalsForChannelSubscriber += w;
+            if (LocaleController.isRTL) nameLeft += w;
         }
         if (drawBotVerified) {
             nameWidth -= dp(21);
@@ -3065,6 +3097,14 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             } else {
                 statusDrawableLeft = (int) (typingLeft + x2 + dp(3));
             }
+        }
+        if (communityBadge != null && nameLayout != null && nameLayout.getLineCount() > 0) {
+            communityBadgeLeft = LocaleController.isRTL
+                    ? nameLeft + Math.max(0, nameLayout.getLineLeft(0)) - dp(28)
+                    : nameLeft + Math.min(nameWidth, nameLayout.getLineRight(0)) + dp(4);
+            int shift = dp(LocaleController.isRTL ? -28 : 28);
+            nameMuteLeft += shift;
+            nameMutedIconLeft += shift;
         }
         updateThumbsPosition();
     }
@@ -4331,6 +4371,13 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                     canvas.restore();
                     canvas.restore();
                 }
+            }
+
+            if (communityBadge != null && nameLayout != null && nameLayout.getLineCount() > 0) {
+                int x = (int) communityBadgeLeft;
+                int y = nameTop + (nameLayout.getHeight() - dp(21)) / 2;
+                communityBadge.setBounds(x, y, x + dp(24), y + dp(21));
+                communityBadge.draw(canvas);
             }
 
             if (timeLayout != null && currentDialogFolderId == 0) {
@@ -5695,7 +5742,9 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
     @Override
     public void invalidateDrawable(Drawable who) {
-        if (who == translationDrawable || who == Theme.dialogs_archiveAvatarDrawable) {
+        if (who == communityBadge) {
+            invalidate();
+        } else if (who == translationDrawable || who == Theme.dialogs_archiveAvatarDrawable) {
             invalidate(who.getBounds());
         } else {
             super.invalidateDrawable(who);
@@ -5780,6 +5829,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
         if (drawVerified) {
             sb.append(getString(R.string.AccDescrVerified));
+            sb.append(". ");
+        }
+        if (communityBadge != null) {
+            sb.append(communityBadgeType == 2 ? FreezgramBadges.getChannelTitle() : FreezgramBadges.getTitle());
             sb.append(". ");
         }
         if (dialogMuted) {
