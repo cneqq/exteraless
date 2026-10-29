@@ -179,6 +179,9 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     private FrameLayout tabsViewWrapper;
     private MainTabsLayout tabsView;
     private BlurredBackgroundDrawable tabsViewBackground;
+    private final org.telegram.messenger.Utilities.Callback<Boolean> iosGlassPowerSaverListener = applied -> {
+        if (app.freezgram.IosLiquidGlassNavigation.isRequested()) blur3_updateColors();
+    };
     private View fadeView;
     private boolean lastHideContacts = NaConfig.INSTANCE.getMainTabsHideContacts().Bool();
     private boolean lastHideCalls = MainTabsHelper.isCallsTabHidden();
@@ -449,11 +452,16 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         BlurredBackgroundDrawableViewFactory iBlur3FactoryGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceTabGlass != null ? iBlur3SourceTabGlass : iBlur3SourceColor);
         iBlur3FactoryGlass.setSourceRootView(viewPositionWatcher, contentView);
-        iBlur3FactoryGlass.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
+        iBlur3FactoryGlass.setLiquidGlassEffectAllowed(MainTabsUiHelper.isIosNavigationBar()
+                ? app.freezgram.IosLiquidGlassNavigation.isEnabled()
+                : LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
 
         tabsViewBackground = iBlur3FactoryGlass.create(tabsView, BlurredBackgroundProviderImpl.mainTabs(resourceProvider));
         tabsViewBackground.setRadius(MainTabsUiHelper.getBackgroundRadius());
         tabsViewBackground.setPadding(MainTabsUiHelper.getBackgroundInset());
+        if (app.freezgram.IosLiquidGlassNavigation.isRequested()) {
+            app.freezgram.IosLiquidGlassNavigation.configure(tabsViewBackground);
+        }
         tabsView.setBackground(tabsViewBackground);
 
         BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
@@ -1252,11 +1260,13 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
             .addGlobal(NotificationCenter.appUpdateLoading)
             .addGlobal(NotificationCenter.needSetDayNightTheme);
 
+        LiteMode.addOnPowerSaverAppliedListener(iosGlassPowerSaverListener);
         return super.onFragmentCreate();
     }
 
     @Override
     public void onFragmentDestroy() {
+        LiteMode.removeOnPowerSaverAppliedListener(iosGlassPowerSaverListener);
         Bulletin.removeDelegate(this);
         Bulletin.removeDelegate(contentView);
 
@@ -1559,6 +1569,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     private void blur3_updateColors() {
         blur3_updateFadeColors();
         if (tabsViewBackground != null) {
+            app.freezgram.IosLiquidGlassNavigation.refresh(tabsViewBackground);
             tabsViewBackground.updateColors();
         }
         blur3_invalidateBlur();

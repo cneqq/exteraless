@@ -19,6 +19,9 @@ import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundProvider
 
 public class BlurredBackgroundProviderImpl {
     public static BlurredBackgroundProvider mainTabs(Theme.ResourcesProvider resourcesProvider) {
+        if (app.freezgram.IosLiquidGlassNavigation.isRequested()) {
+            return app.freezgram.IosLiquidGlassNavigation.colors(resourcesProvider);
+        }
         final BlurredBackgroundProviderBuilder builder = new BlurredBackgroundProviderBuilder(resourcesProvider)
             .setBackgroundColor((r, isDark) -> {
                 final float alpha = LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS) ? 0.85f : 0.76f;

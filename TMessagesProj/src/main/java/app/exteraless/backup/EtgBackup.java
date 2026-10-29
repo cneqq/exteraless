@@ -328,6 +328,7 @@ public final class EtgBackup {
         bool(list, "newChatHeaderStyle", AppearanceConfig.newChatHeaderStyle);
         bool(list, "newNavigationBarStyle", AppearanceConfig.newNavigationBarStyle);
         bool(list, "iosNavigationBarStyle", AppearanceConfig.iosNavigationBarStyle);
+        bool(list, "iosLiquidGlassNavigation", AppearanceConfig.iosLiquidGlassNavigation);
         bool(list, "iosChatHeader", AppearanceConfig.iosChatHeader);
         bool(list, "profileMusicCard", AppearanceConfig.profileMusicCard);
         bool(list, "useSystemFonts", NekoConfig.typeface);

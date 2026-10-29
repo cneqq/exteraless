@@ -121,6 +121,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
     private boolean md3Expanded;
     private int iosGroupRow;
     private int iosNavBarRow;
+    private int iosLiquidGlassRow;
     private int iosChatHeaderRow;
     private boolean iosExpanded;
     private int senderMiniAvatarsRow;
@@ -138,14 +139,6 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
     private int linksHeaderRow;
     private int appNavigationRow;
     private int iconPacksRow;
-    private int badgeStyleRow;
-
-    private CharSequence[] badgeStyleOptions() {
-        return new CharSequence[]{getString(R.string.FreezgramBadgeStyleSparkles),
-                getString(R.string.FreezgramBadgeStylePlain), getString(R.string.FreezgramBadgeStyleSeal),
-                getString(R.string.FreezgramBadgeStyleBlue), getString(R.string.FreezgramBadgeStyleLavender),
-                getString(R.string.FreezgramBadgeStyleGraphite), getString(R.string.FreezgramBadgeStyleMint)};
-    }
     private int emojiSetsRow;
     private int pillStackRow;
     private int playerStyleRow;
@@ -204,7 +197,6 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         linksHeaderRow = addRow("linksHeader");
         appNavigationRow = addRow("appNavigation");
         iconPacksRow = addRow("iconPacks");
-        badgeStyleRow = addRow("freezgramBadgeStyle");
         emojiSetsRow = addRow("emojiSets", "EmojiSets");
         pillStackRow = addRow("pillStack");
         playerStyleRow = addRow("playerStyle");
@@ -235,9 +227,10 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         iosGroupRow = addRow("iosStyles");
         if (iosExpanded) {
             iosNavBarRow = addRow("iosNavBar");
+            iosLiquidGlassRow = AppearanceConfig.iosNavigationBarStyle.Bool() ? addRow("iosLiquidGlass") : -1;
             iosChatHeaderRow = addRow("iosChatHeader");
         } else {
-            iosNavBarRow = iosChatHeaderRow = -1;
+            iosNavBarRow = iosLiquidGlassRow = iosChatHeaderRow = -1;
         }
         gooeyAvatarRow = addRow("gooeyAvatar");
         customThemesRow = addRow("customThemes");
@@ -554,18 +547,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == badgeStyleRow) {
-            if (getParentActivity() == null) return;
-            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-            builder.setTitle(getString(R.string.FreezgramBadgeStyle));
-            builder.setItems(badgeStyleOptions(), (dialog, which) -> {
-                app.freezgram.badges.BadgeStyleConfig.setStyle(which);
-                if (listAdapter != null) listAdapter.notifyItemChanged(position);
-            });
-            builder.setNegativeButton(getString(R.string.Cancel), null);
-            showDialog(builder.create());
-            return;
-        } else if (position == iconPacksRow) {
+        if (position == iconPacksRow) {
             presentFragment(new IconPacksActivity());
             return;
         } else if (position == pillStackRow) {
@@ -620,6 +602,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 leaveFloatingBottomNavigation();
             }
             rebuildAllAndSelf(view, enable);
+            rebuildRowsAndNotify();
             return;
         } else if (position == md3ListItemsRow) {
             AppearanceConfig.m3ListItems.setConfigBool(!AppearanceConfig.m3ListItems.Bool());
@@ -645,6 +628,12 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 AppearanceConfig.newNavigationBarStyle.setConfigBool(false);
                 notifyRow(md3NavBarRow);
             }
+            rebuildAllAndSelf(view, enable);
+            rebuildRowsAndNotify();
+            return;
+        } else if (position == iosLiquidGlassRow) {
+            boolean enable = !AppearanceConfig.iosLiquidGlassNavigation.Bool();
+            AppearanceConfig.iosLiquidGlassNavigation.setConfigBool(enable);
             rebuildAllAndSelf(view, enable);
             return;
         } else if (position == iosChatHeaderRow) {
@@ -1004,11 +993,15 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     } else if (position == iosNavBarRow) {
                         cell.setText(getString(R.string.OEAppearanceIosNavigationBarStyle), "",
                                 AppearanceConfig.iosNavigationBarStyle.Bool(), true, true);
+                    } else if (position == iosLiquidGlassRow) {
+                        cell.setText(getString(R.string.FreezgramIosLiquidGlassNavigation),
+                                getString(R.string.FreezgramIosLiquidGlassNavigationInfo),
+                                AppearanceConfig.iosLiquidGlassNavigation.Bool(), true, true);
                     } else if (position == iosChatHeaderRow) {
                         cell.setText(getString(R.string.OEAppearanceIosChatHeader), "",
                                 AppearanceConfig.iosChatHeader.Bool(), false, true);
                     }
-                    cell.setPad(1);
+                    cell.setPad(position == iosLiquidGlassRow ? 2 : 1);
                     // По умолчанию ячейка этого типа красит текст серым; у exteraGram
                     // вложенные пункты того же цвета, что и обычные строки.
                     cell.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
@@ -1045,10 +1038,6 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                         cell.setTextAndValueAndIcon(getString(R.string.OEAppearanceNavigation), getString(R.string.OEAppearanceNavigationSub), R.drawable.msg_newphone, true);
                     } else if (position == iconPacksRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.OEAppearanceIconPacks), getString(R.string.OEAppearanceIconPacksInfo), R.drawable.msg_sticker, true);
-                    } else if (position == badgeStyleRow) {
-                        cell.setTextAndValueAndIcon(getString(R.string.FreezgramBadgeStyle),
-                                badgeStyleOptions()[app.freezgram.badges.BadgeStyleConfig.getStyle()],
-                                R.drawable.freezgram_settings_icon, true);
                     } else if (position == emojiSetsRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.EmojiSets), getString(NekoConfig.useSystemEmoji.Bool()
                                 ? R.string.OEAppearanceUseSystemEmoji : R.string.OEAppearanceEmojiSetsInfo), R.drawable.msg_emoji_smiles, true);
@@ -1125,7 +1114,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 return TYPE_INFO_PRIVACY;
             } else if (position == fabShapeRow) {
                 return TYPE_FAB_SHAPE;
-            } else if (position == appNavigationRow || position == iconPacksRow || position == badgeStyleRow
+            } else if (position == appNavigationRow || position == iconPacksRow
                     || position == emojiSetsRow || position == pillStackRow || position == playerStyleRow || position == hidingRow) {
                 return TYPE_DETAIL_SETTINGS;
             } else if (position == md3GroupRow || position == iosGroupRow) {
@@ -1134,7 +1123,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     || position == md3SwitchRow || position == md3ChatHeaderRow
                     || position == md3NavBarRow || position == md3ListItemsRow
                     || position == md3PlayerRow || position == md3MiniPlayerRow
-                    || position == iosNavBarRow || position == iosChatHeaderRow) {
+                    || position == iosNavBarRow || position == iosLiquidGlassRow || position == iosChatHeaderRow) {
                 return TYPE_ROUND_CHECK;
             } else if (position == dividerStyleRow || position == glassOutlineRow
                     || position == tabTitleStyleRow

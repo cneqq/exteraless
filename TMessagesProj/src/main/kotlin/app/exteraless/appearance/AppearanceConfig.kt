@@ -386,6 +386,16 @@ object AppearanceConfig {
     }
 
     @JvmField
+    val iosLiquidGlassNavigation =
+        addConfig("FreezgramIosLiquidGlassNavigation", ConfigItem.configTypeBool, false)
+
+    @JvmStatic
+    fun iosLiquidGlassNavigation(): Boolean {
+        ensureLoaded()
+        return iosLiquidGlassNavigation.Bool()
+    }
+
+    @JvmField
     val profileMusicCard =
         addConfig("OEAppearanceProfileMusicCard", ConfigItem.configTypeBool, true)
 

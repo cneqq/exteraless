@@ -25,7 +25,8 @@ public final class FreezgramBadges {
     }
 
     public static Drawable getDrawable(Context context) {
-        return getDrawable(context, false);
+        Drawable plane = ContextCompat.getDrawable(context, R.drawable.freezgram_settings_icon);
+        return plane == null ? null : new FreezgramBadgeDrawable(plane.mutate());
     }
 
     public static boolean hasChannelBadge(TLRPC.Chat chat) {
@@ -34,14 +35,7 @@ public final class FreezgramBadges {
     }
 
     public static Drawable getChannelDrawable(Context context) {
-        return getDrawable(context, true);
-    }
-
-    private static Drawable getDrawable(Context context, boolean channel) {
-        Drawable plane = ContextCompat.getDrawable(context, R.drawable.freezgram_settings_icon);
-        Drawable drawable = ContextCompat.getDrawable(context, channel
-                ? R.drawable.freezgram_channel_badge : R.drawable.freezgram_community_badge);
-        return drawable == null || plane == null ? null : new FreezgramBadgeDrawable(drawable.mutate(), plane.mutate());
+        return getDrawable(context);
     }
 
     public static String getTitle() {
@@ -65,7 +59,7 @@ public final class FreezgramBadges {
             return;
         }
         BulletinFactory.of(fragment).createSimpleBulletin(
-                getDrawable(fragment.getContext(), channel), channel ? getChannelTitle() : getTitle(),
+                getDrawable(fragment.getContext()), channel ? getChannelTitle() : getTitle(),
                 LocaleController.getString(R.string.FreezgramBadgeLocalInfo)).show();
     }
 }

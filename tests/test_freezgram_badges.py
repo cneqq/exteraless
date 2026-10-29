@@ -32,7 +32,7 @@ class BadgeCheck {
   FreezgramBadges.showInfo(new BaseFragment(null));check(BulletinFactory.shown==0);
   FreezgramBadges.showInfo(new BaseFragment(new Context()));check(BulletinFactory.shown==1);
   check("Founder".equals(BulletinFactory.title)&&"Local community".equals(BulletinFactory.info));
-  check(ContextCompat.lastResource==R.drawable.freezgram_community_badge);
+  check(ContextCompat.lastResource==R.drawable.freezgram_settings_icon);
   TLRPC.TL_channel channel=new TLRPC.TL_channel();
   channel.id=-(-1004480543290L)-1000000000000L;
   check(FreezgramBadges.hasChannelBadge(channel));
@@ -53,7 +53,7 @@ class BadgeCheck {
   FreezgramBadges.showChannelInfo(new BaseFragment(null));check(BulletinFactory.shown==1);
   FreezgramBadges.showChannelInfo(new BaseFragment(new Context()));check(BulletinFactory.shown==2);
   check("Official channel".equals(BulletinFactory.title)&&"Local community".equals(BulletinFactory.info));
-  check(ContextCompat.lastResource==R.drawable.freezgram_channel_badge);
+  check(ContextCompat.lastResource==R.drawable.freezgram_settings_icon);
  }
 }
 class TLRPC {
@@ -64,10 +64,10 @@ class TLRPC {
 class ChatObject {static boolean isChannel(TLRPC.Chat chat){return chat instanceof TLRPC.TL_channel;}}
 class Context {}
 class Drawable {Drawable mutate(){return this;}}
-class FreezgramBadgeDrawable extends Drawable {FreezgramBadgeDrawable(Drawable seal,Drawable plane){}}
+class FreezgramBadgeDrawable extends Drawable {FreezgramBadgeDrawable(Drawable plane){}}
 class ContextCompat {static int lastResource;static Drawable getDrawable(Context c,int id){lastResource=id;return new Drawable();}}
 class R {
- static class drawable {static int freezgram_community_badge=1,freezgram_channel_badge=4,freezgram_settings_icon=6;}
+ static class drawable {static int freezgram_settings_icon=6;}
  static class string {static int FreezgramBadgeFounder=2,FreezgramBadgeLocalInfo=3,FreezgramBadgeOfficialChannel=5;}
 }
 class LocaleController {static String getString(int id){return id==2?"Founder":id==5?"Official channel":"Local community";}}
