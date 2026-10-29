@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -21,8 +22,9 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable;
 import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode;
+import org.telegram.ui.Components.glass.GlassTabView;
 
-/** Local visual settings; the preview contains synthetic content only. */
+/** Local visual settings with sample background content and the actual navigation tabs. */
 public final class NavigationGlassSettingsActivity extends BaseFragment {
     private GlassPreview preview;
     private AvatarCornersSeekBar blur, intensity, transparency;
@@ -95,7 +97,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
 
     private static int dp(float value) { return AndroidUtilities.dp(value); }
 
-    private final class GlassPreview extends View {
+    private final class GlassPreview extends FrameLayout {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final RectF panel = new RectF();
         private BlurredBackgroundSourceRenderNode source;
@@ -103,7 +105,25 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
 
         GlassPreview(Context context) {
             super(context);
-            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            setWillNotDraw(false);
+            LinearLayout tabs = new LinearLayout(context);
+            tabs.setOrientation(LinearLayout.HORIZONTAL);
+            GlassTabView[] buttons = {
+                    GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CHATS, R.string.MainTabsChats),
+                    GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.SETTINGS, R.string.Settings),
+                    GlassTabView.createAvatar(context, resourceProvider, currentAccount, R.string.MainTabsProfile)
+            };
+            for (int i = 0; i < buttons.length; i++) {
+                GlassTabView button = buttons[i];
+                button.setSelected(i == 0, false);
+                button.setOnClickListener(v -> {
+                    for (GlassTabView tab : buttons) tab.setSelected(tab == v, true);
+                });
+                tabs.addView(button, new LinearLayout.LayoutParams(0, LayoutHelper.MATCH_PARENT, 1f));
+            }
+            FrameLayout.LayoutParams tabsLayout = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, dp(60));
+            tabsLayout.setMargins(dp(12), dp(148), dp(12), 0);
+            addView(tabs, tabsLayout);
             // The actual AGSL renderer; unsupported phones show the same opaque fallback.
             if (Build.VERSION.SDK_INT >= 33) {
                 source = new BlurredBackgroundSourceRenderNode(null);
@@ -150,16 +170,6 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 paint.setColor(Theme.multAlpha(getThemedColor(Theme.key_windowBackgroundWhite), .82f));
                 canvas.drawRoundRect(panel, dp(30), dp(30), paint);
             }
-            paint.setTextSize(dp(13));
-            paint.setTextAlign(Paint.Align.CENTER);
-            String[] titles = {text(R.string.MainTabsChats), text(R.string.Settings), text(R.string.MainTabsProfile)};
-            for (int i = 0; i < 3; i++) {
-                float x = panel.left + panel.width() * (i + .5f) / 3;
-                paint.setColor(getThemedColor(i == 0 ? Theme.key_windowBackgroundWhiteBlueText : Theme.key_windowBackgroundWhiteBlackText));
-                canvas.drawCircle(x, panel.top + dp(19), dp(7), paint);
-                canvas.drawText(titles[i], x, panel.top + dp(47), paint);
-            }
-            paint.setTextAlign(Paint.Align.LEFT);
         }
     }
 }
