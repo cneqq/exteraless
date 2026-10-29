@@ -154,7 +154,7 @@ public class ChatInputViewsContainer extends FrameLayout {
     private void checkBlurredHeight(boolean force) {
         checkViewsPositions();
 
-        final int blurredHeight = inputBubbleHeightRound + dp(INPUT_BUBBLE_BOTTOM) + Math.round(maxBottomInset);
+        final int blurredHeight = inputBubbleHeightRound + dp(INPUT_BUBBLE_BOTTOM) + Math.round(maxBottomInset) + getInputLiftPx();
         if (currentBlurredHeight != blurredHeight || force) {
             currentBlurredHeight = blurredHeight;
 
@@ -201,8 +201,17 @@ public class ChatInputViewsContainer extends FrameLayout {
         }
     }
 
+    public int getInputLiftPx() {
+        return app.exteraless.appearance.AppearanceConfig.chatComposerStyle() == 1
+                ? dp(app.exteraless.appearance.AppearanceConfig.composerBottomLift()) : 0;
+    }
+
+    public float getInputBubbleOccupiedHeight() {
+        return inputBubbleHeight + getInputLiftPx();
+    }
+
     private void checkViewsPositions() {
-        inputIslandBubbleContainer.setTranslationY(-maxBottomInset - dp(INPUT_BUBBLE_BOTTOM));
+        inputIslandBubbleContainer.setTranslationY(-maxBottomInset - dp(INPUT_BUBBLE_BOTTOM) - getInputLiftPx());
         inAppKeyboardBubbleContainer.setTranslationY(inAppKeyboardBubbleContainer.getMeasuredHeight() - imeBottomInset);
     }
 
@@ -251,7 +260,7 @@ public class ChatInputViewsContainer extends FrameLayout {
     }
 
     public float getInputBubbleBottom() {
-        return getMeasuredHeight() - maxBottomInset - dp(INPUT_BUBBLE_BOTTOM);
+        return getMeasuredHeight() - maxBottomInset - dp(INPUT_BUBBLE_BOTTOM) - getInputLiftPx();
     }
 
     @Override

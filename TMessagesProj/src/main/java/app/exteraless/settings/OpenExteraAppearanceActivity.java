@@ -229,12 +229,12 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         }
         iosGroupRow = addRow("iosStyles");
         if (iosExpanded) {
-            iosNavBarRow = addRow("iosNavBar");
-            iosLiquidGlassRow = AppearanceConfig.iosNavigationBarStyle.Bool() ? addRow("iosLiquidGlass") : -1;
-            iosPanelSettingsRow = AppearanceConfig.iosNavigationBarStyle.Bool() ? addRow("iosPanelSettings") : -1;
+            iosNavBarRow = -1;
+            iosLiquidGlassRow = -1;
+            iosPanelSettingsRow = addRow("iosPanelSettings");
             iosChatHeaderRow = addRow("iosChatHeader");
             chatComposerStyleRow = addRow("chatComposerStyle");
-            composerSettingsRow = AppearanceConfig.chatComposerStyle() == 1 ? addRow("composerSettings") : -1;
+            composerSettingsRow = -1;
             sharedGlassSettingsRow = addRow("sharedGlassSettings");
         } else {
             iosNavBarRow = iosLiquidGlassRow = iosPanelSettingsRow = iosChatHeaderRow = -1;
@@ -656,11 +656,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     ? app.freezgram.NavigationGlassSettingsActivity.COMPOSER : app.freezgram.NavigationGlassSettingsActivity.SHARED));
             return;
         } else if (position == chatComposerStyleRow) {
-            showSelector(position, getString(R.string.FreezgramChatComposerStyle), new CharSequence[]{
-                    getString(R.string.FreezgramChatComposerDefault),
-                    getString(R.string.FreezgramChatComposerIos),
-                    getString(R.string.FreezgramChatComposerAndroid)
-            }, AppearanceConfig.chatComposerStyle, () -> { rebuildAll(); rebuildRowsAndNotify(); });
+            presentFragment(new app.freezgram.NavigationGlassSettingsActivity(app.freezgram.NavigationGlassSettingsActivity.COMPOSER));
             return;
         } else if (position == dividerStyleRow) {
             showSelector(position, getString(R.string.OEAppearanceDividerStyle), new CharSequence[]{
@@ -938,7 +934,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     // иначе строка, побывавшая заблокированной, останется полупрозрачной.
                     cell.setEnabled(position != separateHeadersRow
                             || !AppearanceConfig.sectionsSeparatedHeadersForced(), null);
-                    if (position == centerTitleRow) {
+                    if (position == iosChatHeaderRow) {
+                        cell.setTextAndCheck(getString(R.string.OEAppearanceIosChatHeader), AppearanceConfig.iosChatHeader.Bool(), false);
+                    } else if (position == centerTitleRow) {
                         cell.setTextAndCheck(getString(R.string.OEAppearanceCenterTitle),
                                 AppearanceConfig.INSTANCE.centerTitle(), true);
                     } else if (position == useSystemFontsRow) {
@@ -973,7 +971,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     if (position == iosGroupRow) {
                         cell.setTextAndCheck(getString(R.string.OEAppearanceIosDesign),
                                 iosSelectedCount() > 0, true);
-                        cell.setCollapseArrow(iosSelectedCount() + "/" + IOS_STYLE_COUNT, !iosExpanded,
+                        cell.setCollapseArrow("", !iosExpanded,
                                 OpenExteraAppearanceActivity.this::toggleAllIosStyles);
                         break;
                     }
@@ -1061,7 +1059,10 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 case TYPE_DETAIL_SETTINGS: {
                     // Иконка слева, подпись под заголовком.
                     TextDetailSettingsCell cell = (TextDetailSettingsCell) holder.itemView;
-                    if (position == composerSettingsRow || position == sharedGlassSettingsRow) {
+                    if (position == chatComposerStyleRow) {
+                        String[] styles = {getString(R.string.FreezgramChatComposerDefault), getString(R.string.FreezgramChatComposerIos), getString(R.string.FreezgramChatComposerAndroid)};
+                        cell.setTextAndValueAndIcon(getString(R.string.FreezgramComposerSettings), styles[AppearanceConfig.chatComposerStyle()], R.drawable.msg_newphone, true);
+                    } else if (position == composerSettingsRow || position == sharedGlassSettingsRow) {
                         cell.setTextAndValueAndIcon(getString(position == composerSettingsRow ? R.string.FreezgramComposerSettings : R.string.FreezgramSharedGlassSettings),
                                 getString(position == composerSettingsRow ? R.string.FreezgramComposerSettingsInfo : R.string.FreezgramSharedGlassSettingsInfo), R.drawable.msg_newphone, true);
                     } else if (position == iosPanelSettingsRow) {
@@ -1146,7 +1147,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 return TYPE_INFO_PRIVACY;
             } else if (position == fabShapeRow) {
                 return TYPE_FAB_SHAPE;
-            } else if (position == composerSettingsRow || position == sharedGlassSettingsRow || position == iosPanelSettingsRow || position == appNavigationRow || position == iconPacksRow
+            } else if (position == chatComposerStyleRow || position == composerSettingsRow || position == sharedGlassSettingsRow || position == iosPanelSettingsRow || position == appNavigationRow || position == iconPacksRow
                     || position == emojiSetsRow || position == pillStackRow || position == playerStyleRow || position == hidingRow) {
                 return TYPE_DETAIL_SETTINGS;
             } else if (position == md3GroupRow || position == iosGroupRow) {
@@ -1155,9 +1156,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     || position == md3SwitchRow || position == md3ChatHeaderRow
                     || position == md3NavBarRow || position == md3ListItemsRow
                     || position == md3PlayerRow || position == md3MiniPlayerRow
-                    || position == iosNavBarRow || position == iosLiquidGlassRow || position == iosChatHeaderRow) {
+                    || position == iosNavBarRow || position == iosLiquidGlassRow) {
                 return TYPE_ROUND_CHECK;
-            } else if (position == chatComposerStyleRow || position == dividerStyleRow || position == glassOutlineRow
+            } else if (position == dividerStyleRow || position == glassOutlineRow
                     || position == tabTitleStyleRow
                     || position == tabCounterRow || position == titleTextRow) {
                 return TYPE_SETTINGS;

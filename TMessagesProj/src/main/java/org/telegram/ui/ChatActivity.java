@@ -6051,7 +6051,7 @@ public class ChatActivity extends BaseFragment implements
                     float progress = Math.min(1f, pullingDownOffset / AndroidUtilities.dp(110));
                     c.translate(isSideMenued() ? lerp(dp(32), dp(SIDE_MENU_WIDTH), getSideMenuAlpha()) : 0,
                         -(windowInsetsStateHolder.getAnimatedMaxBottomInset() + dp(10) +
-                        chatInputViewsContainer.getInputBubbleHeight() + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM)));
+                        chatInputViewsContainer.getInputBubbleOccupiedHeight() + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM)));
                     pullingDownDrawable.draw(c, chatListView, progress, 1f - pullingDownAnimateProgress);
 
                     c.restore();
@@ -12032,7 +12032,7 @@ public class ChatActivity extends BaseFragment implements
     private void updatePagedownButtonsPosition() {
         if (sideControlsButtonsLayout != null) {
             float baseTranslationY2 = -windowInsetsStateHolder.getAnimatedMaxBottomInset()
-                - chatInputViewsContainer.getInputBubbleHeight()
+                - chatInputViewsContainer.getInputBubbleOccupiedHeight()
                 - getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM)
                 - dp(ChatInputViewsContainer.INPUT_BUBBLE_BOTTOM + 4);
             sideControlsButtonsLayout.setTranslationY(baseTranslationY2);
@@ -13282,7 +13282,7 @@ public class ChatActivity extends BaseFragment implements
         if (undoView != null) {
             undoView.setAdditionalTranslationY(
                 windowInsetsStateHolder.getAnimatedMaxBottomInset() + dp(9 + 7)
-                    + chatInputViewsContainer.getInputBubbleHeight() + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM));
+                    + chatInputViewsContainer.getInputBubbleOccupiedHeight() + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM));
         }
 
         checkUi_topPanelPositions();
@@ -31886,7 +31886,7 @@ public class ChatActivity extends BaseFragment implements
 
                 return Math.round(windowInsetsStateHolder.getAnimatedMaxBottomInset()
                     + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM)
-                    + (chatInputViewsContainer.getInputBubbleHeight() + dp(9 + 7)));
+                    + (chatInputViewsContainer.getInputBubbleOccupiedHeight() + dp(9 + 7)));
             }
 
             @Override
@@ -51207,7 +51207,7 @@ public class ChatActivity extends BaseFragment implements
         }
 
         final float margin = windowInsetsStateHolder.getAnimatedMaxBottomInset() +
-                (chatInputViewsContainer.getInputBubbleHeight() + dp(9) - dp(5));
+                (chatInputViewsContainer.getInputBubbleOccupiedHeight() + dp(9) - dp(5));
 
         topicsTabs.setSideMenuBackgroundMarginBottom(margin);
     }
@@ -51215,7 +51215,7 @@ public class ChatActivity extends BaseFragment implements
     private void checkUi_botMenuPosition() {
         final float margin = windowInsetsStateHolder.getAnimatedMaxBottomInset()
             + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM)
-            + (chatInputViewsContainer.getInputBubbleHeight() + dp(9 + 6));
+            + (chatInputViewsContainer.getInputBubbleOccupiedHeight() + dp(9 + 6));
 
         if (chatActivityEnterView != null && chatActivityEnterView.botCommandsMenuContainer != null) {
             chatActivityEnterView.botCommandsMenuContainer.setTranslationY(-margin);
@@ -51281,10 +51281,10 @@ public class ChatActivity extends BaseFragment implements
             return;
         }
 
-        inputIslandHeightCurrent = calculateInputIslandHeight(false);
-        inputIslandHeightTarget = calculateInputIslandHeight(true);
+        inputIslandHeightCurrent = calculateInputIslandHeight(false) + chatInputViewsContainer.getInputLiftPx();
+        inputIslandHeightTarget = calculateInputIslandHeight(true) + chatInputViewsContainer.getInputLiftPx();
 
-        chatInputViewsContainer.setInputBubbleHeight(inputIslandHeightCurrent);
+        chatInputViewsContainer.setInputBubbleHeight(inputIslandHeightCurrent - chatInputViewsContainer.getInputLiftPx());
         updatePagedownButtonsPosition();
         updateBotforumTabsBottomMargin();
         checkUi_botMenuPosition();
@@ -51296,7 +51296,7 @@ public class ChatActivity extends BaseFragment implements
     private static final Rect clipBoundsRect = new Rect();
     private void checkUi_BlurHeight() {
         final float inputHeight = shouldHideBottomForGesture() ? 0 : windowInsetsStateHolder.getAnimatedMaxBottomInset()
-            + dp(9) + chatInputViewsContainer.getInputBubbleHeight() + dp(7)
+            + dp(9) + chatInputViewsContainer.getInputBubbleOccupiedHeight() + dp(7)
             + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM);
 
         chatActivityFadeView.setFadeZoneBottom((int) inputHeight);
@@ -51316,7 +51316,7 @@ public class ChatActivity extends BaseFragment implements
         if (emptyViewContainer != null) {
             emptyViewContainer.setTranslationY(-0.5f * (dp(9)
                 + windowInsetsStateHolder.getAnimatedImeBottomInset()
-                + chatInputViewsContainer.getInputBubbleHeight()
+                + chatInputViewsContainer.getInputBubbleOccupiedHeight()
             ));
         }
     }

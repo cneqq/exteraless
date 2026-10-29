@@ -30,10 +30,10 @@ public final class ChatComposerGlass {
 
     /** Visible field starts 50dp + 7dp drawable padding from the left edge. */
     public static int textLeftInsetDp() {
-        return 57 + AppearanceConfig.composerTextInset();
+        return 57 + 16;
     }
     public static int emojiRightInsetDp() {
-        return AppearanceConfig.composerEmojiInset();
+        return 16;
     }
     public static int textRightInsetDp(int emojiWidthDp) {
         return emojiWidthDp + emojiRightInsetDp() + 8;

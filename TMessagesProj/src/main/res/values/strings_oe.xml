@@ -103,8 +103,8 @@
     <string name="FreezgramIosLiquidGlassNavigationInfo">Refracted backdrop with translucent edges. Requires Android 13+ and enabled blur. Uses frosted glass on older Android versions or while power saving is active.</string>
     <string name="FreezgramBadgeOfficialChannel">Official Freezgram channel</string>
     <string name="FreezgramBadgeLocalInfo">Community badge. Visible only in Freezgram.</string>
-    <string name="FreezgramPanelSettings">Bottom panel</string>
-    <string name="FreezgramPanelSettingsInfo">Preview and Liquid Glass adjustments</string>
+    <string name="FreezgramPanelSettings">Navigation panel</string>
+    <string name="FreezgramPanelSettingsInfo">Style, width, bottom gap and contacts</string>
     <string name="FreezgramPanelBlur">Background blur</string>
     <string name="FreezgramPanelIntensity">Refraction intensity</string>
     <string name="FreezgramPanelTransparency">Fill transparency</string>
@@ -114,11 +114,9 @@
     <string name="FreezgramPanelLift">Distance from bottom</string>
     <string name="FreezgramSharedGlassSettings">Liquid Glass</string>
     <string name="FreezgramSharedGlassSettingsInfo">Shared appearance for navigation, chat header and input</string>
-    <string name="FreezgramComposerSettings">Input panel spacing</string>
-    <string name="FreezgramComposerSettingsInfo">Text and emoji spacing with preview</string>
-    <string name="FreezgramComposerTextInset">Text inset</string>
-    <string name="FreezgramComposerEmojiInset">Emoji inset</string>
+    <string name="FreezgramComposerSettings">Input panel</string>
+    <string name="FreezgramComposerSettingsInfo">Style and distance from the bottom edge</string>
     <string name="FreezgramSharedGlassPreviewInfo">Sample header, input and navigation. Blur, refraction and fill transparency apply to all enabled glass panels. Requires Android 13+, blur and inactive power saving.</string>
-    <string name="FreezgramComposerPreviewInfo">Spacing for the iOS input panel. Optical settings are in iOS Design → Liquid Glass. Changes apply when you return to chats.</string>
+    <string name="FreezgramComposerPreviewInfo">iOS text and emoji insets are fixed at 16dp. The slider lifts the whole panel above the bottom edge or keyboard. Glass appearance is in iOS Design → Liquid Glass.</string>
     <string name="FreezgramGlassEnhanceColors">Enhance colors</string>
 </resources>

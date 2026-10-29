@@ -23,7 +23,8 @@ class PrivacyCheck {
  SPACING
  public static void main(String[] args){
   var view=new PrivacyCheck();
-  for(int text:new int[]{4,12,24})for(int emoji:new int[]{0,6,16}){
+  for(int repeat=0;repeat<3;repeat++){
+   int text=16,emoji=16;
    AppearanceConfig.text=text;AppearanceConfig.emoji=emoji;view.iosComposerLayout=true;
    view.applyIosComposerSpacing();
    if(view.messageEditText.params.leftMargin!=57+text||view.emojiButton.params.rightMargin!=emoji)
@@ -42,6 +43,41 @@ class FrameLayout{static class LayoutParams extends MarginLayoutParams{}}
 class ChatComposerGlass{HELPERS}
 class AppearanceConfig{static int text,emoji;static int composerTextInset(){return text;}static int composerEmojiInset(){return emoji;}}
 '''.replace('SPACING',spacing).replace('HELPERS',helpers))
+
+    def test_bottom_gap_moves_surface_and_controls_and_reserves_space(self):
+        text=(JAVA / 'org/telegram/ui/Components/chat/ChatInputViewsContainer.java').read_text()
+        methods='\n'.join(method(text,sig) for sig in (
+            '    public int getInputLiftPx()', '    public float getInputBubbleOccupiedHeight()',
+            '    private void checkViewsPositions()', '    private void checkBlurredHeight(boolean force)',
+            '    public float getInputBubbleHeight()', '    public float getInputBubbleTop()',
+            '    public float getInputBubbleBottom()'))
+        methods=methods.replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig')
+        run_java('''
+class PrivacyCheck {
+ RectF tmpRectF=new RectF();Path underKeyboardPath=new Path();
+ static int INPUT_KEYBOARD_RADIUS=29;void invalidate(){}int getMeasuredWidth(){return 400;}
+ static int INPUT_BUBBLE_BOTTOM=9;int inputBubbleHeightRound=44,currentBlurredHeight;float inputBubbleHeight=44,maxBottomInset,imeBottomInset;
+ View inputIslandBubbleContainer=new View(),inAppKeyboardBubbleContainer=new View();
+ int getMeasuredHeight(){return 1000;}static int dp(int value){return value;}
+ METHODS
+ public static void main(String[] args){
+  var p=new PrivacyCheck();
+  for(int style:new int[]{0,1,2})for(int gap:new int[]{0,16,64})for(int inset:new int[]{20,300}){
+   AppearanceConfig.style=style;AppearanceConfig.gap=gap;p.maxBottomInset=inset;p.imeBottomInset=inset;
+   int expected=style==1?gap:0;p.checkBlurredHeight(true);
+   if(p.inputIslandBubbleContainer.translation!=-inset-9-expected)throw new AssertionError("Controls not lifted");
+   if(p.getInputBubbleBottom()!=1000-inset-9-expected||p.getInputBubbleTop()!=1000-inset-9-expected-44)
+    throw new AssertionError("Visual and hit-test bounds disagree");
+   if(p.currentBlurredHeight!=44+9+inset+expected||p.getInputBubbleOccupiedHeight()!=44+expected||p.getInputBubbleHeight()!=44)
+    throw new AssertionError("Gap missing from capture or content padding");
+  }
+ }
+}
+class RectF{void set(float l,float t,float r,float b){}}
+class Path{enum Direction{CW}void rewind(){}void close(){}void addRoundRect(RectF r,float[] radii,Direction d){}}
+class View{float translation;void setTranslationY(float value){translation=value;}int getMeasuredHeight(){return 250;}}
+class AppearanceConfig{static int style,gap;static int chatComposerStyle(){return style;}static int composerBottomLift(){return gap;}}
+'''.replace('METHODS',methods))
 
     def test_policy_and_surface_bounds(self):
         source = (JAVA / "app/freezgram/ChatComposerGlass.java").read_text()

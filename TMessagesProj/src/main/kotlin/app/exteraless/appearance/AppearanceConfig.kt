@@ -406,13 +406,9 @@ object AppearanceConfig {
     }
 
     @JvmField
-    val composerTextInset = addConfig("FreezgramComposerTextInset", ConfigItem.configTypeInt, 12)
-    @JvmField
-    val composerEmojiInset = addConfig("FreezgramComposerEmojiInset", ConfigItem.configTypeInt, 6)
+    val composerBottomLift = addConfig("FreezgramComposerBottomLift", ConfigItem.configTypeInt, 0)
     @JvmStatic
-    fun composerTextInset(): Int { ensureLoaded(); return composerTextInset.Int().coerceIn(4, 24) }
-    @JvmStatic
-    fun composerEmojiInset(): Int { ensureLoaded(); return composerEmojiInset.Int().coerceIn(0, 16) }
+    fun composerBottomLift(): Int { ensureLoaded(); return composerBottomLift.Int().coerceIn(0, 64) }
 
     @JvmField
     val navigationPanelWidth = addConfig("FreezgramNavigationPanelWidth", ConfigItem.configTypeInt, 100)

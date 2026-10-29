@@ -31,7 +31,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
     public NavigationGlassSettingsActivity() { this(NAVIGATION); }
     public NavigationGlassSettingsActivity(int mode) { this.mode = mode; }
     private GlassPreview preview;
-    private AvatarCornersSeekBar blur, intensity, transparency, width, lift, textInset, emojiInset;
+    private AvatarCornersSeekBar blur, intensity, transparency, width, lift, composerLift;
     private boolean geometryChanged;
     private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors;
 
@@ -79,7 +79,23 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                         AppearanceConfig.navigationGlassTransparency.setConfigInt(value); geometryChanged = true; preview.invalidate();
                     });
         }
-        if (mode == 0) {
+        if (mode == NAVIGATION) {
+            org.telegram.ui.Cells.TextCheckCell enabled = new org.telegram.ui.Cells.TextCheckCell(context);
+            enabled.setTextAndCheck(text(R.string.OEAppearanceIosNavigationBarStyle), AppearanceConfig.iosNavigationBarStyle.Bool(), false);
+            enabled.setOnClickListener(v -> {
+                boolean value = !AppearanceConfig.iosNavigationBarStyle.Bool();
+                AppearanceConfig.iosNavigationBarStyle.setConfigBool(value);
+                if (value) AppearanceConfig.newNavigationBarStyle.setConfigBool(false);
+                enabled.setChecked(value); geometryChanged = true;
+            });
+            content.addView(enabled);
+            org.telegram.ui.Cells.TextCheckCell glassSwitch = new org.telegram.ui.Cells.TextCheckCell(context);
+            glassSwitch.setTextAndCheck("Liquid Glass", AppearanceConfig.iosLiquidGlassNavigation.Bool(), false);
+            glassSwitch.setOnClickListener(v -> {
+                boolean value = !AppearanceConfig.iosLiquidGlassNavigation.Bool();
+                AppearanceConfig.iosLiquidGlassNavigation.setConfigBool(value); glassSwitch.setChecked(value); geometryChanged = true;
+            });
+            content.addView(glassSwitch);
             width = slider(context, content, R.string.FreezgramPanelWidth, 100,
                     AppearanceConfig.navigationPanelWidth(), value -> {
                         AppearanceConfig.navigationPanelWidth.setConfigInt(Math.max(80, value));
@@ -98,14 +114,20 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             });
             content.addView(contacts);
         }
-        if (mode == 2) {
-            textInset = slider(context, content, R.string.FreezgramComposerTextInset, 24,
-                    AppearanceConfig.composerTextInset(), value -> {
-                        AppearanceConfig.composerTextInset.setConfigInt(value); geometryChanged = true; preview.invalidate();
-                    });
-            emojiInset = slider(context, content, R.string.FreezgramComposerEmojiInset, 16,
-                    AppearanceConfig.composerEmojiInset(), value -> {
-                        AppearanceConfig.composerEmojiInset.setConfigInt(value); geometryChanged = true; preview.invalidate();
+        if (mode == COMPOSER) {
+            org.telegram.ui.Cells.TextSettingsCell style = new org.telegram.ui.Cells.TextSettingsCell(context);
+            String[] styles = {text(R.string.FreezgramChatComposerDefault), text(R.string.FreezgramChatComposerIos), text(R.string.FreezgramChatComposerAndroid)};
+            style.setTextAndValue(text(R.string.FreezgramChatComposerStyle), styles[AppearanceConfig.chatComposerStyle()], false);
+            style.setOnClickListener(v -> new org.telegram.ui.ActionBar.AlertDialog.Builder(context)
+                    .setTitle(text(R.string.FreezgramChatComposerStyle)).setItems(styles, (dialog, which) -> {
+                        AppearanceConfig.chatComposerStyle.setConfigInt(which); geometryChanged = true;
+                        style.setTextAndValue(text(R.string.FreezgramChatComposerStyle), styles[which], false);
+                        preview.updateGeometry();
+                    }).show());
+            content.addView(style);
+            composerLift = slider(context, content, R.string.FreezgramPanelLift, 64,
+                    AppearanceConfig.composerBottomLift(), value -> {
+                        AppearanceConfig.composerBottomLift.setConfigInt(value); geometryChanged = true; preview.invalidate();
                     });
         }
         TextView reset = new TextView(context);
@@ -126,9 +148,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 AppearanceConfig.navigationPanelLift.setConfigInt(12);
                 width.setValue(100); lift.setValue(12); preview.updateGeometry();
             } else {
-                AppearanceConfig.composerTextInset.setConfigInt(12);
-                AppearanceConfig.composerEmojiInset.setConfigInt(6);
-                textInset.setValue(12); emojiInset.setValue(6);
+                AppearanceConfig.composerBottomLift.setConfigInt(0);
+                composerLift.setValue(0);
             }
             geometryChanged = true;
             preview.invalidate();
@@ -152,8 +173,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
 
     private AvatarCornersSeekBar slider(Context context, LinearLayout parent, int title, int max,
                                        int value, AvatarCornersSeekBar.OnDrag onDrag) {
-        AvatarCornersSeekBar slider = new AvatarCornersSeekBar(context, onDrag, title == R.string.FreezgramPanelWidth ? 80 : title == R.string.FreezgramComposerTextInset ? 4 : 0, max,
-                text(title), title == R.string.FreezgramPanelWidth ? "80" : title == R.string.FreezgramComposerTextInset ? "4" : "0", String.valueOf(max));
+        AvatarCornersSeekBar slider = new AvatarCornersSeekBar(context, onDrag, title == R.string.FreezgramPanelWidth ? 80 : 0, max,
+                text(title), title == R.string.FreezgramPanelWidth ? "80" : "0", String.valueOf(max));
         slider.setValueSuffix(max == 100 ? "%" : "dp");
         slider.setValue(value);
         parent.addView(slider, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 112));
@@ -170,7 +191,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         private final android.graphics.Rect field = new android.graphics.Rect(), leftButton = new android.graphics.Rect(), rightButton = new android.graphics.Rect();
         private final android.graphics.drawable.Drawable attachIcon, emojiIcon, micIcon;
 
-        private LinearLayout tabs;
+        private org.telegram.ui.MainTabsLayout tabs;
         private GlassTabView contactTab;
 
         GlassPreview(Context context) {
@@ -179,8 +200,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             attachIcon = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.msg_input_attach2).mutate();
             emojiIcon = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.input_smile).mutate();
             micIcon = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.input_mic).mutate();
-            tabs = new LinearLayout(context);
-            tabs.setOrientation(LinearLayout.HORIZONTAL);
+            tabs = new org.telegram.ui.MainTabsLayout(context, resourceProvider);
+            tabs.setPadding(dp(12), dp(14), dp(12), dp(14));
             GlassTabView[] buttons = {
                     GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CHATS, R.string.MainTabsChats),
                     GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.SETTINGS, R.string.Settings),
@@ -192,19 +213,20 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 button.setOnClickListener(v -> {
                     for (GlassTabView tab : buttons) tab.setSelected(tab == v, true);
                 });
-                tabs.addView(button, new LinearLayout.LayoutParams(0, LayoutHelper.MATCH_PARENT, 1f));
+                tabs.addView(button);
+                tabs.addTabToIgnoreClick(button); tabs.setViewVisible(button, true, false);
             }
             contactTab = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CONTACTS, R.string.MainTabsContacts);
             contactTab.setOnClickListener(v -> {
                 for (GlassTabView tab : buttons) tab.setSelected(false, true);
                 contactTab.setSelected(true, true);
             });
-            tabs.addView(contactTab, 1, new LinearLayout.LayoutParams(0, LayoutHelper.MATCH_PARENT, 1f));
+            tabs.addView(contactTab, 1); tabs.addTabToIgnoreClick(contactTab);
             for (GlassTabView button : buttons) button.setOnClickListener(v -> {
                 contactTab.setSelected(false, true);
                 for (GlassTabView tab : buttons) tab.setSelected(tab == v, true);
             });
-            FrameLayout.LayoutParams tabsLayout = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, dp(60));
+            FrameLayout.LayoutParams tabsLayout = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, dp(76));
             tabsLayout.setMargins(dp(12), dp(148), dp(12), 0);
             addView(tabs, tabsLayout);
             updateGeometry();
@@ -224,10 +246,10 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             float top = dp((mode == 1 ? 296 : 160) - AppearanceConfig.navigationPanelLift());
             panel.set(side, top, getWidth() - side, top + dp(60));
             FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) tabs.getLayoutParams();
-            lp.setMargins(Math.round(side), Math.round(top), Math.round(side), 0);
+            lp.setMargins(Math.round(side) - dp(8), Math.round(top) - dp(8), Math.round(side) - dp(8), 0);
             tabs.setLayoutParams(lp);
             tabs.setVisibility(mode == 2 ? GONE : VISIBLE);
-            contactTab.setVisibility(xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().Bool() ? GONE : VISIBLE);
+            tabs.setViewVisible(contactTab, !xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().Bool(), false);
             invalidate();
         }
 
@@ -300,7 +322,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                     paint.setColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText)); paint.setTextSize(dp(16));
                     canvas.drawText("Freezgram", dp(32), dp(43), paint);
                 }
-                int top = dp(mode == 1 ? 128 : 118);
+                int top = dp(150 - (AppearanceConfig.chatComposerStyle() == 1 ? AppearanceConfig.composerBottomLift() : 0));
                 android.graphics.Rect whole = new android.graphics.Rect(0, top, getWidth(), top + dp(58));
                 boolean split = AppearanceConfig.chatComposerStyle() != 2;
                 ChatComposerGlass.surfaceBounds(whole, field, leftButton, rightButton, split);

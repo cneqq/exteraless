@@ -2,15 +2,20 @@
 
 Settings live under **Freezgram settings → Appearance → iOS Design**:
 
-- **Navigation bar** and **Liquid Glass navigation bar** enable the navigation style.
-- **Bottom panel** adjusts width (80–100%), bottom gap (0–64dp) and contact visibility.
+- **Navigation panel** opens its own editor with iOS/Liquid Glass switches,
+  width (80–100%), bottom gap (0–64dp) and contact visibility.
 - **Chat header** enables the centered glass header.
-- **Input panel style** chooses Default, iOS glass, or Android glass.
-- **Input panel spacing** appears for the iOS input style: text inset (4–24dp,
-  default 12dp) and emoji inset (0–16dp, default 6dp).
-- **Liquid Glass** is the shared optical editor with sample header, composer and
-  navigation surfaces. It controls blur (0–30dp), refraction (0–100%) and fill
-  transparency (0–100%). Each geometry editor has its own preview as well.
+- **Input panel** opens the Default/iOS/Android style selector and a bottom-gap
+  slider (0–64dp). The gap applies to iOS input above both the system inset and
+  the keyboard. It moves the entire island, including controls and background.
+- **Liquid Glass** is the shared optics editor with sample header, composer and
+  navigation surfaces: blur, refraction, fill transparency and color enhancement.
+
+The iOS text and emoji insets are fixed at 16dp, including for existing installs
+with older spacing preferences. The obsolete spacing preferences are no longer
+read or exported. Each editor has its own preview. Navigation previews use the
+actual MainTabsLayout measurement and GlassTabView components, rather than equal
+weighted placeholder columns. Reset affects only the current editor.
 
 ## Shared appearance
 
@@ -52,14 +57,18 @@ retain a stronger fallback capture until reopened.
 ## Composer geometry
 
 The iOS field is inset 50dp on either side, plus its existing 7dp transparent
-drawable padding. Text starts after that visible edge plus the configured text
-inset. Emoji moves inward by its configured margin, and the edit field reserves
-space for its full touch target plus a gap. Returning to replies, editing, voice
-recording, bot controls, or narrow layouts restores the original control
-arrangement. Existing send/attach/record handlers remain unchanged.
+drawable padding. Text starts after that visible edge plus 16dp. Emoji has a
+fixed 16dp margin, and the edit field reserves space for its touch target.
+Returning to replies, editing, voice recording, bot controls, or narrow layouts
+restores the original control arrangement. Existing send/attach/record handlers
+remain unchanged.
 
-Spacing and shared optics are included in settings backup. The contact switch
-only changes contact visibility and does not modify other tab preferences.
+The iOS bottom gap moves child views and captured drawable bounds by the same
+amount. Occupied-height calculations include that gap, so list padding, scroll
+buttons, overlays and capture bounds stay above the lifted input. Keyboard
+translation is accounted for separately. Style Default/Android retains zero
+additional gap. Geometry and shared optics are included in settings backup.
+The contact switch only changes contact visibility.
 
 ## Validation
 

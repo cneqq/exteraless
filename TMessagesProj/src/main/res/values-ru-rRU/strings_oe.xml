@@ -76,8 +76,8 @@
     <string name="FreezgramIosLiquidGlassNavigationInfo">Преломление фона и полупрозрачные края. Нужны Android 13+ и включённое размытие. На старых версиях Android и в энергосбережении — матовое стекло.</string>
     <string name="FreezgramBadgeOfficialChannel">Официальный канал Freezgram</string>
     <string name="FreezgramBadgeLocalInfo">Значок сообщества. Виден только в Freezgram.</string>
-    <string name="FreezgramPanelSettings">Нижняя панель</string>
-    <string name="FreezgramPanelSettingsInfo">Предпросмотр и настройка Liquid Glass</string>
+    <string name="FreezgramPanelSettings">Панель навигации</string>
+    <string name="FreezgramPanelSettingsInfo">Стиль, ширина, отступ снизу и контакты</string>
     <string name="FreezgramPanelBlur">Размытие фона</string>
     <string name="FreezgramPanelIntensity">Сила преломления</string>
     <string name="FreezgramPanelTransparency">Прозрачность заливки</string>
@@ -87,11 +87,9 @@
     <string name="FreezgramPanelLift">Отступ от нижнего края</string>
     <string name="FreezgramSharedGlassSettings">Liquid Glass</string>
     <string name="FreezgramSharedGlassSettingsInfo">Общий вид навигации, шапки чата и поля ввода</string>
-    <string name="FreezgramComposerSettings">Отступы панели ввода</string>
-    <string name="FreezgramComposerSettingsInfo">Отступы текста и эмодзи с предпросмотром</string>
-    <string name="FreezgramComposerTextInset">Отступ текста от края поля</string>
-    <string name="FreezgramComposerEmojiInset">Отступ эмодзи от края поля</string>
+    <string name="FreezgramComposerSettings">Панель ввода</string>
+    <string name="FreezgramComposerSettingsInfo">Стиль и отступ всей панели от нижнего края</string>
     <string name="FreezgramSharedGlassPreviewInfo">Пример шапки, поля ввода и навигации. Размытие, преломление и прозрачность общие для всех включённых стеклянных панелей. Нужны Android 13+, размытие и отключённое энергосбережение.</string>
-    <string name="FreezgramComposerPreviewInfo">Отступы для iOS-панели ввода. Параметры стекла находятся в iOS Design → Liquid Glass. Изменения применяются при возвращении к чатам.</string>
+    <string name="FreezgramComposerPreviewInfo">Внутренние отступы текста и эмодзи в iOS-поле всегда 16 dp. Ползунок поднимает всю панель над нижним краем или клавиатурой. Параметры стекла находятся в iOS Design → Liquid Glass.</string>
     <string name="FreezgramGlassEnhanceColors">Усиливать цвета</string>
 </resources>
