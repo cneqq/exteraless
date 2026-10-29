@@ -32,6 +32,7 @@ public class DownscaleScrollableNoiseSuppressor {
     private final boolean navigationGlassEnabled;
     private final int k;
     private float navigationBlurRadius = dpf2(6f);
+    private boolean navigationEnhanceColors = true;
 
     public DownscaleScrollableNoiseSuppressor() {
         this(true, false);
@@ -81,24 +82,25 @@ public class DownscaleScrollableNoiseSuppressor {
     }
 
     /** Replace only the navigation capture area; other surfaces retain their old blur. */
-    public void drawNavigationGlass(Canvas canvas, RectF bounds, float radius) {
+    public void drawNavigationGlass(Canvas canvas, RectF bounds, float radius, boolean enhanceColors) {
         if (!navigationGlassEnabled || bounds.isEmpty()) return;
-        setNavigationGlassBlur(radius);
+        setNavigationGlassBlur(radius, enhanceColors);
         canvas.save();
         canvas.clipRect(bounds);
         canvas.drawRenderNode(resultRenderNodes[2]);
         canvas.restore();
     }
 
-    public boolean setNavigationGlassBlur(float radius) {
+    public boolean setNavigationGlassBlur(float radius, boolean enhanceColors) {
         if (!navigationGlassEnabled) return false;
         radius = Math.max(0, radius);
-        if (navigationBlurRadius == radius) return false;
+        if (navigationBlurRadius == radius && navigationEnhanceColors == enhanceColors) return false;
         navigationBlurRadius = radius;
+        navigationEnhanceColors = enhanceColors;
         for (SourcePart part : rectRenderNodes) {
             int scale = radius == 0 ? 1 : 4;
             part.renderNodesForNavigation.setScale(scale, scale);
-            part.renderNodesForNavigation.setPrimaryEffectBlur(radius, RenderNodeEffects.getSaturationX3RenderEffect());
+            part.renderNodesForNavigation.setPrimaryEffectBlur(radius, enhanceColors ? RenderNodeEffects.getSaturationX3RenderEffect() : null);
             if (part.renderNode.hasDisplayList()) part.renderNodesForNavigation.invalidateRenderNodes(part.renderNode);
         }
         return true;
@@ -180,6 +182,7 @@ public class DownscaleScrollableNoiseSuppressor {
 
         public void setPrimaryEffectBlur(float radius, RenderEffect secondEffect) {
             if (radius <= 0) { setPrimaryEffect(secondEffect); return; }
+            if (secondEffect == null) { setPrimaryEffectBlur(radius); return; }
             final float downsampledRadiusX = downscaleRadius(radius, scaleX);
             final float downsampledRadiusY = downscaleRadius(radius, scaleY);
 
@@ -452,7 +455,7 @@ public class DownscaleScrollableNoiseSuppressor {
             if (navigationGlassEnabled) {
                 renderNodesForNavigation = new DownscaledRenderNode("navigation", 0, true);
                 renderNodesForNavigation.setScale(navigationBlurRadius == 0 ? 1 : 4, navigationBlurRadius == 0 ? 1 : 4);
-                renderNodesForNavigation.setPrimaryEffectBlur(navigationBlurRadius, RenderNodeEffects.getSaturationX3RenderEffect());
+                renderNodesForNavigation.setPrimaryEffectBlur(navigationBlurRadius, navigationEnhanceColors ? RenderNodeEffects.getSaturationX3RenderEffect() : null);
             } else {
                 renderNodesForNavigation = null;
             }

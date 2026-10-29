@@ -93,4 +93,5 @@
     <string name="FreezgramComposerEmojiInset">Отступ эмодзи от края поля</string>
     <string name="FreezgramSharedGlassPreviewInfo">Пример шапки, поля ввода и навигации. Размытие, преломление и прозрачность общие для всех включённых стеклянных панелей. Нужны Android 13+, размытие и отключённое энергосбережение.</string>
     <string name="FreezgramComposerPreviewInfo">Отступы для iOS-панели ввода. Параметры стекла находятся в iOS Design → Liquid Glass. Изменения применяются при возвращении к чатам.</string>
+    <string name="FreezgramGlassEnhanceColors">Усиливать цвета</string>
 </resources>

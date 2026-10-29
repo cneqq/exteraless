@@ -331,6 +331,7 @@ public final class EtgBackup {
         bool(list, "iosLiquidGlassNavigation", AppearanceConfig.iosLiquidGlassNavigation);
         integer(list, "navigationPanelWidth", AppearanceConfig.navigationPanelWidth, 80, 100);
         integer(list, "navigationPanelLift", AppearanceConfig.navigationPanelLift, 0, 64);
+        bool(list, "glassEnhanceColors", AppearanceConfig.glassEnhanceColors);
         integer(list, "navigationGlassBlur", AppearanceConfig.navigationGlassBlur, 0, 30);
         integer(list, "navigationGlassIntensity", AppearanceConfig.navigationGlassIntensity, 0, 100);
         integer(list, "navigationGlassTransparency", AppearanceConfig.navigationGlassTransparency, -1, 100);

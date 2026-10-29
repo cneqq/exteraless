@@ -14,5 +14,7 @@ def run_java(source):
             source = re.sub(r'class AppearanceConfig\s*\{', 'class AppearanceConfig { static int navigationGlassBlur(){return 6;} static int navigationGlassIntensity(){return 55;} static int navigationGlassTransparency(){return -1;}', source)
         if 'key_windowBackgroundWhite' not in source:
             source = re.sub(r'class Theme\s*\{', 'class Theme { static int key_windowBackgroundWhite;', source)
+        if 'glassEnhanceColors()' not in source:
+            source = re.sub(r'class AppearanceConfig\s*\{', 'class AppearanceConfig { static boolean glassEnhanceColors(){return true;}', source)
         source += shared
     run_source(source)

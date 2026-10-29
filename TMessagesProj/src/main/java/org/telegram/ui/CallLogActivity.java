@@ -804,7 +804,7 @@ public class CallLogActivity extends BaseFragment implements NotificationCenter.
 						if (SharedConfig.chatBlurEnabled()) {
 							scrollableViewNoiseSuppressor.draw(c, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
 							if (app.freezgram.IosLiquidGlassNavigation.isEnabled()) {
-							    scrollableViewNoiseSuppressor.drawNavigationGlass(c, iBlur3PositionMainTabs, AndroidUtilities.dpf2(app.freezgram.IosLiquidGlassNavigation.blurRadiusDp()));
+							    scrollableViewNoiseSuppressor.drawNavigationGlass(c, iBlur3PositionMainTabs, AndroidUtilities.dpf2(app.freezgram.IosLiquidGlassNavigation.blurRadiusDp()), app.freezgram.LiquidGlassStyle.enhanceColors());
 							}
 						}
 						iBlur3SourceGlass.endRecording();

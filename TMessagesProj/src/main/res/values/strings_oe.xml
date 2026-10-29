@@ -120,4 +120,5 @@
     <string name="FreezgramComposerEmojiInset">Emoji inset</string>
     <string name="FreezgramSharedGlassPreviewInfo">Sample header, input and navigation. Blur, refraction and fill transparency apply to all enabled glass panels. Requires Android 13+, blur and inactive power saving.</string>
     <string name="FreezgramComposerPreviewInfo">Spacing for the iOS input panel. Optical settings are in iOS Design → Liquid Glass. Changes apply when you return to chats.</string>
+    <string name="FreezgramGlassEnhanceColors">Enhance colors</string>
 </resources>

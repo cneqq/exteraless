@@ -424,6 +424,11 @@ object AppearanceConfig {
     fun navigationPanelLift(): Int { ensureLoaded(); return navigationPanelLift.Int().coerceIn(0, 64) }
 
     @JvmField
+    val glassEnhanceColors = addConfig("FreezgramGlassEnhanceColors", ConfigItem.configTypeBool, true)
+    @JvmStatic
+    fun glassEnhanceColors(): Boolean { ensureLoaded(); return glassEnhanceColors.Bool() }
+
+    @JvmField
     val navigationGlassBlur = addConfig("FreezgramNavigationGlassBlur", ConfigItem.configTypeInt, 6)
     @JvmField
     val navigationGlassIntensity = addConfig("FreezgramNavigationGlassIntensity", ConfigItem.configTypeInt, 55)

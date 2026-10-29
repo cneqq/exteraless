@@ -16,9 +16,10 @@ public final class LiquidGlassStyle {
         return transparency < 0 ? (dark ? .10f : .07f) : (100 - transparency) / 100f;
     }
     public static int blurRadiusDp() { return AppearanceConfig.navigationGlassBlur(); }
+    public static boolean enhanceColors() { return AppearanceConfig.glassEnhanceColors(); }
     public static int revision() {
-        return (blurRadiusDp() * 101 + AppearanceConfig.navigationGlassIntensity()) * 102
-                + AppearanceConfig.navigationGlassTransparency() + 1;
+        return ((blurRadiusDp() * 101 + AppearanceConfig.navigationGlassIntensity()) * 102
+                + AppearanceConfig.navigationGlassTransparency() + 1) * 2 + (enhanceColors() ? 1 : 0);
     }
     public static void configure(BlurredBackgroundDrawable drawable) {
         drawable.setThickness(AndroidUtilities.dp(12));

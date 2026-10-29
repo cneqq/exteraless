@@ -24,6 +24,13 @@ the existing navigation preference keys, so existing slider choices are retained
 they now apply to the header and composer too. Geometry preferences remain separate.
 Reset only affects the editor currently open.
 
+**Enhance colors** controls the existing 3× saturation filter on the independent
+capture output used by these panels. It defaults to enabled to preserve the
+previous look and is included in backup. Disable it to remove this extra color
+filter; blur, tint, lighting and compositing can still change perceived colors.
+The preview applies the same choice, including at zero blur. Unrelated legacy
+frosted surfaces retain their previous color policy.
+
 Refraction requires Android 13+, enabled chat blur and inactive power saving.
 The preview uses the same renderer on sample content, with the actual navigation
 tab components and composer icon resources. It illustrates enabled glass, even

@@ -33,7 +33,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
     private GlassPreview preview;
     private AvatarCornersSeekBar blur, intensity, transparency, width, lift, textInset, emojiInset;
     private boolean geometryChanged;
-    private org.telegram.ui.Cells.TextCheckCell contacts;
+    private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors;
 
     private String text(int id) { return LocaleController.getString(id); }
 
@@ -59,6 +59,13 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         info.setPadding(dp(20), dp(12), dp(20), dp(12));
         content.addView(info);
         if (mode == 1) {
+            enhanceColors = new org.telegram.ui.Cells.TextCheckCell(context);
+            enhanceColors.setTextAndCheck(text(R.string.FreezgramGlassEnhanceColors), LiquidGlassStyle.enhanceColors(), false);
+            enhanceColors.setOnClickListener(v -> {
+                AppearanceConfig.glassEnhanceColors.setConfigBool(!LiquidGlassStyle.enhanceColors());
+                enhanceColors.setChecked(LiquidGlassStyle.enhanceColors()); geometryChanged = true; preview.invalidate();
+            });
+            content.addView(enhanceColors);
             blur = slider(context, content, R.string.FreezgramPanelBlur, 30,
                     AppearanceConfig.navigationGlassBlur(), value -> {
                         AppearanceConfig.navigationGlassBlur.setConfigInt(value); geometryChanged = true; preview.invalidate();
@@ -108,6 +115,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         reset.setPadding(dp(22), dp(20), dp(22), dp(24));
         reset.setOnClickListener(v -> {
             if (mode == 1) {
+                AppearanceConfig.glassEnhanceColors.setConfigBool(true);
+                enhanceColors.setChecked(true);
                 AppearanceConfig.navigationGlassBlur.setConfigInt(6);
                 AppearanceConfig.navigationGlassIntensity.setConfigInt(55);
                 AppearanceConfig.navigationGlassTransparency.setConfigInt(-1);
@@ -281,7 +290,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             if (source != null && canvas.isHardwareAccelerated()) {
                 Canvas capture = source.beginRecording(getWidth(), getHeight());
                 background(capture); source.endRecording();
-                source.setBlur(AndroidUtilities.dpf2(LiquidGlassStyle.blurRadiusDp()));
+                source.setBlur(AndroidUtilities.dpf2(LiquidGlassStyle.blurRadiusDp()), LiquidGlassStyle.enhanceColors()
+                        ? org.telegram.messenger.utils.RenderNodeEffects.getSaturationX3RenderEffect() : null);
             }
             if (mode != 2) surface(canvas, glass, new android.graphics.Rect((int) panel.left, (int) panel.top, (int) panel.right, (int) panel.bottom), 30, 0);
             if (mode != 0) {

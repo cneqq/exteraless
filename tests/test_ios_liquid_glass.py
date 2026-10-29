@@ -8,6 +8,32 @@ from glass_test_support import run_java
 
 class IosGlassTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
+    def test_preview_handles_zero_blur_and_optional_color_effect(self):
+        path=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/source/BlurredBackgroundSourceRenderNode.java'
+        text=path.read_text()
+        methods=method(text,'    public void setBlur(float radius)')+'\n'+method(text,'    public void setBlur(float radius, RenderEffect effect)')
+        run_java('''
+class PrivacyCheck {
+ RenderNode renderNode=new RenderNode();
+ METHODS
+ public static void main(String[] args){
+  var p=new PrivacyCheck();var saturation=new RenderEffect("saturation");
+  p.setBlur(0,null);if(p.renderNode.effect!=null)throw new AssertionError("Neutral zero blur");
+  p.setBlur(0,saturation);if(p.renderNode.effect!=saturation)throw new AssertionError("Color-only effect");
+  p.setBlur(6,null);if(!p.renderNode.effect.name.equals("blur"))throw new AssertionError("Neutral blur");
+  p.setBlur(6,saturation);if(!p.renderNode.effect.name.equals("chain"))throw new AssertionError("Enhanced blur");
+ }
+}
+class RenderNode{RenderEffect effect;void setRenderEffect(RenderEffect e){effect=e;}}
+class Shader{enum TileMode{CLAMP}}
+class RenderEffect{
+ String name;RenderEffect(String n){name=n;}
+ static RenderEffect createBlurEffect(float x,float y,Shader.TileMode mode){if(x<=0||y<=0)throw new AssertionError("Invalid radius");return new RenderEffect("blur");}
+ static RenderEffect createChainEffect(RenderEffect a,RenderEffect b){if(a==null||b==null)throw new AssertionError("Null chain");return new RenderEffect("chain");}
+}
+'''.replace('METHODS',methods))
+
+    @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
     def test_navigation_gets_weak_blur_without_changing_other_glass_outputs(self):
         path=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/DownscaleScrollableNoiseSuppressor.java'
         text=path.read_text()
@@ -35,21 +61,29 @@ class PrivacyCheck {
    if(part.renderNodesForBlur.input!=(global?part.renderNodesForGlass.renderNodeRestored[0]:part.renderNode))
     throw new AssertionError("Legacy blur input changed");
    if(nav&&s.getRenderNode(2,0)!=part.renderNodesForNavigation.renderNodeRestored[0])throw new AssertionError("Navigation still strongly blurred");
-   Canvas c=new Canvas();RectF area=new RectF();s.drawNavigationGlass(c,area,6);
+   Canvas c=new Canvas();RectF area=new RectF();s.drawNavigationGlass(c,area,6,true);
    if(nav) {
-    s.drawNavigationGlass(c,area,20);
+    s.drawNavigationGlass(c,area,20,true);
     if(part.renderNodesForNavigation.radius!=20||part.renderNodesForBlur.radius<38)throw new AssertionError("Blur adjustment isolation");
-    s.drawNavigationGlass(c,area,0);
+    s.drawNavigationGlass(c,area,0,true);
     if(part.renderNodesForNavigation.radius!=0||part.renderNodesForNavigation.scaleX!=1)throw new AssertionError("Zero blur");
    }
    if(nav?(c.node!=s.resultRenderNodes[2]||c.clip!=area||c.depth!=0):c.node!=null)throw new AssertionError("Navigation capture isolation");
-   area.empty=true;c.node=null;s.drawNavigationGlass(c,area,6);
+   if(nav){
+    if(!s.setNavigationGlassBlur(20,false)||part.renderNodesForNavigation.colorEffect!=null||part.renderNodesForNavigation.radius!=20)
+     throw new AssertionError("Neutral colors must remove saturation, preserving blur");
+    if(s.setNavigationGlassBlur(20,false))throw new AssertionError("Unnecessary effect recreation");
+    if(!s.setNavigationGlassBlur(20,true)||part.renderNodesForNavigation.colorEffect==null)
+     throw new AssertionError("Enhancement not restored");
+    if(global&&part.renderNodesForGlass.colorEffect==null)throw new AssertionError("Unrelated glass changed");
+   }
+   area.empty=true;c.node=null;s.drawNavigationGlass(c,area,6,true);
    if(c.node!=null)throw new AssertionError("Empty bounds drawn");
   }
  }
 }
 class DownscaleScrollableNoiseSuppressor {
- boolean isLiquidGlassEnabled,simpleMode,navigationGlassEnabled,allowNoiseSuppress;int k;
+ boolean isLiquidGlassEnabled,simpleMode,navigationGlassEnabled,allowNoiseSuppress;boolean navigationEnhanceColors=true;int k;
  RenderNode[] resultRenderNodes;float navigationBlurRadius=6;
  java.util.ArrayList<SourcePart> rectRenderNodes=new java.util.ArrayList<>();
  CONSTRUCTOR
@@ -62,19 +96,19 @@ class DownscaleScrollableNoiseSuppressor {
   INVALIDATE
  }
  class DownscaledRenderNode {
-  float radius;int scaleX;RenderNode input;RenderNode[] renderNodeRestored={new RenderNode(null)};
+  Object colorEffect;float radius;int scaleX;RenderNode input;RenderNode[] renderNodeRestored={new RenderNode(null)};
   DownscaledRenderNode(String name,int effects){}
   DownscaledRenderNode(String name,int effects,boolean simple){}
   void setScale(int x,int y){scaleX=x;}
   void setPrimaryEffectBlur(float r){radius=r;}
-  void setPrimaryEffectBlur(float r,Object e){radius=r;}
+  void setPrimaryEffectBlur(float r,Object e){radius=r;colorEffect=e;}
   void setSecondaryEffect(int i,Object e){}
   void invalidateRenderNodes(RenderNode node){input=node;}
  }
 }
 class RenderNode{RenderNode(String name){}boolean hasDisplayList(){return false;}}
 class LiteMode{static boolean enabled;static int FLAG_LIQUID_GLASS;static boolean isEnabled(int flag){return enabled;}}
-class RenderNodeEffects{static Object getSaturationX3RenderEffect(){return null;}}
+class RenderNodeEffects{static Object getSaturationX3RenderEffect(){return new Object();}}
 class RectF{boolean empty;boolean isEmpty(){return empty;}}
 class Canvas{
  int depth;RectF clip;RenderNode node;
@@ -185,6 +219,8 @@ class PrivacyCheck {
   BlurredBackgroundDrawable drawable=new BlurredBackgroundDrawable();
   IosLiquidGlassNavigation.configure(drawable);
   if(drawable.thickness!=12||drawable.intensity!=.55f)throw new AssertionError("Refraction settings");
+  int original=LiquidGlassStyle.revision();AppearanceConfig.colors=false;
+  if(LiquidGlassStyle.revision()==original)throw new AssertionError("Color switch must refresh optics");
   for(int value:new int[]{0,25,90,100}){
    int before=LiquidGlassStyle.revision();
    AppearanceConfig.transparency=value;AppearanceConfig.intensity=value;AppearanceConfig.blur=value%31;
@@ -198,7 +234,7 @@ class PrivacyCheck {
 class Build{static class VERSION{static int SDK_INT;}}
 class MainTabsUiHelper{static boolean ios;static boolean isIosNavigationBar(){return ios;}}
 class AppearanceConfig{
- static boolean glass;static int blur=6,intensity=55,transparency=-1;
+ static boolean glass,colors=true;static boolean glassEnhanceColors(){return colors;}static int blur=6,intensity=55,transparency=-1;
  static boolean iosLiquidGlassNavigation(){return glass;}
  static int navigationGlassBlur(){return blur;}
  static int navigationGlassIntensity(){return intensity;}
