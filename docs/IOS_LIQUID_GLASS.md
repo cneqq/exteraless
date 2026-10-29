@@ -98,3 +98,10 @@ selected. This covers the separate controls around the subscribe/mute action,
 not just the central input island. Visual/device validation remains necessary.
 Visible upstream branding is replaced by Freezgram; attribution, upstream links,
 namespace identifiers and import compatibility descriptions are retained.
+
+Input settings also expose a single symmetric side-inset slider (0–48dp).
+The entire iOS island and its backdrop are inset together; text/emoji internal
+insets remain fixed at 16dp. Left and right always use the same value, limited
+on narrow windows to retain at least 240dp for the input where possible.
+The preview, reset and settings backup include this parameter. Other input
+styles retain their existing horizontal geometry.

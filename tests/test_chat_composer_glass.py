@@ -79,6 +79,28 @@ class View{float translation;void setTranslationY(float value){translation=value
 class AppearanceConfig{static int style,gap;static int chatComposerStyle(){return style;}static int composerBottomLift(){return gap;}}
 '''.replace('METHODS',methods))
 
+    def test_side_insets_are_symmetric_and_keep_minimum_input_width(self):
+        text=(JAVA / 'org/telegram/ui/Components/chat/ChatInputViewsContainer.java').read_text()
+        apply=method(text, '    private void applyInputSideInsets(int width)').replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig')
+        run_java('''
+class PrivacyCheck {
+ int inputSideInset;View inputIslandBubbleContainer=new View();static int dp(int n){return n*2;}
+ APPLY
+ public static void main(String[] args){
+  var p=new PrivacyCheck();
+  for(int style:new int[]{0,1,2})for(int side:new int[]{0,16,48})for(int width:new int[]{440,480,640,824}){
+   AppearanceConfig.style=style;AppearanceConfig.side=side;p.applyInputSideInsets(width);
+   int expected=style==1?Math.min(side*2,Math.max(0,(width-480)/2)):0;
+   if(p.inputSideInset!=expected||p.inputIslandBubbleContainer.params.leftMargin!=expected||p.inputIslandBubbleContainer.params.rightMargin!=expected)
+    throw new AssertionError("Whole panel must have equal left/right margins");
+  }
+ }
+}
+class LayoutParams{int leftMargin,rightMargin;}
+class View{LayoutParams params=new LayoutParams();Object getLayoutParams(){return params;}void setLayoutParams(LayoutParams p){params=p;}}
+class AppearanceConfig{static int style,side;static int chatComposerStyle(){return style;}static int composerSideInset(){return side;}}
+'''.replace('APPLY',apply))
+
     def test_policy_and_surface_bounds(self):
         source = (JAVA / "app/freezgram/ChatComposerGlass.java").read_text()
         methods = "\n".join(method(source, sig) for sig in (

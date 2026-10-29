@@ -93,4 +93,5 @@
     <string name="FreezgramComposerPreviewInfo">Внутренние отступы текста и эмодзи в iOS-поле всегда 16 dp. Ползунок поднимает всю панель над нижним краем или клавиатурой. Параметры стекла находятся в iOS Design → Liquid Glass.</string>
     <string name="FreezgramGlassEnhanceColors">Усиливать цвета</string>
     <string name="FreezgramFoldersGlass">Папки чатов: Liquid Glass</string>
+    <string name="FreezgramComposerSideInset">Отступ по бокам</string>
 </resources>

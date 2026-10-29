@@ -31,7 +31,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
     public NavigationGlassSettingsActivity() { this(NAVIGATION); }
     public NavigationGlassSettingsActivity(int mode) { this.mode = mode; }
     private GlassPreview preview;
-    private AvatarCornersSeekBar blur, intensity, transparency, width, lift, composerLift;
+    private AvatarCornersSeekBar blur, intensity, transparency, width, lift, composerLift, composerSide;
     private boolean geometryChanged;
     private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors;
 
@@ -138,6 +138,10 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                         preview.updateGeometry();
                     }).show());
             content.addView(style);
+            composerSide = slider(context, content, R.string.FreezgramComposerSideInset, 48,
+                    AppearanceConfig.composerSideInset(), value -> {
+                        AppearanceConfig.composerSideInset.setConfigInt(value); geometryChanged = true; preview.invalidate();
+                    });
             composerLift = slider(context, content, R.string.FreezgramPanelLift, 64,
                     AppearanceConfig.composerBottomLift(), value -> {
                         AppearanceConfig.composerBottomLift.setConfigInt(value); geometryChanged = true; preview.invalidate();
@@ -162,7 +166,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 width.setValue(100); lift.setValue(12); preview.updateGeometry();
             } else {
                 AppearanceConfig.composerBottomLift.setConfigInt(0);
-                composerLift.setValue(0);
+                AppearanceConfig.composerSideInset.setConfigInt(0);
+                composerLift.setValue(0); composerSide.setValue(0);
             }
             geometryChanged = true;
             preview.invalidate();
@@ -336,7 +341,9 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                     canvas.drawText("Freezgram", dp(32), dp(43), paint);
                 }
                 int top = dp(150 - (AppearanceConfig.chatComposerStyle() == 1 ? AppearanceConfig.composerBottomLift() : 0));
-                android.graphics.Rect whole = new android.graphics.Rect(0, top, getWidth(), top + dp(58));
+                int side = AppearanceConfig.chatComposerStyle() == 1
+                        ? Math.min(dp(AppearanceConfig.composerSideInset()), Math.max(0, (getWidth() - dp(240)) / 2)) : 0;
+                android.graphics.Rect whole = new android.graphics.Rect(side, top, getWidth() - side, top + dp(58));
                 boolean split = AppearanceConfig.chatComposerStyle() != 2;
                 ChatComposerGlass.surfaceBounds(whole, field, leftButton, rightButton, split);
                 surface(canvas, fieldGlass, field, 24, 7);
@@ -345,14 +352,14 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                     surface(canvas, rightGlass, rightButton, 24, 7);
                 }
                 float y = whole.bottom - dp(29);
-                icon(canvas, attachIcon, dp(split ? 29 : 26), y);
-                icon(canvas, micIcon, getWidth() - dp(29), y);
-                float emojiX = split ? getWidth() - dp(66 + ChatComposerGlass.emojiRightInsetDp()) : dp(70);
+                icon(canvas, attachIcon, whole.left + dp(split ? 29 : 26), y);
+                icon(canvas, micIcon, whole.right - dp(29), y);
+                float emojiX = split ? whole.right - dp(66 + ChatComposerGlass.emojiRightInsetDp()) : whole.left + dp(70);
                 icon(canvas, emojiIcon, emojiX, y);
-                float textX = dp(split ? ChatComposerGlass.textLeftInsetDp() : 94);
+                float textX = whole.left + dp(split ? ChatComposerGlass.textLeftInsetDp() : 94);
                 paint.setColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText)); paint.setTextSize(dp(16));
                 canvas.save();
-                canvas.clipRect(textX, top, split ? emojiX - dp(22) : getWidth() - dp(55), whole.bottom);
+                canvas.clipRect(textX, top, split ? emojiX - dp(22) : whole.right - dp(55), whole.bottom);
                 canvas.drawText(text(R.string.TypeMessage), textX, y - (paint.ascent() + paint.descent()) / 2, paint);
                 canvas.restore();
             }

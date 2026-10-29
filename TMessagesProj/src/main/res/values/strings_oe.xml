@@ -120,4 +120,5 @@
     <string name="FreezgramComposerPreviewInfo">iOS text and emoji insets are fixed at 16dp. The slider lifts the whole panel above the bottom edge or keyboard. Glass appearance is in iOS Design → Liquid Glass.</string>
     <string name="FreezgramGlassEnhanceColors">Enhance colors</string>
     <string name="FreezgramFoldersGlass">Chat folders: Liquid Glass</string>
+    <string name="FreezgramComposerSideInset">Side inset</string>
 </resources>

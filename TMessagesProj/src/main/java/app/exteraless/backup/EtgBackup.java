@@ -337,6 +337,7 @@ public final class EtgBackup {
         integer(list, "navigationGlassIntensity", AppearanceConfig.navigationGlassIntensity, 0, 100);
         integer(list, "navigationGlassTransparency", AppearanceConfig.navigationGlassTransparency, -1, 100);
         bool(list, "iosChatHeader", AppearanceConfig.iosChatHeader);
+        integer(list, "composerSideInset", AppearanceConfig.composerSideInset, 0, 48);
         integer(list, "composerBottomLift", AppearanceConfig.composerBottomLift, 0, 64);
         integer(list, "chatComposerStyle", AppearanceConfig.chatComposerStyle, 0, 2);
         bool(list, "profileMusicCard", AppearanceConfig.profileMusicCard);

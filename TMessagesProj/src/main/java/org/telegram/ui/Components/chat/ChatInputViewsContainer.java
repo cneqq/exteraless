@@ -201,6 +201,19 @@ public class ChatInputViewsContainer extends FrameLayout {
         }
     }
 
+    private int inputSideInset;
+
+    private void applyInputSideInsets(int width) {
+        int requested = app.exteraless.appearance.AppearanceConfig.chatComposerStyle() == 1
+                ? dp(app.exteraless.appearance.AppearanceConfig.composerSideInset()) : 0;
+        inputSideInset = Math.min(requested, Math.max(0, (width - dp(240)) / 2));
+        LayoutParams params = (LayoutParams) inputIslandBubbleContainer.getLayoutParams();
+        if (params.leftMargin != inputSideInset || params.rightMargin != inputSideInset) {
+            params.leftMargin = params.rightMargin = inputSideInset;
+            inputIslandBubbleContainer.setLayoutParams(params);
+        }
+    }
+
     public int getInputLiftPx() {
         return app.exteraless.appearance.AppearanceConfig.chatComposerStyle() == 1
                 ? dp(app.exteraless.appearance.AppearanceConfig.composerBottomLift()) : 0;
@@ -265,6 +278,7 @@ public class ChatInputViewsContainer extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        applyInputSideInsets(MeasureSpec.getSize(widthMeasureSpec));
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         checkBlurredHeight(true);
         checkDrawableBounds();
@@ -289,9 +303,9 @@ public class ChatInputViewsContainer extends FrameLayout {
         final int blurTop = getMeasuredHeight() - currentBlurredHeight;
 
         tmpRect.set(
-            Math.round(inputBubbleOffsetLeft),
+            Math.round(inputBubbleOffsetLeft) + inputSideInset,
             0,
-            getMeasuredWidth() - Math.round(inputBubbleOffsetRight),
+            getMeasuredWidth() - Math.round(inputBubbleOffsetRight) - inputSideInset,
             inputBubbleHeightRound
         );
         tmpRect.inset(0, -dp(7));
