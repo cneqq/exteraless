@@ -125,6 +125,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
     private int iosPanelSettingsRow;
     private int iosChatHeaderRow;
     private int chatComposerStyleRow;
+    private int composerSettingsRow, sharedGlassSettingsRow;
     private boolean iosExpanded;
     private int senderMiniAvatarsRow;
     private int titleTextRow;
@@ -232,10 +233,13 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
             iosLiquidGlassRow = AppearanceConfig.iosNavigationBarStyle.Bool() ? addRow("iosLiquidGlass") : -1;
             iosPanelSettingsRow = AppearanceConfig.iosNavigationBarStyle.Bool() ? addRow("iosPanelSettings") : -1;
             iosChatHeaderRow = addRow("iosChatHeader");
+            chatComposerStyleRow = addRow("chatComposerStyle");
+            composerSettingsRow = AppearanceConfig.chatComposerStyle() == 1 ? addRow("composerSettings") : -1;
+            sharedGlassSettingsRow = addRow("sharedGlassSettings");
         } else {
             iosNavBarRow = iosLiquidGlassRow = iosPanelSettingsRow = iosChatHeaderRow = -1;
+            chatComposerStyleRow = composerSettingsRow = sharedGlassSettingsRow = -1;
         }
-        chatComposerStyleRow = addRow("chatComposerStyle");
         gooeyAvatarRow = addRow("gooeyAvatar");
         customThemesRow = addRow("customThemes");
         appearanceDividerRow = addRow();
@@ -647,12 +651,16 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
             AppearanceConfig.iosChatHeader.setConfigBool(!AppearanceConfig.iosChatHeader.Bool());
             rebuildAllAndSelf(view, AppearanceConfig.iosChatHeader.Bool());
             return;
+        } else if (position == composerSettingsRow || position == sharedGlassSettingsRow) {
+            presentFragment(new app.freezgram.NavigationGlassSettingsActivity(position == composerSettingsRow
+                    ? app.freezgram.NavigationGlassSettingsActivity.COMPOSER : app.freezgram.NavigationGlassSettingsActivity.SHARED));
+            return;
         } else if (position == chatComposerStyleRow) {
             showSelector(position, getString(R.string.FreezgramChatComposerStyle), new CharSequence[]{
                     getString(R.string.FreezgramChatComposerDefault),
                     getString(R.string.FreezgramChatComposerIos),
                     getString(R.string.FreezgramChatComposerAndroid)
-            }, AppearanceConfig.chatComposerStyle, this::rebuildAll);
+            }, AppearanceConfig.chatComposerStyle, () -> { rebuildAll(); rebuildRowsAndNotify(); });
             return;
         } else if (position == dividerStyleRow) {
             showSelector(position, getString(R.string.OEAppearanceDividerStyle), new CharSequence[]{
@@ -1053,7 +1061,10 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 case TYPE_DETAIL_SETTINGS: {
                     // Иконка слева, подпись под заголовком.
                     TextDetailSettingsCell cell = (TextDetailSettingsCell) holder.itemView;
-                    if (position == iosPanelSettingsRow) {
+                    if (position == composerSettingsRow || position == sharedGlassSettingsRow) {
+                        cell.setTextAndValueAndIcon(getString(position == composerSettingsRow ? R.string.FreezgramComposerSettings : R.string.FreezgramSharedGlassSettings),
+                                getString(position == composerSettingsRow ? R.string.FreezgramComposerSettingsInfo : R.string.FreezgramSharedGlassSettingsInfo), R.drawable.msg_newphone, true);
+                    } else if (position == iosPanelSettingsRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.FreezgramPanelSettings), getString(R.string.FreezgramPanelSettingsInfo), R.drawable.msg_newphone, true);
                     } else if (position == appNavigationRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.OEAppearanceNavigation), getString(R.string.OEAppearanceNavigationSub), R.drawable.msg_newphone, true);
@@ -1135,7 +1146,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 return TYPE_INFO_PRIVACY;
             } else if (position == fabShapeRow) {
                 return TYPE_FAB_SHAPE;
-            } else if (position == iosPanelSettingsRow || position == appNavigationRow || position == iconPacksRow
+            } else if (position == composerSettingsRow || position == sharedGlassSettingsRow || position == iosPanelSettingsRow || position == appNavigationRow || position == iconPacksRow
                     || position == emojiSetsRow || position == pillStackRow || position == playerStyleRow || position == hidingRow) {
                 return TYPE_DETAIL_SETTINGS;
             } else if (position == md3GroupRow || position == iosGroupRow) {
@@ -1208,12 +1219,13 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         }
     }
 
-    private static final int IOS_STYLE_COUNT = 2;
+    private static final int IOS_STYLE_COUNT = 3;
 
     private int iosSelectedCount() {
         int n = 0;
         if (AppearanceConfig.iosNavigationBarStyle.Bool()) n++;
         if (AppearanceConfig.iosChatHeader.Bool()) n++;
+        if (AppearanceConfig.chatComposerStyle() == 1) n++;
         return n;
     }
 
@@ -1221,6 +1233,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         boolean enable = iosSelectedCount() == 0;
         AppearanceConfig.iosNavigationBarStyle.setConfigBool(enable);
         AppearanceConfig.iosChatHeader.setConfigBool(enable);
+        if (enable || AppearanceConfig.chatComposerStyle() == 1) AppearanceConfig.chatComposerStyle.setConfigInt(enable ? 1 : 0);
         if (enable) {
             AppearanceConfig.newNavigationBarStyle.setConfigBool(false);
         }

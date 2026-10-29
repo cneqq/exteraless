@@ -2,7 +2,8 @@
 import shutil
 import unittest
 from pathlib import Path
-from test_personal_privacy import method, run_java
+from test_personal_privacy import method
+from glass_test_support import run_java
 
 
 class IosGlassTests(unittest.TestCase):
@@ -12,7 +13,7 @@ class IosGlassTests(unittest.TestCase):
         text=path.read_text()
         constructor=method(text, '    public DownscaleScrollableNoiseSuppressor(boolean simple, boolean allowNoiseSuppress, boolean navigationGlassEnabled)')
         selector=method(text, '    private RenderNode getRenderNode(int a, int b)')
-        draw=method(text, '    public void drawNavigationGlass(')
+        draw=method(text, '    public void drawNavigationGlass(')+'\n'+method(text, '    public boolean setNavigationGlassBlur(')
         def inner_method(signature):
             start=text.index(signature)
             return text[start:text.index('\n        }',start)+len('\n        }')]
@@ -39,7 +40,7 @@ class PrivacyCheck {
     s.drawNavigationGlass(c,area,20);
     if(part.renderNodesForNavigation.radius!=20||part.renderNodesForBlur.radius<38)throw new AssertionError("Blur adjustment isolation");
     s.drawNavigationGlass(c,area,0);
-    if(part.renderNodesForNavigation.radius!=0)throw new AssertionError("Zero blur");
+    if(part.renderNodesForNavigation.radius!=0||part.renderNodesForNavigation.scaleX!=1)throw new AssertionError("Zero blur");
    }
    if(nav?(c.node!=s.resultRenderNodes[2]||c.clip!=area||c.depth!=0):c.node!=null)throw new AssertionError("Navigation capture isolation");
    area.empty=true;c.node=null;s.drawNavigationGlass(c,area,6);
@@ -61,17 +62,17 @@ class DownscaleScrollableNoiseSuppressor {
   INVALIDATE
  }
  class DownscaledRenderNode {
-  float radius;RenderNode input;RenderNode[] renderNodeRestored={new RenderNode(null)};
+  float radius;int scaleX;RenderNode input;RenderNode[] renderNodeRestored={new RenderNode(null)};
   DownscaledRenderNode(String name,int effects){}
   DownscaledRenderNode(String name,int effects,boolean simple){}
-  void setScale(int x,int y){}
+  void setScale(int x,int y){scaleX=x;}
   void setPrimaryEffectBlur(float r){radius=r;}
   void setPrimaryEffectBlur(float r,Object e){radius=r;}
   void setSecondaryEffect(int i,Object e){}
   void invalidateRenderNodes(RenderNode node){input=node;}
  }
 }
-class RenderNode{RenderNode(String name){}}
+class RenderNode{RenderNode(String name){}boolean hasDisplayList(){return false;}}
 class LiteMode{static boolean enabled;static int FLAG_LIQUID_GLASS;static boolean isEnabled(int flag){return enabled;}}
 class RenderNodeEffects{static Object getSaturationX3RenderEffect(){return null;}}
 class RectF{boolean empty;boolean isEmpty(){return empty;}}
@@ -185,7 +186,9 @@ class PrivacyCheck {
   IosLiquidGlassNavigation.configure(drawable);
   if(drawable.thickness!=12||drawable.intensity!=.55f)throw new AssertionError("Refraction settings");
   for(int value:new int[]{0,25,90,100}){
+   int before=LiquidGlassStyle.revision();
    AppearanceConfig.transparency=value;AppearanceConfig.intensity=value;AppearanceConfig.blur=value%31;
+   if(LiquidGlassStyle.revision()==before)throw new AssertionError("Stale style revision");
    if(Math.abs(IosLiquidGlassNavigation.overlayAlpha(false)-(100-value)/100f)>.0001f)throw new AssertionError("Transparency direction");
    IosLiquidGlassNavigation.configure(drawable);
    if(drawable.intensity!=value/100f||IosLiquidGlassNavigation.blurRadiusDp()!=value%31)throw new AssertionError("Saved values ignored");

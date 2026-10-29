@@ -1,98 +1,71 @@
-# iOS navigation Liquid Glass
+# Freezgram Liquid Glass
 
-Enable **Freezgram settings → Appearance → iOS Design → Navigation bar**,
-then **Liquid Glass navigation bar**. The child option is local and off by default.
+Settings live under **Freezgram settings → Appearance → iOS Design**:
 
-The main tabs use the existing Telegram backdrop capture, `LiquidGlassEffect`
-and `liquid_glass_shader`. Refraction requires Android 13+, enabled blur and
-inactive power saving. Other configurations use a more opaque frosted surface.
-The preference is included in settings backup. No new runtime dependency,
-native library or network service is added.
+- **Navigation bar** and **Liquid Glass navigation bar** enable the navigation style.
+- **Bottom panel** adjusts width (80–100%), bottom gap (0–64dp) and contact visibility.
+- **Chat header** enables the centered glass header.
+- **Input panel style** chooses Default, iOS glass, or Android glass.
+- **Input panel spacing** appears for the iOS input style: text inset (4–24dp,
+  default 12dp) and emoji inset (0–16dp, default 6dp).
+- **Liquid Glass** is the shared optical editor with sample header, composer and
+  navigation surfaces. It controls blur (0–30dp), refraction (0–100%) and fill
+  transparency (0–100%). Each geometry editor has its own preview as well.
 
-Reference projects reviewed for the implementation choice:
+## Shared appearance
 
-- [Kyant0/AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass):
-  Apache-2.0, Compose Multiplatform; `LiquidBottomTabs` combines a backdrop,
-  lens, highlights and shadows. Adding Compose is unnecessary for this View UI.
-- [QmDeve/AndroidLiquidGlassView](https://github.com/QmDeve/AndroidLiquidGlassView):
-  MIT, Android View refraction/dispersion, Android 13+. Its older-platform
-  transparent fallback would need adaptation for readable navigation.
+`LiquidGlassStyle` supplies the same theme color, tint alpha, outline, shadow,
+12dp lens thickness, and configurable refraction intensity for all three glass
+surfaces. Defaults are 6dp blur, 55% refraction, and 90% dark / 93% light fill
+transparency. These percentages describe the color overlay, not total composited
+opacity. Unsupported or power-saving configurations retain an 82% opaque fill.
+Each surface still has its own opt-in style switch. Parameters are stored using
+the existing navigation preference keys, so existing slider choices are retained;
+they now apply to the header and composer too. Geometry preferences remain separate.
+Reset only affects the editor currently open.
 
-No source code from these projects was copied. This implementation configures
-the client's existing renderer and adds an opt-in navigation color provider.
+Refraction requires Android 13+, enabled chat blur and inactive power saving.
+The preview uses the same renderer on sample content, with the actual navigation
+tab components and composer icon resources. It illustrates enabled glass, even
+if a particular production style is currently disabled. It is not a live chat.
+Changes are previewed immediately; underlying fragments rebuild on leaving the
+editor. Header/composer drawable revisions update after shared optics change.
 
-Phone verification: switch on/off, change light/dark themes, scroll and switch
-tabs, rotate, show/hide navigation, and verify fallback with blur disabled or
-power saving active. GPU appearance and performance require a device check.
+The existing Telegram capture, `LiquidGlassEffect` and `liquid_glass_shader` are
+reused; no runtime dependency, native library or network service was added.
+An independently allocated capture output avoids depending on the old global
+Liquid Glass flag. Navigation supplies the selected blur radius for its capture;
+ChatActivity supplies the same radius for the header and composer. Zero blur
+removes the blur effect and uses full-resolution capture. Existing unrelated
+frosted surfaces keep their old blur. Feed delegates navigation capture to the
+chat source; tint and refraction are shared, while its capture remains dependent
+on the enabled chat styles. A chat constructed before enabling a glass style may
+retain a stronger fallback capture until reopened.
 
-The navigation capture has a separate weak-blur output (6dp) even when the old
-client-wide Liquid Glass flag is off. Only the navigation capture rectangle uses
-that output; existing frosted surfaces keep the previous strong-blur output.
-The color overlay is 10% in dark themes and 7% in light themes; unsupported or
-power-saving configurations retain the 82% fallback. The visible upper edge is
-also softer. These are overlay alpha values, not the final composited opacity.
+## Composer geometry
 
-An additional **Bottom panel** entry in the expanded iOS Design group opens a
-synthetic-content preview using the same AGSL renderer. Sliders persist blur
-(0–30dp), refraction intensity (0–100%), and fill transparency (0–100%). They
-apply to the live panel when returning to the main tabs. Reset restores 6dp,
-55%, and the theme-dependent default transparency. Values are included in
-settings backup and clamped when read. The Android/power-saving fallback keeps
-its fixed opacity. The optional Feed tab delegates capture to ChatActivity and
-retains its existing background blur; tint/refraction still use the new values.
-Device checks should include that limitation, restore/reset, theme changes,
-and both the old global glass toggle states.
+The iOS field is inset 50dp on either side, plus its existing 7dp transparent
+drawable padding. Text starts after that visible edge plus the configured text
+inset. Emoji moves inward by its configured margin, and the edit field reserves
+space for its full touch target plus a gap. Returning to replies, editing, voice
+recording, bot controls, or narrow layouts restores the original control
+arrangement. Existing send/attach/record handlers remain unchanged.
 
-## iOS chat header
+Spacing and shared optics are included in settings backup. The contact switch
+only changes contact visibility and does not modify other tab preferences.
 
-The existing **iOS Design → Chat header** option also enables glass for the
-centered name/status capsule and the back/avatar surfaces. The avatar opens
-the existing chat menu; the name opens the profile. iOS takes precedence if
-the Material chat-header preference is also enabled.
+## Validation
 
-The header uses its own capture source and the separate 6dp weak-blur output,
-including when the global Liquid Glass option is off. Other chat surfaces
-keep their existing blur. Refraction uses a 12dp lens thickness and 55%
-intensity; tint alpha is 12% in light themes and 18% in dark themes. These are
-overlay values, not final composited opacity. Bottom-panel sliders do not
-change the header.
+Standalone Java harnesses exercise glass eligibility, shared optical values,
+capture selection, slider updates, drawable lifetime, composer bounds and spacing
+restoration. Java/Kotlin parsing and XML validation do not prove GPU appearance.
+Check on a phone: light/dark themes, existing and reopened chats, search/selection,
+long text, keyboard/emoji, replies/edits, attachments, voice/video recording,
+channels, screen rotation, disabled blur and power saving, settings reset/restore.
 
-Android 13+, enabled chat blur and inactive power saving are required for
-refraction; other configurations use an 88% tint. The center capsule keeps
-round ends independently of avatar corners, including after search closes.
-Its vertical edge inset relaxes during search and message selection.
+Reference projects reviewed for the original renderer choice:
 
-Java policy/capture/hit-test regressions can run without an APK. Appearance,
-touch transitions and GPU performance still require verification on a phone.
+- [Kyant0/AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass), Apache-2.0.
+- [QmDeve/AndroidLiquidGlassView](https://github.com/QmDeve/AndroidLiquidGlassView), MIT.
 
-Panel geometry controls set width (80–100% of the available width before the
-existing side margins) and distance above the system bottom inset (0–64dp).
-The contact switch changes only the existing hide-contacts preference; it does
-not modify Feed or other tab preferences. Geometry/tab changes rebuild
-underlying fragments when leaving the editor so content padding, FAB clearance,
-and cached pager positions stay in sync. Preview tabs use the same components
-as the real panel. Phone layout checks are still needed.
-
-
-## Chat input styles
-
-Appearance → Input panel style offers Default, iOS + Liquid Glass, and Android +
-Liquid Glass. Default keeps the existing appearance. Android retains one capsule;
-iOS moves the existing attachment control to a separate left circle and retains
-an independent record/send surface on the right. The existing emoji control moves
-to the right end of the field. Existing attach/record/send handlers remain in use.
-
-The new styles use a separate color/lens policy and the existing independent 6dp
-chat capture output, without following the global glass toggle or navigation
-sliders. Refraction requires Android 13+, chat blur and inactive power saving;
-otherwise the fill is 92% opaque. A chat constructed before the style was enabled
-uses its existing stronger frosted capture until reopened. Replies, edits,
-recording, sender/bot/rich-draft controls and widths below 240dp retain a whole
-glass surface and the original control arrangement. Multiline ordinary input
-keeps the field growing and both side circles aligned at the bottom.
-
-No APK build was run for this change. Standalone Java tests cover eligibility,
-surface bounds, lens/color fallback and animation alpha; Java parsing and XML
-validation do not prove Android integration or visual fidelity. Device checks
-remain: light/dark themes, typing/send, attachment and voice/video recording,
-keyboard/emoji, reply/edit, channels, narrow/multiline input and power-saving.
+No source code from these projects was copied.

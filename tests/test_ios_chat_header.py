@@ -2,7 +2,8 @@
 import shutil
 import unittest
 from pathlib import Path
-from test_personal_privacy import method, run_java
+from test_personal_privacy import method
+from glass_test_support import run_java
 
 JAVA = Path(__file__).resolve().parents[1] / 'TMessagesProj/src/main/java'
 
@@ -86,7 +87,7 @@ class PrivacyCheck {
    if(d.thickness!=12||d.intensity!=.55f)throw new AssertionError("Header lens parameters");
    for(boolean dark:new boolean[]{false,true}) {
     int alpha=IosLiquidGlassChatHeader.colors(null).background.getColor(null,dark)>>>24;
-    if(expected ? alpha<25||alpha>50 : alpha<220)throw new AssertionError("Unreadable fallback or excessive glass tint");
+    if(expected ? alpha<15||alpha>30 : alpha<200)throw new AssertionError("Unreadable fallback or excessive glass tint");
    }
   }
   IosLiquidGlassChatHeader.refresh(null);

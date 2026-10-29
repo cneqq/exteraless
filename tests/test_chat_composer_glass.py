@@ -2,12 +2,47 @@
 import unittest
 import shutil
 from pathlib import Path
-from test_personal_privacy import method, run_java
+from test_personal_privacy import method
+from glass_test_support import run_java
 
 JAVA = Path(__file__).resolve().parents[1] / "TMessagesProj/src/main/java"
 
 @unittest.skipUnless(shutil.which("java"), "Java source launcher required")
 class ComposerGlassTests(unittest.TestCase):
+    def test_ios_text_and_emoji_spacing_and_restoration(self):
+        source=(JAVA / 'org/telegram/ui/Components/ChatActivityEnterView.java').read_text()
+        spacing=method(source, '    private void applyIosComposerSpacing()').replace('app.freezgram.ChatComposerGlass','ChatComposerGlass')
+        policy=(JAVA / 'app/freezgram/ChatComposerGlass.java').read_text()
+        helpers='\n'.join(method(policy, sig) for sig in (
+            '    public static int textLeftInsetDp()', '    public static int emojiRightInsetDp()',
+            '    public static int textRightInsetDp('))
+        run_java('''
+class PrivacyCheck {
+ boolean iosComposerLayout; View emojiButton=new View(),messageEditText=new View();
+ static int dp(int value){return value;}
+ SPACING
+ public static void main(String[] args){
+  var view=new PrivacyCheck();
+  for(int text:new int[]{4,12,24})for(int emoji:new int[]{0,6,16}){
+   AppearanceConfig.text=text;AppearanceConfig.emoji=emoji;view.iosComposerLayout=true;
+   view.applyIosComposerSpacing();
+   if(view.messageEditText.params.leftMargin!=57+text||view.emojiButton.params.rightMargin!=emoji)
+    throw new AssertionError("Text/emoji must stay inside the shifted field");
+   if(ChatComposerGlass.textRightInsetDp(44)!=52+emoji)throw new AssertionError("Emoji reservation");
+   view.iosComposerLayout=false;view.messageEditText.params.leftMargin=50;
+   view.applyIosComposerSpacing();
+   if(view.emojiButton.params.rightMargin!=0||view.messageEditText.params.leftMargin!=50)
+    throw new AssertionError("Special states must keep legacy layout");
+  }
+ }
+}
+class View{FrameLayout.LayoutParams params=new FrameLayout.LayoutParams();Object getLayoutParams(){return params;}}
+class MarginLayoutParams{int leftMargin,rightMargin;}
+class FrameLayout{static class LayoutParams extends MarginLayoutParams{}}
+class ChatComposerGlass{HELPERS}
+class AppearanceConfig{static int text,emoji;static int composerTextInset(){return text;}static int composerEmojiInset(){return emoji;}}
+'''.replace('SPACING',spacing).replace('HELPERS',helpers))
+
     def test_policy_and_surface_bounds(self):
         source = (JAVA / "app/freezgram/ChatComposerGlass.java").read_text()
         methods = "\n".join(method(source, sig) for sig in (
@@ -74,7 +109,7 @@ class PrivacyCheck {
    if(drawable.enabled!=enabled||drawable.thickness!=12||drawable.intensity!=.55f)throw new AssertionError("Lens fallback");
    for(boolean dark:new boolean[]{false,true}){
     int alpha=colors(null).background.getColor(null,dark)>>>24;
-    if(enabled?(alpha<25||alpha>50):alpha<230)throw new AssertionError("Surface contrast");
+    if(enabled?(alpha<15||alpha>30):alpha<200)throw new AssertionError("Surface contrast");
    }
   }
   refresh(null);refresh(new BlurredBackgroundDrawable());

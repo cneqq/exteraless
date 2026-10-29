@@ -83,17 +83,25 @@ public class DownscaleScrollableNoiseSuppressor {
     /** Replace only the navigation capture area; other surfaces retain their old blur. */
     public void drawNavigationGlass(Canvas canvas, RectF bounds, float radius) {
         if (!navigationGlassEnabled || bounds.isEmpty()) return;
-        radius = Math.max(0, radius);
-        if (navigationBlurRadius != radius) {
-            navigationBlurRadius = radius;
-            for (SourcePart part : rectRenderNodes) {
-                part.renderNodesForNavigation.setPrimaryEffectBlur(radius, RenderNodeEffects.getSaturationX3RenderEffect());
-            }
-        }
+        setNavigationGlassBlur(radius);
         canvas.save();
         canvas.clipRect(bounds);
         canvas.drawRenderNode(resultRenderNodes[2]);
         canvas.restore();
+    }
+
+    public boolean setNavigationGlassBlur(float radius) {
+        if (!navigationGlassEnabled) return false;
+        radius = Math.max(0, radius);
+        if (navigationBlurRadius == radius) return false;
+        navigationBlurRadius = radius;
+        for (SourcePart part : rectRenderNodes) {
+            int scale = radius == 0 ? 1 : 4;
+            part.renderNodesForNavigation.setScale(scale, scale);
+            part.renderNodesForNavigation.setPrimaryEffectBlur(radius, RenderNodeEffects.getSaturationX3RenderEffect());
+            if (part.renderNode.hasDisplayList()) part.renderNodesForNavigation.invalidateRenderNodes(part.renderNode);
+        }
+        return true;
     }
 
     public void drawInline(Canvas canvas, int index) {
@@ -443,7 +451,7 @@ public class DownscaleScrollableNoiseSuppressor {
         private SourcePart() {
             if (navigationGlassEnabled) {
                 renderNodesForNavigation = new DownscaledRenderNode("navigation", 0, true);
-                renderNodesForNavigation.setScale(4, 4);
+                renderNodesForNavigation.setScale(navigationBlurRadius == 0 ? 1 : 4, navigationBlurRadius == 0 ? 1 : 4);
                 renderNodesForNavigation.setPrimaryEffectBlur(navigationBlurRadius, RenderNodeEffects.getSaturationX3RenderEffect());
             } else {
                 renderNodesForNavigation = null;

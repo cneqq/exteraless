@@ -10161,7 +10161,7 @@ public class ChatActivityEnterView extends FrameLayout implements
             layoutParams.rightMargin = Math.max(layoutParams.rightMargin, Math.max(0, doneButton.width() - dp(DEFAULT_HEIGHT)));
         }
         if (useIosComposerLayout()) {
-            layoutParams.rightMargin = Math.max(layoutParams.rightMargin, dp(50));
+            layoutParams.rightMargin = Math.max(layoutParams.rightMargin, dp(app.freezgram.ChatComposerGlass.textRightInsetDp(DEFAULT_HEIGHT)));
         }
         if (oldRightMargin != layoutParams.rightMargin) {
             messageEditText.setLayoutParams(layoutParams);
@@ -16268,6 +16268,15 @@ public class ChatActivityEnterView extends FrameLayout implements
                 (int) (widthPx / AndroidUtilities.density));
     }
 
+    private void applyIosComposerSpacing() {
+        FrameLayout.LayoutParams emojiParams = (FrameLayout.LayoutParams) emojiButton.getLayoutParams();
+        emojiParams.rightMargin = iosComposerLayout ? dp(app.freezgram.ChatComposerGlass.emojiRightInsetDp()) : 0;
+        if (iosComposerLayout) {
+            emojiParams.leftMargin = 0;
+            ((MarginLayoutParams) messageEditText.getLayoutParams()).leftMargin = dp(app.freezgram.ChatComposerGlass.textLeftInsetDp());
+        }
+    }
+
     public boolean useIosComposerLayout() {
         return iosComposerLayout;
     }
@@ -16323,7 +16332,7 @@ public class ChatActivityEnterView extends FrameLayout implements
             attachmentParams.leftMargin = 0;
             FrameLayout.LayoutParams emojiParams = (FrameLayout.LayoutParams) emojiButton.getLayoutParams();
             emojiParams.gravity = Gravity.BOTTOM | (iosComposerLayout ? Gravity.RIGHT : Gravity.LEFT);
-            if (iosComposerLayout) emojiParams.leftMargin = 0;
+            applyIosComposerSpacing();
             attachButton.setAlpha(attachButtonAlpha);
             attachButton.setScaleX(iosComposerLayout ? 1f : (attachButtonAlpha > .5f ? 1f : .5f));
             attachButton.setScaleY(attachButton.getScaleX());

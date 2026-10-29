@@ -104,6 +104,7 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
     private boolean drawGlassMiddlePill = true;
     private boolean iosChatHeaderGlass;
     private Boolean iosHeaderRefractionEnabled;
+    private int iosHeaderStyleRevision = Integer.MIN_VALUE;
     private BlurredBackgroundDrawable glassDrawableBack;
     private BlurredBackgroundDrawable glassDrawableMenu;
     private INavigationLayout.BackButtonState backButtonState = INavigationLayout.BackButtonState.BACK;
@@ -2453,7 +2454,9 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
     protected void dispatchDraw(Canvas canvas) {
         if (iosChatHeaderGlass) {
             final boolean enabled = app.freezgram.IosLiquidGlassChatHeader.isEnabled();
-            if (iosHeaderRefractionEnabled == null || iosHeaderRefractionEnabled != enabled) {
+            if (iosHeaderRefractionEnabled == null || iosHeaderRefractionEnabled != enabled
+                    || iosHeaderStyleRevision != app.freezgram.LiquidGlassStyle.revision()) {
+                iosHeaderStyleRevision = app.freezgram.LiquidGlassStyle.revision();
                 iosHeaderRefractionEnabled = enabled;
                 app.freezgram.IosLiquidGlassChatHeader.refresh(glassDrawable);
                 app.freezgram.IosLiquidGlassChatHeader.refresh(glassDrawableBack);

@@ -78,6 +78,7 @@ public class ChatInputViewsContainer extends FrameLayout {
     private BlurredBackgroundDrawable underKeyboardBackgroundDrawable;
     private BlurredBackgroundDrawable composerLeftDrawable, composerRightDrawable;
     private Boolean composerGlassEnabled;
+    private int composerStyleRevision = Integer.MIN_VALUE;
     private final Rect composerFieldBounds = new Rect(), composerLeftBounds = new Rect(), composerRightBounds = new Rect();
 
     public void setComposerGlassButtons(BlurredBackgroundDrawable left, BlurredBackgroundDrawable right) {
@@ -297,7 +298,9 @@ public class ChatInputViewsContainer extends FrameLayout {
         }
         if (customComposer) {
             boolean enabled = app.freezgram.ChatComposerGlass.isEnabled();
-            if (composerGlassEnabled == null || composerGlassEnabled != enabled) {
+            if (composerGlassEnabled == null || composerGlassEnabled != enabled
+                    || composerStyleRevision != app.freezgram.LiquidGlassStyle.revision()) {
+                composerStyleRevision = app.freezgram.LiquidGlassStyle.revision();
                 composerGlassEnabled = enabled;
                 for (BlurredBackgroundDrawable drawable : new BlurredBackgroundDrawable[]{
                         blurredBackgroundDrawable, composerLeftDrawable, composerRightDrawable}) {

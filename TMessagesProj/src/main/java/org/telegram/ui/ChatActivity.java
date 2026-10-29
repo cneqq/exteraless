@@ -52043,7 +52043,9 @@ public class ChatActivity extends BaseFragment implements
         }
 
         //if (BitwiseUtils.hasFlag(flags, BLUR_INVALIDATE_FLAG_POSITIONS | BLUR_INVALIDATE_FLAG_SCROLL)) {
-        final boolean hasChanges = scrollableViewNoiseSuppressor.invalidateResultRenderNodes(contentView::drawList, contentView.getWidth(), contentView.getHeight());
+        final boolean blurChanged = scrollableViewNoiseSuppressor.setNavigationGlassBlur(
+                AndroidUtilities.dpf2(app.freezgram.LiquidGlassStyle.blurRadiusDp()));
+        final boolean hasChanges = scrollableViewNoiseSuppressor.invalidateResultRenderNodes(contentView::drawList, contentView.getWidth(), contentView.getHeight()) | blurChanged;
         if (hasChanges) {
             if (glassBackgroundSourceRenderNode != null) {
                 glassBackgroundSourceRenderNode.invalidateDisplayListForDrawables();

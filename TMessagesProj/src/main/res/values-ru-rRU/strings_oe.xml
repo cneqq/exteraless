@@ -85,4 +85,12 @@
     <string name="FreezgramPanelPreviewInfo">Используется при включённом Liquid Glass. Пример содержимого. Изменения применяются к панели при возвращении. Liquid Glass требует Android 13+, включённого размытия и отключённого энергосбережения.</string>
     <string name="FreezgramPanelWidth">Ширина панели</string>
     <string name="FreezgramPanelLift">Отступ от нижнего края</string>
+    <string name="FreezgramSharedGlassSettings">Liquid Glass</string>
+    <string name="FreezgramSharedGlassSettingsInfo">Общий вид навигации, шапки чата и поля ввода</string>
+    <string name="FreezgramComposerSettings">Отступы панели ввода</string>
+    <string name="FreezgramComposerSettingsInfo">Отступы текста и эмодзи с предпросмотром</string>
+    <string name="FreezgramComposerTextInset">Отступ текста от края поля</string>
+    <string name="FreezgramComposerEmojiInset">Отступ эмодзи от края поля</string>
+    <string name="FreezgramSharedGlassPreviewInfo">Пример шапки, поля ввода и навигации. Размытие, преломление и прозрачность общие для всех включённых стеклянных панелей. Нужны Android 13+, размытие и отключённое энергосбережение.</string>
+    <string name="FreezgramComposerPreviewInfo">Отступы для iOS-панели ввода. Параметры стекла находятся в iOS Design → Liquid Glass. Изменения применяются при возвращении к чатам.</string>
 </resources>
