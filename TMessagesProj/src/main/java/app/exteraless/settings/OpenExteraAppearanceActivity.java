@@ -138,6 +138,12 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
     private int linksHeaderRow;
     private int appNavigationRow;
     private int iconPacksRow;
+    private int badgeStyleRow;
+
+    private CharSequence[] badgeStyleOptions() {
+        return new CharSequence[]{getString(R.string.FreezgramBadgeStyleSparkles),
+                getString(R.string.FreezgramBadgeStylePlain), getString(R.string.FreezgramBadgeStyleSeal)};
+    }
     private int emojiSetsRow;
     private int pillStackRow;
     private int playerStyleRow;
@@ -196,6 +202,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         linksHeaderRow = addRow("linksHeader");
         appNavigationRow = addRow("appNavigation");
         iconPacksRow = addRow("iconPacks");
+        badgeStyleRow = addRow("freezgramBadgeStyle");
         emojiSetsRow = addRow("emojiSets", "EmojiSets");
         pillStackRow = addRow("pillStack");
         playerStyleRow = addRow("playerStyle");
@@ -545,7 +552,18 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == iconPacksRow) {
+        if (position == badgeStyleRow) {
+            if (getParentActivity() == null) return;
+            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+            builder.setTitle(getString(R.string.FreezgramBadgeStyle));
+            builder.setItems(badgeStyleOptions(), (dialog, which) -> {
+                app.freezgram.badges.BadgeStyleConfig.setStyle(which);
+                if (listAdapter != null) listAdapter.notifyItemChanged(position);
+            });
+            builder.setNegativeButton(getString(R.string.Cancel), null);
+            showDialog(builder.create());
+            return;
+        } else if (position == iconPacksRow) {
             presentFragment(new IconPacksActivity());
             return;
         } else if (position == pillStackRow) {
@@ -1025,6 +1043,10 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                         cell.setTextAndValueAndIcon(getString(R.string.OEAppearanceNavigation), getString(R.string.OEAppearanceNavigationSub), R.drawable.msg_newphone, true);
                     } else if (position == iconPacksRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.OEAppearanceIconPacks), getString(R.string.OEAppearanceIconPacksInfo), R.drawable.msg_sticker, true);
+                    } else if (position == badgeStyleRow) {
+                        cell.setTextAndValueAndIcon(getString(R.string.FreezgramBadgeStyle),
+                                badgeStyleOptions()[app.freezgram.badges.BadgeStyleConfig.getStyle()],
+                                R.drawable.freezgram_settings_icon, true);
                     } else if (position == emojiSetsRow) {
                         cell.setTextAndValueAndIcon(getString(R.string.EmojiSets), getString(NekoConfig.useSystemEmoji.Bool()
                                 ? R.string.OEAppearanceUseSystemEmoji : R.string.OEAppearanceEmojiSetsInfo), R.drawable.msg_emoji_smiles, true);
@@ -1101,7 +1123,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 return TYPE_INFO_PRIVACY;
             } else if (position == fabShapeRow) {
                 return TYPE_FAB_SHAPE;
-            } else if (position == appNavigationRow || position == iconPacksRow
+            } else if (position == appNavigationRow || position == iconPacksRow || position == badgeStyleRow
                     || position == emojiSetsRow || position == pillStackRow || position == playerStyleRow || position == hidingRow) {
                 return TYPE_DETAIL_SETTINGS;
             } else if (position == md3GroupRow || position == iosGroupRow) {

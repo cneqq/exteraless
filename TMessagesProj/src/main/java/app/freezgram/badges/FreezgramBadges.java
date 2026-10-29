@@ -38,9 +38,10 @@ public final class FreezgramBadges {
     }
 
     private static Drawable getDrawable(Context context, boolean channel) {
+        Drawable plane = ContextCompat.getDrawable(context, R.drawable.freezgram_settings_icon);
         Drawable drawable = ContextCompat.getDrawable(context, channel
                 ? R.drawable.freezgram_channel_badge : R.drawable.freezgram_community_badge);
-        return drawable == null ? null : new FreezgramBadgeDrawable(drawable.mutate());
+        return drawable == null || plane == null ? null : new FreezgramBadgeDrawable(drawable.mutate(), plane.mutate());
     }
 
     public static String getTitle() {

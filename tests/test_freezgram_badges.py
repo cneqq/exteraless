@@ -64,10 +64,10 @@ class TLRPC {
 class ChatObject {static boolean isChannel(TLRPC.Chat chat){return chat instanceof TLRPC.TL_channel;}}
 class Context {}
 class Drawable {Drawable mutate(){return this;}}
-class FreezgramBadgeDrawable extends Drawable {FreezgramBadgeDrawable(Drawable seal){}}
+class FreezgramBadgeDrawable extends Drawable {FreezgramBadgeDrawable(Drawable seal,Drawable plane){}}
 class ContextCompat {static int lastResource;static Drawable getDrawable(Context c,int id){lastResource=id;return new Drawable();}}
 class R {
- static class drawable {static int freezgram_community_badge=1,freezgram_channel_badge=4;}
+ static class drawable {static int freezgram_community_badge=1,freezgram_channel_badge=4,freezgram_settings_icon=6;}
  static class string {static int FreezgramBadgeFounder=2,FreezgramBadgeLocalInfo=3,FreezgramBadgeOfficialChannel=5;}
 }
 class LocaleController {static String getString(int id){return id==2?"Founder":id==5?"Official channel":"Local community";}}

@@ -17,13 +17,16 @@ import org.telegram.messenger.SharedConfig;
 /** Community seal with the Freezgram plane and lightweight sparkle effects. */
 public final class FreezgramBadgeDrawable extends Drawable {
     private final Drawable seal;
+    private final Drawable plane;
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path star = new Path();
     private final Runnable nextFrame = this::invalidateSelf;
     private int alpha = 255;
 
-    public FreezgramBadgeDrawable(Drawable seal) {
+    public FreezgramBadgeDrawable(Drawable seal, Drawable plane) {
         this.seal = seal;
+        this.plane = plane;
+        BadgeStyleConfig.register(this);
         paint.setColor(0xff76c5ff);
         star.moveTo(0, -1);
         star.lineTo(.22f, -.22f);
@@ -37,7 +40,7 @@ public final class FreezgramBadgeDrawable extends Drawable {
     }
 
     private boolean animate() {
-        if (alpha == 0 || !isVisible() || !SharedConfig.animationsEnabled()
+        if (BadgeStyleConfig.getStyle() == BadgeStyleConfig.PLAIN || alpha == 0 || !isVisible() || !SharedConfig.animationsEnabled()
                 || !LiteMode.isEnabled(LiteMode.FLAG_ANIMATED_EMOJI_CHAT_NOT_PREMIUM)) return false;
         Callback callback = getCallback();
         if (!(callback instanceof View)) return false;
@@ -54,17 +57,34 @@ public final class FreezgramBadgeDrawable extends Drawable {
         int save = canvas.save();
         canvas.translate(bounds.left, bounds.top);
         canvas.scale(bounds.width() / 32f, bounds.height() / 28f);
-        int sealSave = canvas.save();
-        canvas.translate(2, 2);
-        int sealSize = AndroidUtilities.dp(24);
-        canvas.scale(24f / sealSize, 24f / sealSize);
-        seal.setBounds(0, 0, sealSize, sealSize);
-        seal.setAlpha(alpha);
-        seal.draw(canvas);
-        canvas.restoreToCount(sealSave);
-        sparkle(canvas, 28.2f, 7, 1.9f, phase, animated);
-        sparkle(canvas, 29, 18.5f, 2.6f, phase + .36f, animated);
-        sparkle(canvas, 2, 5, 1.15f, phase + .68f, animated);
+        int style = BadgeStyleConfig.getStyle();
+        if (style == BadgeStyleConfig.SEAL) {
+            int sealSave = canvas.save();
+            canvas.translate(2, 2);
+            int sealSize = AndroidUtilities.dp(24);
+            canvas.scale(24f / sealSize, 24f / sealSize);
+            seal.setBounds(0, 0, sealSize, sealSize);
+            seal.setAlpha(alpha);
+            seal.draw(canvas);
+            canvas.restoreToCount(sealSave);
+        } else {
+            int size = style == BadgeStyleConfig.PLAIN ? 26 : 22;
+            int pixels = AndroidUtilities.dp(size);
+            int planeSave = canvas.save();
+            float centerX = style == BadgeStyleConfig.PLAIN ? 16 : 14;
+            // Optical centering of the asymmetric plane, including its transparent margins.
+            canvas.translate(centerX - size / 2f - size * .057f, 14 - size / 2f - size * .017f);
+            canvas.scale((float) size / pixels, (float) size / pixels);
+            plane.setBounds(0, 0, pixels, pixels);
+            plane.setAlpha(alpha);
+            plane.draw(canvas);
+            canvas.restoreToCount(planeSave);
+        }
+        if (style != BadgeStyleConfig.PLAIN) {
+            sparkle(canvas, 28.2f, 7, 1.9f, phase, animated);
+            sparkle(canvas, 29, 18.5f, 2.6f, phase + .36f, animated);
+            sparkle(canvas, 2, 5, 1.15f, phase + .68f, animated);
+        }
         canvas.restoreToCount(save);
 
         // A frame requests a redraw only; it does not schedule another frame itself.
@@ -89,6 +109,7 @@ public final class FreezgramBadgeDrawable extends Drawable {
     @Override public void setAlpha(int alpha) { this.alpha = alpha; invalidateSelf(); }
     @Override public void setColorFilter(ColorFilter filter) {
         seal.setColorFilter(filter);
+        plane.setColorFilter(filter);
         paint.setColorFilter(filter);
         invalidateSelf();
     }
