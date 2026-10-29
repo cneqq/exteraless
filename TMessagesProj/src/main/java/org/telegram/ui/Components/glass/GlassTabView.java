@@ -61,6 +61,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     private BackupImageView backupImageView;
     private Theme.ResourcesProvider resourcesProvider;
     private final Paint paintCounterBackground = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint selectedOutlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final AnimatedTextView.AnimatedTextDrawable counter;
 
     private static final int ANIMATOR_ID_IS_SELECTED = 0;
@@ -84,6 +85,8 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
 
     public GlassTabView(@NonNull Context context) {
         super(context);
+        selectedOutlinePaint.setStyle(Paint.Style.STROKE);
+        selectedOutlinePaint.setStrokeWidth(dpf2(1));
         imageView = new RLottieImageView(context);
         addView(imageView, LayoutHelper.createFrame(44, 44, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, -6, 0, 0));
 
@@ -139,6 +142,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     private float gestureSelectedOverride;
     private boolean skipDrawSelector;
     private boolean mainTabMaterial3;
+    private boolean mainTabIos;
 
     private void applyMainTabsMaterial3() {
         mainTabMaterial3 = true;
@@ -180,7 +184,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
                 paintCounterBackground.setColor(MainTabsUiHelper.getMainTabSelectedIndicatorColor(colorSelected, alpha));
                 r = tmpRectF.height() / 2f;
             } else {
-                paintCounterBackground.setColor(Theme.multAlpha(colorSelected, 0.09f * alpha));
+                paintCounterBackground.setColor(Theme.multAlpha(colorSelected, (mainTabIos ? .24f : .09f) * alpha));
                 tmpRectF.set(0, 0, viewWidth, getHeight());
                 r = Math.min(tmpRectF.width(), tmpRectF.height()) / 2f;
             }
@@ -191,6 +195,12 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
                     MainTabsUiHelper.getSelectedBackgroundScaleY(mainTabMaterial3, selectedFactor) * scale,
                     tmpRectF.centerX(), tmpRectF.centerY());
             canvas.drawRoundRect(tmpRectF, r, r, paintCounterBackground);
+            if (mainTabIos) {
+                selectedOutlinePaint.setColor(Theme.multAlpha(colorSelected, .60f * alpha));
+                float inset = selectedOutlinePaint.getStrokeWidth() / 2;
+                tmpRectF.inset(inset, inset);
+                canvas.drawRoundRect(tmpRectF, Math.max(0, r - inset), Math.max(0, r - inset), selectedOutlinePaint);
+            }
             canvas.restore();
         }
 
@@ -447,6 +457,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
 
     public static GlassTabView createMainTab(Context context, Theme.ResourcesProvider resourcesProvider, TabAnimation tabAnimation, @StringRes int stringRes) {
         GlassTabView tab = new GlassTabView(context);
+        tab.mainTabIos = MainTabsUiHelper.isIosNavigationBar();
         tab.resourcesProvider = resourcesProvider;
         tab.tabAnimation = tabAnimation;
         tab.textView.setText(LocaleController.getString(stringRes));
@@ -464,6 +475,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
 
     public static GlassTabView createAvatar(Context context, Theme.ResourcesProvider resourcesProvider, int currentAccount, @StringRes int stringRes) {
         GlassTabView tab = new GlassTabView(context);
+        tab.mainTabIos = MainTabsUiHelper.isIosNavigationBar();
         tab.textView.setText(LocaleController.getString(stringRes));
         tab.imageView.setVisibility(GONE);
 
