@@ -28,6 +28,13 @@ public class ChatActivityTopPanelLayout extends AnimatedLinearLayout {
     }
 
     BlurredBackgroundDrawable backgroundDrawable;
+    private boolean iosHeaderGlass;
+    private int glassRevision = Integer.MIN_VALUE;
+    private Boolean refractionEnabled;
+
+    public void setIosHeaderGlass(boolean enabled) {
+        iosHeaderGlass = enabled; glassRevision = Integer.MIN_VALUE; refractionEnabled = null;
+    }
 
     public void setBlurredBackground(BlurredBackgroundDrawable background) {
         backgroundDrawable = background;
@@ -102,11 +109,23 @@ public class ChatActivityTopPanelLayout extends AnimatedLinearLayout {
         return super.verifyDrawable(who) || callFragmentContextView != null && callFragmentContextView.getCapsuleBlobDrawable() == who;
     }
 
+    private void updateIosGlassStyle() {
+        if (!iosHeaderGlass || backgroundDrawable == null) return;
+        boolean enabled = app.freezgram.IosLiquidGlassChatHeader.isEnabled();
+        int revision = app.freezgram.LiquidGlassStyle.revision();
+        if (refractionEnabled == null || refractionEnabled != enabled || glassRevision != revision) {
+            refractionEnabled = enabled; glassRevision = revision;
+            app.freezgram.IosLiquidGlassChatHeader.refresh(backgroundDrawable);
+            backgroundDrawable.updateColors();
+        }
+    }
+
     @Override
     protected void dispatchDraw(@NonNull Canvas canvas) {
         if (getMetadata().getTotalVisibility() == 0) return;
 
         if (backgroundDrawable != null) {
+            updateIosGlassStyle();
             backgroundDrawable.draw(canvas);
         }
 

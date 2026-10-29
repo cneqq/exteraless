@@ -105,3 +105,11 @@ insets remain fixed at 16dp. Left and right always use the same value, limited
 on narrow windows to retain at least 240dp for the input where possible.
 The preview, reset and settings backup include this parameter. Other input
 styles retain their existing horizontal geometry.
+
+The shared editor now includes actual FilterTabsView-based folder preview tabs;
+the folder glass toggle updates that preview and the shared optics. The header
+switch also controls the common top-panel surface containing pinned messages,
+translation and chat information notices. It uses the same independent capture,
+colors and power-saving behavior as the header, with cached effect updates.
+The default chat-list title is Freezgram in the shared title helper; explicit
+custom titles remain unchanged.

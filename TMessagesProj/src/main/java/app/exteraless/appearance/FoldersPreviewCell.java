@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import org.telegram.messenger.LocaleController;
@@ -37,6 +38,7 @@ public class FoldersPreviewCell extends FrameLayout {
     private final Theme.ResourcesProvider resourcesProvider;
     private final FilterTabsView tabsView;
     private final BlurredBackgroundSourceColor backgroundSource;
+    private final BlurredBackgroundDrawable defaultBackground;
 
     private int renderedTitleType = Integer.MIN_VALUE;
 
@@ -104,6 +106,7 @@ public class FoldersPreviewCell extends FrameLayout {
         backgroundSource.setColor(Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider));
         BlurredBackgroundDrawable background = new BlurredBackgroundDrawableViewFactory(backgroundSource)
                 .create(tabsView, BlurredBackgroundProviderImpl.topPanel(resourcesProvider));
+        defaultBackground = background;
         background.setRadius(dp(18));
         background.setPadding(dp(6.666f));
         tabsView.setPadding(0, dp(7), 0, dp(7));
@@ -112,6 +115,13 @@ public class FoldersPreviewCell extends FrameLayout {
         addView(tabsView, LayoutHelper.createFrame(
                 LayoutHelper.MATCH_PARENT, 50, Gravity.CENTER, 21, 0, 21, 0));
         rebuildTabs(false);
+    }
+
+    public View getTabsPreviewView() { return tabsView; }
+
+    public void setGlassPreviewBackground(BlurredBackgroundDrawable background) {
+        tabsView.setBlurredBackground(background != null ? background : defaultBackground);
+        invalidate();
     }
 
     private void rebuildTabs(boolean animated) {

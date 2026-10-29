@@ -9786,8 +9786,11 @@ public class ChatActivity extends BaseFragment implements
         }
 
         checkUi_topPanelLayoutWidth();
-        topPanelLayout.setBlurredBackground(glassBackgroundDrawableFactory.create(topPanelLayout)
-            .setColorProvider(BlurredBackgroundProviderImpl.topPanelChatActivity(themeDelegate))
+        topPanelLayout.setIosHeaderGlass(app.freezgram.IosLiquidGlassChatHeader.isRequested());
+        topPanelLayout.setBlurredBackground((app.freezgram.IosLiquidGlassChatHeader.isRequested() ? iosHeaderGlassFactory : glassBackgroundDrawableFactory).create(topPanelLayout)
+            .setColorProvider(app.freezgram.IosLiquidGlassChatHeader.isRequested()
+                    ? app.freezgram.IosLiquidGlassChatHeader.colors(themeDelegate)
+                    : BlurredBackgroundProviderImpl.topPanelChatActivity(themeDelegate))
             .setRadius(dp(18))
             .setPadding(dp(7)));
 

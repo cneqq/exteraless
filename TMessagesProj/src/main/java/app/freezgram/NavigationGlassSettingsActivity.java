@@ -51,7 +51,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         content.setOrientation(LinearLayout.VERTICAL);
         scroll.addView(content);
         preview = new GlassPreview(context);
-        content.addView(preview, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, mode == 1 ? 360 : 240));
+        content.addView(preview, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, mode == 1 ? 420 : 240));
         TextView info = new TextView(context);
         info.setText(text(mode == 0 ? R.string.FreezgramPanelPreviewInfo : mode == 1 ? R.string.FreezgramSharedGlassPreviewInfo : R.string.FreezgramComposerPreviewInfo));
         info.setTextSize(14);
@@ -205,7 +205,10 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final RectF panel = new RectF();
         private BlurredBackgroundSourceRenderNode source;
-        private BlurredBackgroundDrawable glass, headerGlass, fieldGlass, leftGlass, rightGlass;
+        private BlurredBackgroundDrawable glass, headerGlass, fieldGlass, leftGlass, rightGlass, foldersGlass;
+        private app.exteraless.appearance.FoldersPreviewCell foldersPreview;
+        private Boolean foldersPreviewEnabled;
+        private final RectF foldersPosition = new RectF();
         private final android.graphics.Rect field = new android.graphics.Rect(), leftButton = new android.graphics.Rect(), rightButton = new android.graphics.Rect();
         private final android.graphics.drawable.Drawable attachIcon, emojiIcon, micIcon;
 
@@ -248,6 +251,11 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             tabsLayout.setMargins(dp(12), dp(148), dp(12), 0);
             addView(tabs, tabsLayout);
             updateGeometry();
+            if (mode == SHARED) {
+                foldersPreview = new app.exteraless.appearance.FoldersPreviewCell(context, resourceProvider);
+                FrameLayout.LayoutParams folderParams = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, dp(86));
+                folderParams.topMargin = dp(68); addView(foldersPreview, folderParams);
+            }
             // The actual AGSL renderer; unsupported phones show the same opaque fallback.
             if (Build.VERSION.SDK_INT >= 33) {
                 source = new BlurredBackgroundSourceRenderNode(null);
@@ -256,12 +264,13 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 fieldGlass = createGlass(24, 7);
                 leftGlass = createGlass(24, 7);
                 rightGlass = createGlass(24, 7);
+                foldersGlass = createGlass(18, 7);
             }
         }
 
         void updateGeometry() {
             float side = dp(12) + Math.max(0, getWidth() - dp(24)) * (100 - AppearanceConfig.navigationPanelWidth()) / 200f;
-            float top = dp((mode == 1 ? 296 : 160) - AppearanceConfig.navigationPanelLift());
+            float top = dp((mode == 1 ? 356 : 160) - AppearanceConfig.navigationPanelLift());
             panel.set(side, top, getWidth() - side, top + dp(60));
             FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) tabs.getLayoutParams();
             lp.setMargins(Math.round(side) - dp(8), Math.round(top) - dp(8), Math.round(side) - dp(8), 0);
@@ -276,7 +285,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         }
 
         @Override protected boolean verifyDrawable(android.graphics.drawable.Drawable who) {
-            return who == glass || who == headerGlass || who == fieldGlass || who == leftGlass || who == rightGlass || super.verifyDrawable(who);
+            return who == glass || who == headerGlass || who == fieldGlass || who == leftGlass || who == rightGlass || who == foldersGlass || super.verifyDrawable(who);
         }
 
         private void background(Canvas canvas) {
@@ -333,6 +342,21 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 source.setBlur(AndroidUtilities.dpf2(LiquidGlassStyle.blurRadiusDp()), LiquidGlassStyle.enhanceColors()
                         ? org.telegram.messenger.utils.RenderNodeEffects.getSaturationX3RenderEffect() : null);
             }
+            if (foldersPreview != null) {
+                boolean enabled = AppearanceConfig.foldersLiquidGlass();
+                if (foldersPreviewEnabled == null || foldersPreviewEnabled != enabled) {
+                    foldersPreviewEnabled = enabled;
+                    foldersPreview.setGlassPreviewBackground(enabled ? foldersGlass : null);
+                }
+                if (enabled && foldersGlass != null) {
+                    if (org.telegram.ui.Components.chat.ViewPositionWatcher.computeRectInParent(foldersPreview.getTabsPreviewView(), this, foldersPosition)) {
+                        foldersGlass.setSourceOffset(foldersPosition.left, foldersPosition.top);
+                    }
+                    LiquidGlassStyle.configure(foldersGlass);
+                    ((org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawableRenderNode) foldersGlass).setLiquidGlassEffectAllowed(effectsEnabled());
+                    foldersGlass.updateColors();
+                }
+            }
             if (mode != 2) surface(canvas, glass, new android.graphics.Rect((int) panel.left, (int) panel.top, (int) panel.right, (int) panel.bottom), 30, 0);
             if (mode != 0) {
                 if (mode == 1) {
@@ -340,7 +364,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                     paint.setColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText)); paint.setTextSize(dp(16));
                     canvas.drawText("Freezgram", dp(32), dp(43), paint);
                 }
-                int top = dp(150 - (AppearanceConfig.chatComposerStyle() == 1 ? AppearanceConfig.composerBottomLift() : 0));
+                int top = dp((mode == SHARED ? 220 : 150) - (AppearanceConfig.chatComposerStyle() == 1 ? AppearanceConfig.composerBottomLift() : 0));
                 int side = AppearanceConfig.chatComposerStyle() == 1
                         ? Math.min(dp(AppearanceConfig.composerSideInset()), Math.max(0, (getWidth() - dp(240)) / 2)) : 0;
                 android.graphics.Rect whole = new android.graphics.Rect(side, top, getWidth() - side, top + dp(58));

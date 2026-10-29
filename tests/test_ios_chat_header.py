@@ -2,7 +2,7 @@
 import shutil
 import unittest
 from pathlib import Path
-from test_personal_privacy import method
+from test_personal_privacy import method, run_java as run_plain_java
 from glass_test_support import run_java
 
 JAVA = Path(__file__).resolve().parents[1] / 'TMessagesProj/src/main/java'
@@ -10,6 +10,32 @@ JAVA = Path(__file__).resolve().parents[1] / 'TMessagesProj/src/main/java'
 
 @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
 class IosChatHeaderTests(unittest.TestCase):
+    def test_panels_follow_header_switch_and_refresh_after_optical_changes(self):
+        source=(JAVA / 'org/telegram/ui/Components/ChatActivityTopPanelLayout.java').read_text()
+        methods=method(source,'    public void setIosHeaderGlass(')+'\n'+method(source,'    private void updateIosGlassStyle()')
+        run_plain_java('''
+class PrivacyCheck {
+ boolean iosHeaderGlass;int glassRevision=Integer.MIN_VALUE;Boolean refractionEnabled;
+ Drawable backgroundDrawable=new Drawable();
+ METHODS
+ public static void main(String[] args){
+  var p=new PrivacyCheck();p.updateIosGlassStyle();if(p.backgroundDrawable.refreshes!=0)throw new AssertionError("Legacy changed");
+  p.setIosHeaderGlass(true);p.updateIosGlassStyle();p.updateIosGlassStyle();
+  if(p.backgroundDrawable.refreshes!=1)throw new AssertionError("Effect recreated each frame");
+  IosLiquidGlassChatHeader.enabled=false;p.updateIosGlassStyle();
+  if(p.backgroundDrawable.refreshes!=2||p.backgroundDrawable.enabled)throw new AssertionError("Power-saving fallback");
+  LiquidGlassStyle.value++;p.updateIosGlassStyle();
+  if(p.backgroundDrawable.refreshes!=3)throw new AssertionError("Shared settings stale");
+  p.setIosHeaderGlass(false);p.updateIosGlassStyle();
+  if(p.backgroundDrawable.refreshes!=3)throw new AssertionError("Disabled style changed");
+  p.backgroundDrawable=null;p.setIosHeaderGlass(true);p.updateIosGlassStyle();
+ }
+}
+class Drawable{int refreshes;boolean enabled;void updateColors(){}}
+class LiquidGlassStyle{static int value;static int revision(){return value;}}
+class IosLiquidGlassChatHeader{static boolean enabled=true;static boolean isEnabled(){return enabled;}static void refresh(Drawable d){d.refreshes++;d.enabled=enabled;}}
+'''.replace('METHODS',methods).replace('app.freezgram.',''))
+
     def test_avatar_remains_clickable_when_the_menu_icon_is_hidden(self):
         source = (JAVA / 'org/telegram/ui/ActionBar/ActionBar.java').read_text()
         hit = method(source, '    private boolean isInsideIosHeaderAvatar(')
