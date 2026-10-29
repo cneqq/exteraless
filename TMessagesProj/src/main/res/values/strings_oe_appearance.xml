@@ -147,4 +147,8 @@
     <string name="OEAppearanceHidingInChats">In Chats</string>
     <string name="OEAppearanceHidingAiPremium">AI and Premium</string>
     <string name="OEKillApp">Close App</string>
+    <string name="FreezgramChatComposerStyle">Input panel style</string>
+    <string name="FreezgramChatComposerDefault">Default</string>
+    <string name="FreezgramChatComposerIos">iOS + Liquid Glass</string>
+    <string name="FreezgramChatComposerAndroid">Android + Liquid Glass</string>
 </resources>

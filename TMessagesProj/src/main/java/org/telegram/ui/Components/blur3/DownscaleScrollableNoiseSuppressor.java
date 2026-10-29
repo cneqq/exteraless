@@ -58,6 +58,8 @@ public class DownscaleScrollableNoiseSuppressor {
     public static final int DRAW_GLASS = -2;
     public static final int DRAW_FROSTED_GLASS = -3;
     public static final int DRAW_FROSTED_GLASS_NO_SATURATION = -4;
+    /** The independently allocated 6dp output, used only by the iOS chat header. */
+    public static final int DRAW_HEADER_GLASS = -5;
 
     public void draw(Canvas canvas, int index) {
         if (!canvas.isHardwareAccelerated()) {
@@ -96,7 +98,9 @@ public class DownscaleScrollableNoiseSuppressor {
 
     public void drawInline(Canvas canvas, int index) {
         final int a;
-        if (!isLiquidGlassEnabled && simpleMode) {
+        if (index == DRAW_HEADER_GLASS && navigationGlassEnabled) {
+            a = 2;
+        } else if (!isLiquidGlassEnabled && simpleMode) {
             a = 0;
         } else if (index == DRAW_GLASS) {
             a = isLiquidGlassEnabled ? 0 : 1;

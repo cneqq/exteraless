@@ -102,6 +102,8 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
 
     private BlurredBackgroundDrawable glassDrawable;
     private boolean drawGlassMiddlePill = true;
+    private boolean iosChatHeaderGlass;
+    private Boolean iosHeaderRefractionEnabled;
     private BlurredBackgroundDrawable glassDrawableBack;
     private BlurredBackgroundDrawable glassDrawableMenu;
     private INavigationLayout.BackButtonState backButtonState = INavigationLayout.BackButtonState.BACK;
@@ -223,6 +225,16 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         this.chatAvatarContainer = chatAvatarContainer;
     }
 
+    public void setIosChatHeaderGlass(boolean enabled) {
+        iosChatHeaderGlass = enabled;
+        iosHeaderRefractionEnabled = null;
+        if (enabled) {
+            setDrawGlassMiddlePill(true);
+            if (glassDrawable != null) glassDrawable.setRadius(dp(23));
+        }
+        invalidate();
+    }
+
     public void setupGlass(BlurredBackgroundDrawableViewFactory factory, BlurredBackgroundColorProvider colorProvider) {
         setupGlass(factory, colorProvider, false);
     }
@@ -301,7 +313,8 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         glassDrawableLeftRadius = radius;
         glassAvatarRadius = radius;
         glassMenuAppliedOuterRadius = glassMenuAppliedInnerRadius = -1;
-        glassDrawable.setRadius(glassDrawableLeftRadius, dp(23), dp(23), glassDrawableLeftRadius);
+        glassDrawable.setRadius(iosChatHeaderGlass ? dp(23) : glassDrawableLeftRadius, dp(23), dp(23),
+                iosChatHeaderGlass ? dp(23) : glassDrawableLeftRadius);
         invalidate();
     }
 
@@ -1290,7 +1303,7 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         alphaUpdate.addUpdateListener(anm -> {
             searchFieldVisibleAlpha = (float) anm.getAnimatedValue();
 
-            if (glassDrawable != null && glassDrawableLeftRadius != dp(23)) {
+            if (glassDrawable != null && !iosChatHeaderGlass && glassDrawableLeftRadius != dp(23)) {
                 final float r1 = dp(23);
                 final float r2 = lerp(glassDrawableLeftRadius, dp(23), searchFieldVisibleAlpha);
                 glassDrawable.setRadius(r2, r1, r1, r2);
@@ -2028,6 +2041,7 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
 
                 boolean contains = false;
                 contains |= glassDrawable != null && glassDrawable.getBounds().contains(x, y);
+                contains |= iosChatHeaderGlass && isInsideIosHeaderAvatar(x, y);
                 if (child != null && child != chatAvatarContainer) {
                     contains |= glassDrawableBack != null && glassDrawableBack.getBounds().contains(x, y);
                     contains |= glassDrawableMenu != null && glassDrawableMenu.getBounds().contains(x, y);
@@ -2040,6 +2054,18 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         }
 
         return super.dispatchTouchEvent(ev);
+    }
+
+    private boolean isInsideIosHeaderAvatar(float x, float y) {
+        if (chatAvatarContainer == null || !chatAvatarContainer.isAvatarCentered()
+                || chatAvatarContainer.getVisibility() != View.VISIBLE || chatAvatarContainer.getAlpha() <= 0) {
+            return false;
+        }
+        final View avatar = chatAvatarContainer.getAvatarImageView();
+        if (avatar == null || avatar.getVisibility() != View.VISIBLE || avatar.getAlpha() <= 0) return false;
+        final float left = chatAvatarContainer.getX() + avatar.getX();
+        final float top = chatAvatarContainer.getY() + avatar.getY();
+        return x >= left && x < left + avatar.getWidth() && y >= top && y < top + avatar.getHeight();
     }
 
     public static View findChildUnder(ViewGroup parent, float x, float y, View exclude) {
@@ -2425,6 +2451,16 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        if (iosChatHeaderGlass) {
+            final boolean enabled = app.freezgram.IosLiquidGlassChatHeader.isEnabled();
+            if (iosHeaderRefractionEnabled == null || iosHeaderRefractionEnabled != enabled) {
+                iosHeaderRefractionEnabled = enabled;
+                app.freezgram.IosLiquidGlassChatHeader.refresh(glassDrawable);
+                app.freezgram.IosLiquidGlassChatHeader.refresh(glassDrawableBack);
+                app.freezgram.IosLiquidGlassChatHeader.refresh(glassDrawableMenu);
+                updateColors();
+            }
+        }
         final int p = dp(6);
         final int s = dp(46);
 
@@ -2468,11 +2504,13 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
                 right = rightDefault;
             }
 
-            glassDrawable.setBounds(left, t, right, b);
+            final int inset = iosChatHeaderGlass ? Math.round(dp(2) * (1f - Math.max(searchFactor, actionModeFactor))) : 0;
+            glassDrawable.setBounds(left, t + inset, right, b - inset);
             glassDrawable.draw(canvas);
         }
         if (glassDrawableBack != null && hasBackButton) {
-            glassDrawableBack.setBounds(0, t, s + p * 2, b);
+            final int inset = iosChatHeaderGlass ? dp(3) : 0;
+            glassDrawableBack.setBounds(inset, t + inset, s + p * 2 - inset, b - inset);
             glassDrawableBack.draw(canvas);
         }
         if (glassDrawableMenu != null && menuWidth > 0 && !glassOnlyBack && !doNotDrawGlassMenu) {

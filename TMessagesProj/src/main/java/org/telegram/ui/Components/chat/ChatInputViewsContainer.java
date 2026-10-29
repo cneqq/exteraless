@@ -76,6 +76,23 @@ public class ChatInputViewsContainer extends FrameLayout {
     public boolean drawInputBackground = true;
     public BlurredBackgroundDrawable blurredBackgroundDrawable;
     private BlurredBackgroundDrawable underKeyboardBackgroundDrawable;
+    private BlurredBackgroundDrawable composerLeftDrawable, composerRightDrawable;
+    private Boolean composerGlassEnabled;
+    private final Rect composerFieldBounds = new Rect(), composerLeftBounds = new Rect(), composerRightBounds = new Rect();
+
+    public void setComposerGlassButtons(BlurredBackgroundDrawable left, BlurredBackgroundDrawable right) {
+        composerLeftDrawable = left;
+        composerRightDrawable = right;
+        for (BlurredBackgroundDrawable drawable : new BlurredBackgroundDrawable[]{left, right}) {
+            drawable.setPadding(dp(7));
+            drawable.setRadius(dp(INPUT_BUBBLE_RADIUS));
+        }
+    }
+
+    protected boolean useSplitComposer() {
+        return false;
+    }
+
     public void setInputIslandBubbleDrawable(BlurredBackgroundDrawable drawable) {
         blurredBackgroundDrawable = drawable;
         blurredBackgroundDrawable.setPadding(dp(7));
@@ -93,6 +110,8 @@ public class ChatInputViewsContainer extends FrameLayout {
     public void updateColors() {
         blurredBackgroundDrawable.updateColors();
         underKeyboardBackgroundDrawable.updateColors();
+        if (composerLeftDrawable != null) composerLeftDrawable.updateColors();
+        if (composerRightDrawable != null) composerRightDrawable.updateColors();
         invalidate();
     }
 
@@ -268,9 +287,33 @@ public class ChatInputViewsContainer extends FrameLayout {
         tmpRect.inset(0, -dp(7));
         tmpRect.offset(0, blurTop + (int) bubbleInputTranlationY);
 
-        blurredBackgroundDrawable.setBounds(tmpRect);
-        if (drawInputBackground)
+        final boolean customComposer = app.freezgram.ChatComposerGlass.isRequested();
+        final boolean split = customComposer && composerLeftDrawable != null && useSplitComposer();
+        app.freezgram.ChatComposerGlass.surfaceBounds(tmpRect, composerFieldBounds, composerLeftBounds, composerRightBounds, split);
+        blurredBackgroundDrawable.setBounds(composerFieldBounds);
+        if (composerLeftDrawable != null) {
+            composerLeftDrawable.setBounds(composerLeftBounds);
+            composerRightDrawable.setBounds(composerRightBounds);
+        }
+        if (customComposer) {
+            boolean enabled = app.freezgram.ChatComposerGlass.isEnabled();
+            if (composerGlassEnabled == null || composerGlassEnabled != enabled) {
+                composerGlassEnabled = enabled;
+                for (BlurredBackgroundDrawable drawable : new BlurredBackgroundDrawable[]{
+                        blurredBackgroundDrawable, composerLeftDrawable, composerRightDrawable}) {
+                    if (drawable == null) continue;
+                    app.freezgram.ChatComposerGlass.refresh(drawable);
+                    drawable.updateColors();
+                }
+            }
+        }
+        if (drawInputBackground) {
             blurredBackgroundDrawable.draw(canvas);
+            if (split) {
+                composerLeftDrawable.draw(canvas);
+                composerRightDrawable.draw(canvas);
+            }
+        }
 
         if (needDrawInAppKeyboard) {
             underKeyboardBackgroundDrawable.draw(canvas);
@@ -323,6 +366,8 @@ public class ChatInputViewsContainer extends FrameLayout {
         if (blurredBackgroundDrawable != null) {
             blurredBackgroundDrawable.setAlpha(alpha);
         }
+        if (composerLeftDrawable != null) composerLeftDrawable.setAlpha(alpha);
+        if (composerRightDrawable != null) composerRightDrawable.setAlpha(alpha);
 
     }
 

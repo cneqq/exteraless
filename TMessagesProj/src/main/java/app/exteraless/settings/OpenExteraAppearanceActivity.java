@@ -124,6 +124,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
     private int iosLiquidGlassRow;
     private int iosPanelSettingsRow;
     private int iosChatHeaderRow;
+    private int chatComposerStyleRow;
     private boolean iosExpanded;
     private int senderMiniAvatarsRow;
     private int titleTextRow;
@@ -234,6 +235,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         } else {
             iosNavBarRow = iosLiquidGlassRow = iosPanelSettingsRow = iosChatHeaderRow = -1;
         }
+        chatComposerStyleRow = addRow("chatComposerStyle");
         gooeyAvatarRow = addRow("gooeyAvatar");
         customThemesRow = addRow("customThemes");
         appearanceDividerRow = addRow();
@@ -645,6 +647,13 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
             AppearanceConfig.iosChatHeader.setConfigBool(!AppearanceConfig.iosChatHeader.Bool());
             rebuildAllAndSelf(view, AppearanceConfig.iosChatHeader.Bool());
             return;
+        } else if (position == chatComposerStyleRow) {
+            showSelector(position, getString(R.string.FreezgramChatComposerStyle), new CharSequence[]{
+                    getString(R.string.FreezgramChatComposerDefault),
+                    getString(R.string.FreezgramChatComposerIos),
+                    getString(R.string.FreezgramChatComposerAndroid)
+            }, AppearanceConfig.chatComposerStyle, this::rebuildAll);
+            return;
         } else if (position == dividerStyleRow) {
             showSelector(position, getString(R.string.OEAppearanceDividerStyle), new CharSequence[]{
                     getString(R.string.OEAppearanceDividerHidden),
@@ -1014,7 +1023,12 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                 }
                 case TYPE_SETTINGS: {
                     TextSettingsCell cell = (TextSettingsCell) holder.itemView;
-                    if (position == dividerStyleRow) {
+                    if (position == chatComposerStyleRow) {
+                        String[] styles = {getString(R.string.FreezgramChatComposerDefault),
+                                getString(R.string.FreezgramChatComposerIos), getString(R.string.FreezgramChatComposerAndroid)};
+                        cell.setTextAndValue(getString(R.string.FreezgramChatComposerStyle),
+                                styles[AppearanceConfig.chatComposerStyle()], true);
+                    } else if (position == dividerStyleRow) {
                         String[] v = {getString(R.string.OEAppearanceDividerHidden), getString(R.string.OEAppearanceDividerLine), getString(R.string.OEAppearanceDividerSegments)};
                         cell.setTextAndValue(getString(R.string.OEAppearanceDividerStyle), v[clamp(AppearanceConfig.dividerStyle.Int(), v.length)], false);
                     } else if (position == glassOutlineRow) {
@@ -1132,7 +1146,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     || position == md3PlayerRow || position == md3MiniPlayerRow
                     || position == iosNavBarRow || position == iosLiquidGlassRow || position == iosChatHeaderRow) {
                 return TYPE_ROUND_CHECK;
-            } else if (position == dividerStyleRow || position == glassOutlineRow
+            } else if (position == chatComposerStyleRow || position == dividerStyleRow || position == glassOutlineRow
                     || position == tabTitleStyleRow
                     || position == tabCounterRow || position == titleTextRow) {
                 return TYPE_SETTINGS;

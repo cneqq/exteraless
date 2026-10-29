@@ -385,6 +385,16 @@ object AppearanceConfig {
         return iosNavigationBarStyle.Bool()
     }
 
+    /** 0: current layout, 1: iOS glass, 2: Android glass. */
+    @JvmField
+    val chatComposerStyle = addConfig("FreezgramChatComposerStyle", ConfigItem.configTypeInt, 0)
+
+    @JvmStatic
+    fun chatComposerStyle(): Int {
+        ensureLoaded()
+        return chatComposerStyle.Int().takeIf { it in 0..2 } ?: 0
+    }
+
     @JvmField
     val iosLiquidGlassNavigation =
         addConfig("FreezgramIosLiquidGlassNavigation", ConfigItem.configTypeBool, false)

@@ -20,7 +20,7 @@ public final class ChatHeaderUiHelper {
     }
 
     public static boolean isMaterial3ChatHeaderStyle() {
-        return AppearanceConfig.newChatHeaderStyle();
+        return AppearanceConfig.newChatHeaderStyle() && !AppearanceConfig.iosChatHeader();
     }
 
     /** Назад ? 4 : (m3 ? 57 : 52). */

@@ -138,4 +138,8 @@
     <string name="OEAppearanceHidingInChats">В чатах</string>
     <string name="OEAppearanceHidingAiPremium">AI и Premium</string>
     <string name="OEKillApp">Закрыть приложение</string>
+    <string name="FreezgramChatComposerStyle">Стиль панели ввода</string>
+    <string name="FreezgramChatComposerDefault">По умолчанию</string>
+    <string name="FreezgramChatComposerIos">iOS + Liquid Glass</string>
+    <string name="FreezgramChatComposerAndroid">Android + Liquid Glass</string>
 </resources>

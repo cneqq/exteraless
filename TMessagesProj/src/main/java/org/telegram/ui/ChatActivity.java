@@ -554,6 +554,9 @@ public class ChatActivity extends BaseFragment implements
 
     private final @Nullable BlurredBackgroundSourceRenderNode glassBackgroundSourceRenderNode;
     private final @Nullable BlurredBackgroundSourceRenderNode glassBackgroundSourceFrostedRenderNode;
+    private final @Nullable BlurredBackgroundSourceRenderNode iosHeaderGlassSource;
+    private final @NonNull BlurredBackgroundDrawableViewFactory iosHeaderGlassFactory;
+    private final @NonNull BlurredBackgroundDrawableViewFactory composerGlassFactory;
     private final @NonNull BlurredBackgroundDrawableViewFactory glassBackgroundDrawableFactory;
     private final @NonNull BlurredBackgroundDrawableViewFactory glassBackgroundDrawableFactoryFrosted;
 
@@ -3061,7 +3064,8 @@ public class ChatActivity extends BaseFragment implements
 
         navbarContentSourceWallpaper = new BlurredBackgroundSourceWrapped();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SharedConfig.chatBlurEnabled()) {
-            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor();
+            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(
+                    true, false, app.freezgram.IosLiquidGlassChatHeader.isRequested() || app.freezgram.ChatComposerGlass.isRequested());
 
             recommendedAdditionalSizeY = Math.max(0, dp(48) - Math.min(AndroidUtilities.navigationBarHeight, AndroidUtilities.statusBarHeight));
 
@@ -3094,15 +3098,37 @@ public class ChatActivity extends BaseFragment implements
             glassBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(navbarContentSourceWallpaper);
             glassBackgroundDrawableFactoryFrosted = new BlurredBackgroundDrawableViewFactory(navbarContentSourceWallpaper);
         }
+        if (scrollableViewNoiseSuppressor != null && (app.freezgram.IosLiquidGlassChatHeader.isRequested() || app.freezgram.ChatComposerGlass.isRequested())) {
+            iosHeaderGlassSource = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
+            iosHeaderGlassSource.setOnDrawablesRelativePositionChangeListener(this::invalidateMergedVisibleBlurredPositionsAndSourcesPositions);
+            iosHeaderGlassSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
+            iosHeaderGlassSource.setUnderSource(navbarContentSourceWallpaper);
+            iosHeaderGlassFactory = new BlurredBackgroundDrawableViewFactory(iosHeaderGlassSource);
+        } else {
+            iosHeaderGlassSource = null;
+            iosHeaderGlassFactory = new BlurredBackgroundDrawableViewFactory(navbarContentSourceWallpaper);
+        }
+        iosHeaderGlassFactory.setLiquidGlassEffectAllowed(app.freezgram.IosLiquidGlassChatHeader.isEnabled());
+        // A chat created before enabling the style can be rebuilt in place by Appearance.
+        // Until it is reopened, retain a captured chat backdrop using its existing frosted source.
+        composerGlassFactory = new BlurredBackgroundDrawableViewFactory(
+                iosHeaderGlassSource != null ? iosHeaderGlassSource
+                    : glassBackgroundSourceFrostedRenderNode != null ? glassBackgroundSourceFrostedRenderNode
+                    : navbarContentSourceWallpaper);
+        composerGlassFactory.setLiquidGlassEffectAllowed(app.freezgram.ChatComposerGlass.isEnabled());
+        composerGlassFactory.setLinkedViewsRef(glassAttachedViews);
+        composerGlassFactory.setLinkedDrawablesRef(glassAttachedDrawables);
         navbarContentDrawableFactory = new BlurredBackgroundDrawableViewFactory(navbarContentSourceWallpaper);
         navbarContentDrawableFactory.setLinkedViewsRef(glassAttachedViews);
         glassBackgroundDrawableFactory.setLinkedViewsRef(glassAttachedViews);
         glassBackgroundDrawableFactoryFrosted.setLinkedViewsRef(glassAttachedViews);
+        iosHeaderGlassFactory.setLinkedViewsRef(glassAttachedViews);
         scrimBlur3Factory.setLinkedViewsRef(new ReferenceList<>());
 
         navbarContentDrawableFactory.setLinkedDrawablesRef(glassAttachedDrawables);
         glassBackgroundDrawableFactory.setLinkedDrawablesRef(glassAttachedDrawables);
         glassBackgroundDrawableFactoryFrosted.setLinkedDrawablesRef(glassAttachedDrawables);
+        iosHeaderGlassFactory.setLinkedDrawablesRef(glassAttachedDrawables);
         scrimBlur3Factory.setLinkedDrawablesRef(glassAttachedDrawables);
     }
 
@@ -5282,6 +5308,8 @@ public class ChatActivity extends BaseFragment implements
         final ViewGroup parentView = parentChatActivity != null ? parentChatActivity.contentView : contentView;
         glassBackgroundDrawableFactory.setSourceRootView(viewPositionWatcher, parentView);
         glassBackgroundDrawableFactoryFrosted.setSourceRootView(viewPositionWatcher, parentView);
+        iosHeaderGlassFactory.setSourceRootView(viewPositionWatcher, parentView);
+        composerGlassFactory.setSourceRootView(viewPositionWatcher, parentView);
         navbarContentDrawableFactory.setSourceRootView(viewPositionWatcher, parentView);
         scrimBlur3Factory.setSourceRootView(viewPositionWatcher, parentView);
 
@@ -5292,12 +5320,16 @@ public class ChatActivity extends BaseFragment implements
         contentView.setOccupyStatusBar(!inBubbleMode && !isInsideContainer && !inPreviewMode);
 
         actionBar.setupGlass(
-            glassBackgroundDrawableFactory,
-            BlurredBackgroundProviderImpl.topPanelChatActivity(themeDelegate),
+            isTitleCentered() ? iosHeaderGlassFactory : glassBackgroundDrawableFactory,
+            isTitleCentered() ? app.freezgram.IosLiquidGlassChatHeader.colors(themeDelegate)
+                    : BlurredBackgroundProviderImpl.topPanelChatActivity(themeDelegate),
             ChatObject.isForum(currentChat));
+        actionBar.setIosChatHeaderGlass(isTitleCentered());
         app.exteraless.appearance.ChatHeaderUiHelper.applyChatHeaderGlassStyle(actionBar);
-        //actionBar.setChatAvatarContainer(avatarContainer);
-        //avatarContainer.setActionBar(actionBar);
+        if (isTitleCentered()) {
+            actionBar.setChatAvatarContainer(avatarContainer);
+            avatarContainer.setActionBar(actionBar);
+        }
 
         if (chatMode == MODE_PINNED) {
             actionBar.setChatAvatarContainer(avatarContainer);
@@ -5313,12 +5345,26 @@ public class ChatActivity extends BaseFragment implements
             avatarContainer.setActionBar(actionBar);
         }
 
-        chatInputViewsContainer = new ChatInputViewsContainer(context);
+        chatInputViewsContainer = new ChatInputViewsContainer(context) {
+            @Override
+            protected boolean useSplitComposer() {
+                return chatActivityEnterView != null && chatActivityEnterView.useIosComposerLayout()
+                        && bottomViewsVisibilityController.getCurrentPriorityContainerId() == MESSAGE_INPUT_CONTAINER
+                        && bottomViewsVisibilityController.getVisibility(MESSAGE_INPUT_CONTAINER) >= .999f;
+            }
+        };
         chatInputViewsContainer.setClipChildren(false);
         chatInputViewsContainer.drawInputBackground = !isFeedSearch();
         chatInputViewsContainer.setWindowInsetsProvider(windowInsetsStateHolder);
         chatInputViewsContainer.setInputIslandBubbleDrawable(
-            glassBackgroundDrawableFactory.create(chatInputViewsContainer, blurredBackgroundColorProvider));
+            app.freezgram.ChatComposerGlass.isRequested()
+                ? composerGlassFactory.create(chatInputViewsContainer, app.freezgram.ChatComposerGlass.colors(themeDelegate))
+                : glassBackgroundDrawableFactory.create(chatInputViewsContainer, blurredBackgroundColorProvider));
+        if (app.freezgram.ChatComposerGlass.isRequested()) {
+            chatInputViewsContainer.setComposerGlassButtons(
+                    composerGlassFactory.create(chatInputViewsContainer, app.freezgram.ChatComposerGlass.colors(themeDelegate)),
+                    composerGlassFactory.create(chatInputViewsContainer, app.freezgram.ChatComposerGlass.colors(themeDelegate)));
+        }
         chatInputViewsContainer.setUnderKeyboardBackgroundDrawable(
             glassBackgroundDrawableFactoryFrosted.create(chatInputViewsContainer, blurredBackgroundColorProvider));
 
@@ -52005,6 +52051,9 @@ public class ChatActivity extends BaseFragment implements
             if (glassBackgroundSourceFrostedRenderNode != null) {
                 glassBackgroundSourceFrostedRenderNode.invalidateDisplayListForDrawables();
             }
+            if (iosHeaderGlassSource != null) {
+                iosHeaderGlassSource.invalidateDisplayListForDrawables();
+            }
             if (actionBar != null) {
                 actionBar.invalidate();
             }
@@ -52059,6 +52108,9 @@ public class ChatActivity extends BaseFragment implements
 
             if (glassBackgroundSourceRenderNode != null) {
                 count += glassBackgroundSourceRenderNode.getVisiblePositions(positions, count, dp(8));
+            }
+            if (iosHeaderGlassSource != null) {
+                count += iosHeaderGlassSource.getVisiblePositions(positions, count, dp(8));
             }
 
             return count;
