@@ -80,7 +80,6 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         contacts.setOnClickListener(v -> {
             boolean hidden = !xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().Bool();
             xyz.nextalone.nagram.NaConfig.INSTANCE.getMainTabsHideContacts().setConfigBool(hidden);
-            if (!hidden) AppearanceConfig.showFeedTab.setConfigBool(false);
             contacts.setChecked(!hidden); geometryChanged = true; preview.updateGeometry();
         });
         content.addView(contacts);
