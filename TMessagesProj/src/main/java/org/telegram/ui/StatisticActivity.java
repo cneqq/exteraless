@@ -216,7 +216,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         iBlur3SourceColor = new BlurredBackgroundSourceColor();
         iBlur3SourceColor.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor();
+            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(true, false, app.freezgram.IosLiquidGlassNavigation.isRequested());
             iBlur3SourceGlassFrosted = new BlurredBackgroundSourceRenderNode(null);
             iBlur3SourceGlass = new BlurredBackgroundSourceRenderNode(null);
             iBlur3FactoryLiquidGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceGlass);
@@ -766,6 +766,9 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                         c.drawColor(getThemedColor(Theme.key_windowBackgroundWhite));
                         if (SharedConfig.chatBlurEnabled()) {
                             scrollableViewNoiseSuppressor.draw(c, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
+                            if (app.freezgram.IosLiquidGlassNavigation.isEnabled()) {
+                                scrollableViewNoiseSuppressor.drawNavigationGlass(c, iBlur3PositionMainTabs);
+                            }
                         }
                         iBlur3SourceGlass.endRecording();
                     }

@@ -24,3 +24,10 @@ the client's existing renderer and adds an opt-in navigation color provider.
 Phone verification: switch on/off, change light/dark themes, scroll and switch
 tabs, rotate, show/hide navigation, and verify fallback with blur disabled or
 power saving active. GPU appearance and performance require a device check.
+
+The navigation capture has a separate weak-blur output (6dp) even when the old
+client-wide Liquid Glass flag is off. Only the navigation capture rectangle uses
+that output; existing frosted surfaces keep the previous strong-blur output.
+The color overlay is 10% in dark themes and 7% in light themes; unsupported or
+power-saving configurations retain the 82% fallback. The visible upper edge is
+also softer. These are overlay alpha values, not the final composited opacity.

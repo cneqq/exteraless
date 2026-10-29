@@ -7,6 +7,78 @@ from test_personal_privacy import method, run_java
 
 class IosGlassTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
+    def test_navigation_gets_weak_blur_without_changing_other_glass_outputs(self):
+        path=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/DownscaleScrollableNoiseSuppressor.java'
+        text=path.read_text()
+        constructor=method(text, '    public DownscaleScrollableNoiseSuppressor(boolean simple, boolean allowNoiseSuppress, boolean navigationGlassEnabled)')
+        selector=method(text, '    private RenderNode getRenderNode(int a, int b)')
+        draw=method(text, '    public void drawNavigationGlass(')
+        def inner_method(signature):
+            start=text.index(signature)
+            return text[start:text.index('\n        }',start)+len('\n        }')]
+        source_constructor=inner_method('        private SourcePart()')
+        invalidate=inner_method('        public void invalidate()')
+        run_java('''
+class PrivacyCheck {
+ public static void main(String[] args) {
+  for(boolean global:new boolean[]{false,true})for(boolean nav:new boolean[]{false,true})
+  for(boolean simple:new boolean[]{false,true}){
+   LiteMode.enabled=global;
+   var s=new DownscaleScrollableNoiseSuppressor(simple,false,nav);
+   var part=s.new SourcePart();s.rectRenderNodes.add(part);part.invalidate();
+   if((part.renderNodesForGlass!=null)!=(global||nav))throw new AssertionError("Weak output allocation");
+   if(part.renderNodesForGlass!=null&&part.renderNodesForGlass.radius!=6)throw new AssertionError("Weak radius");
+   if(part.renderNodesForBlur.radius<38)throw new AssertionError("Frosted blur changed");
+   if(s.getRenderNode(0,0)!=(global?part.renderNodesForGlass.renderNodeRestored[0]:part.renderNodesForBlur.renderNodeRestored[0]))
+    throw new AssertionError("Legacy glass selection changed");
+   if(part.renderNodesForBlur.input!=(global?part.renderNodesForGlass.renderNodeRestored[0]:part.renderNode))
+    throw new AssertionError("Legacy blur input changed");
+   if(nav&&s.getRenderNode(2,0)!=part.renderNodesForGlass.renderNodeRestored[0])throw new AssertionError("Navigation still strongly blurred");
+   Canvas c=new Canvas();RectF area=new RectF();s.drawNavigationGlass(c,area);
+   if(nav?(c.node!=s.resultRenderNodes[2]||c.clip!=area||c.depth!=0):c.node!=null)throw new AssertionError("Navigation capture isolation");
+   area.empty=true;c.node=null;s.drawNavigationGlass(c,area);
+   if(c.node!=null)throw new AssertionError("Empty bounds drawn");
+  }
+ }
+}
+class DownscaleScrollableNoiseSuppressor {
+ boolean isLiquidGlassEnabled,simpleMode,navigationGlassEnabled,allowNoiseSuppress;int k;
+ RenderNode[] resultRenderNodes;
+ java.util.ArrayList<SourcePart> rectRenderNodes=new java.util.ArrayList<>();
+ CONSTRUCTOR
+ SELECTOR
+ DRAW
+ static float dpf2(float value){return value;}
+ class SourcePart {
+  RenderNode renderNode=new RenderNode(null);DownscaledRenderNode renderNodesForGlass,renderNodesForBlur;
+  SOURCE_CONSTRUCTOR
+  INVALIDATE
+ }
+ class DownscaledRenderNode {
+  float radius;RenderNode input;RenderNode[] renderNodeRestored={new RenderNode(null)};
+  DownscaledRenderNode(String name,int effects){}
+  DownscaledRenderNode(String name,int effects,boolean simple){}
+  void setScale(int x,int y){}
+  void setPrimaryEffectBlur(float r){radius=r;}
+  void setPrimaryEffectBlur(float r,Object e){radius=r;}
+  void setSecondaryEffect(int i,Object e){}
+  void invalidateRenderNodes(RenderNode node){input=node;}
+ }
+}
+class RenderNode{RenderNode(String name){}}
+class LiteMode{static boolean enabled;static int FLAG_LIQUID_GLASS;static boolean isEnabled(int flag){return enabled;}}
+class RenderNodeEffects{static Object getSaturationX3RenderEffect(){return null;}}
+class RectF{boolean empty;boolean isEmpty(){return empty;}}
+class Canvas{
+ int depth;RectF clip;RenderNode node;
+ void save(){depth++;}void restore(){depth--;}void clipRect(RectF r){clip=r;}void drawRenderNode(RenderNode n){node=n;}
+}
+'''.replace('SOURCE_CONSTRUCTOR',source_constructor).replace('CONSTRUCTOR',constructor)
+           .replace('SELECTOR',selector).replace('DRAW',draw).replace('INVALIDATE',invalidate)
+           .replace('private RenderNode getRenderNode','RenderNode getRenderNode')
+           .replace('private SourcePart()','SourcePart()'))
+
+    @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
     def test_ios_lift_keeps_visual_height_but_moves_capture_and_reserves_content(self):
         path=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java/app/exteraless/appearance/MainTabsUiHelper.java'
         text=path.read_text()
@@ -94,7 +166,9 @@ class PrivacyCheck {
    if(renderNode.enabled!=expected)throw new AssertionError("Shader state not refreshed");
    BlurredBackgroundProvider provider=IosLiquidGlassNavigation.colors(null);
    int alpha=provider.background.getColor(null,false)>>>24;
-   if(expected ? alpha>80||alpha<20 : alpha<200)throw new AssertionError("Unreadable fallback");
+   if(expected ? alpha>30||alpha<15 : alpha<200)throw new AssertionError("Unreadable fallback");
+   int darkAlpha=provider.background.getColor(null,true)>>>24;
+   if(expected ? darkAlpha>30||darkAlpha<20 : darkAlpha<200)throw new AssertionError("Dark tint");
   }
   BlurredBackgroundDrawable drawable=new BlurredBackgroundDrawable();
   IosLiquidGlassNavigation.configure(drawable);

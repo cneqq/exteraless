@@ -2783,13 +2783,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         iBlur3SourceColor = new BlurredBackgroundSourceColor();
         iBlur3SourceColor.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor();
+            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(true, false, app.freezgram.IosLiquidGlassNavigation.isRequested());
             iBlur3SourceGlassFrosted = new BlurredBackgroundSourceRenderNode(null);
             iBlur3SourceGlassFrosted.setupRenderer(new RenderNodeWithHash.Renderer() {
                 @Override
                 public void renderNodeCalculateHash(IBlur3Hash hash) {
                     hash.add(getThemedColor(Theme.key_windowBackgroundWhite));
                     hash.add(SharedConfig.chatBlurEnabled());
+                    hash.add(app.freezgram.IosLiquidGlassNavigation.isEnabled());
 
                     if (SharedConfig.chatBlurEnabled()) {
                         TopicsFragment topicsFragment = null;
@@ -2838,6 +2839,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 public void renderNodeCalculateHash(IBlur3Hash hash) {
                     hash.add(getThemedColor(Theme.key_windowBackgroundWhite));
                     hash.add(SharedConfig.chatBlurEnabled());
+                    hash.add(app.freezgram.IosLiquidGlassNavigation.isEnabled());
 
                     if (SharedConfig.chatBlurEnabled()) {
                         TopicsFragment topicsFragment = null;
@@ -2877,6 +2879,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         }
 
                         scrollableViewNoiseSuppressor.draw(canvas, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
+                        if (app.freezgram.IosLiquidGlassNavigation.isEnabled()) {
+                            scrollableViewNoiseSuppressor.drawNavigationGlass(canvas, iBlur3PositionMainTabs);
+                        }
                     }
                 }
             });

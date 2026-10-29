@@ -208,7 +208,7 @@ public class ContactsActivity extends BaseFragment implements FactorAnimator.Tar
         super(args);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor();
+            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(true, false, app.freezgram.IosLiquidGlassNavigation.isRequested());
             iBlur3SourceGlassFrosted = new BlurredBackgroundSourceRenderNode(null);
             iBlur3SourceGlass = new BlurredBackgroundSourceRenderNode(null);
         } else {
@@ -487,6 +487,9 @@ public class ContactsActivity extends BaseFragment implements FactorAnimator.Tar
                         c.drawColor(getThemedColor(Theme.key_windowBackgroundWhite));
                         if (SharedConfig.chatBlurEnabled()) {
                             scrollableViewNoiseSuppressor.draw(c, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
+                            if (app.freezgram.IosLiquidGlassNavigation.isEnabled()) {
+                                scrollableViewNoiseSuppressor.drawNavigationGlass(c, iBlur3PositionMainTabs);
+                            }
                         }
                         iBlur3SourceGlass.endRecording();
                         // }
