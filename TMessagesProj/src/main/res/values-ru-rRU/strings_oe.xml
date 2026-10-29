@@ -75,7 +75,11 @@
     <string name="FreezgramBadgeStyle">Вид значка Freezgram</string>
     <string name="FreezgramBadgeStyleSparkles">Крупный самолётик со звёздочками</string>
     <string name="FreezgramBadgeStylePlain">Крупный самолётик без эффектов</string>
-    <string name="FreezgramBadgeStyleSeal">Полупрозрачная плашка со звёздочками</string>
+    <string name="FreezgramBadgeStyleSeal">Серебристая плашка со звёздочками</string>
+    <string name="FreezgramBadgeStyleBlue">Ледяная голубая плашка со звёздочками</string>
+    <string name="FreezgramBadgeStyleLavender">Лавандовая плашка со звёздочками</string>
+    <string name="FreezgramBadgeStyleGraphite">Графитовая плашка со звёздочками</string>
+    <string name="FreezgramBadgeStyleMint">Мятная плашка со звёздочками</string>
     <string name="FreezgramBadgeOfficialChannel">Официальный канал Freezgram</string>
     <string name="FreezgramBadgeLocalInfo">Значок сообщества. Виден только в Freezgram.</string>
 </resources>

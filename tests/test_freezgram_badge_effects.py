@@ -16,12 +16,15 @@ class PrivacyCheck {
  public static void main(String[] args) throws Exception {
   if(BadgeStyleConfig.getStyle()!=BadgeStyleConfig.SPARKLES)throw new AssertionError("Wrong default");
   Drawable existing=new Drawable();BadgeStyleConfig.register(existing);
-  for(int style:new int[]{BadgeStyleConfig.PLAIN,BadgeStyleConfig.SEAL,BadgeStyleConfig.SPARKLES}){
+  java.util.Set<Integer> colors=new java.util.HashSet<>();
+  for(int style=BadgeStyleConfig.SPARKLES;style<=BadgeStyleConfig.MAX_STYLE;style++){
    int before=existing.invalidations;BadgeStyleConfig.setStyle(style);
    if(existing.invalidations!=before+1)throw new AssertionError("Existing badge did not refresh");
    var field=BadgeStyleConfig.class.getDeclaredField("style");field.setAccessible(true);field.setInt(null,-1);
    if(BadgeStyleConfig.getStyle()!=style)throw new AssertionError("Style not persisted");
+   if(style>=BadgeStyleConfig.SEAL)colors.add(BadgeStyleConfig.getSealColor(style));
   }
+  if(colors.size()!=5)throw new AssertionError("Seal colors are not distinct");
   boolean rejected=false;
   try{BadgeStyleConfig.setStyle(99);}catch(IllegalArgumentException e){rejected=true;}
   if(!rejected)throw new AssertionError("Invalid style accepted");
@@ -48,7 +51,7 @@ class ApplicationLoader{static Context applicationContext=new Context();}
 class PrivacyCheck {
   static void check(boolean value){if(!value)throw new AssertionError("Animation lifecycle");}
   public static void main(String[] args){
-    Drawable seal=new Drawable();
+    LayerDrawable seal=new LayerDrawable();
     Drawable plane=new Drawable();
     BadgeStyleConfig.style=BadgeStyleConfig.SEAL;
     FreezgramBadgeDrawable badge=new FreezgramBadgeDrawable(seal,plane);
@@ -75,6 +78,11 @@ class PrivacyCheck {
     check(plane.getBounds().width()==78);
     BadgeStyleConfig.style=BadgeStyleConfig.SPARKLES;
     badge.draw(canvas);check(badge.scheduled==before+1);check(plane.getBounds().width()==66);
+    for(int style=BadgeStyleConfig.SEAL;style<=6;style++){
+      BadgeStyleConfig.style=style;badge.draw(canvas);
+      check(seal.backing.tint==BadgeStyleConfig.getSealColor(style));
+      check(seal.getBounds().width()==72);
+    }
   }
 }
 class Rect {
@@ -84,7 +92,7 @@ class Rect {
 }
 class Drawable {
   interface Callback {}
-  Callback callback; Rect bounds=new Rect(); int scheduled; Runnable frame;
+  Callback callback; Rect bounds=new Rect(); int scheduled,tint; Runnable frame;
   void setCallback(Callback c){callback=c;} Callback getCallback(){return callback;}
   boolean isVisible(){return true;} Rect getBounds(){return bounds;}
   void setBounds(int l,int t,int r,int b){bounds.left=l;bounds.top=t;bounds.right=r;bounds.bottom=b;}
@@ -92,7 +100,12 @@ class Drawable {
   void scheduleSelf(Runnable r,long when){scheduled++;frame=r;}
   public void draw(Canvas c){} public int getIntrinsicWidth(){return 0;} public int getIntrinsicHeight(){return 0;}
   public void setAlpha(int alpha){} public void setColorFilter(ColorFilter filter){} public int getOpacity(){return 0;}
+  public void setTint(int color){tint=color;}
 }
+class LayerDrawable extends Drawable {
+  Drawable backing=new Drawable();Drawable findDrawableByLayerId(int id){return backing;}
+}
+class R {static class id {static int freezgram_badge_background=1;}}
 class Canvas {
   int depth; int save(){return depth++;} void restoreToCount(int count){depth=count;}
   void translate(float x,float y){} void scale(float x,float y){} void drawPath(Path p,Paint paint){}
@@ -113,6 +126,7 @@ class LiteMode {static int FLAG_ANIMATED_EMOJI_CHAT_NOT_PREMIUM=4096;static bool
 class BadgeStyleConfig {
  static int SPARKLES=0,PLAIN=1,SEAL=2,style;
  static int getStyle(){return style;}static void register(Drawable d){}
+ static int getSealColor(int style){return style+100;}
 }
 ''' + source)
 

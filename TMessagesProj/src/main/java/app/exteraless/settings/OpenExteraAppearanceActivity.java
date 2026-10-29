@@ -142,7 +142,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
 
     private CharSequence[] badgeStyleOptions() {
         return new CharSequence[]{getString(R.string.FreezgramBadgeStyleSparkles),
-                getString(R.string.FreezgramBadgeStylePlain), getString(R.string.FreezgramBadgeStyleSeal)};
+                getString(R.string.FreezgramBadgeStylePlain), getString(R.string.FreezgramBadgeStyleSeal),
+                getString(R.string.FreezgramBadgeStyleBlue), getString(R.string.FreezgramBadgeStyleLavender),
+                getString(R.string.FreezgramBadgeStyleGraphite), getString(R.string.FreezgramBadgeStyleMint)};
     }
     private int emojiSetsRow;
     private int pillStackRow;

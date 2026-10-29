@@ -102,7 +102,11 @@
     <string name="FreezgramBadgeStyle">Freezgram badge style</string>
     <string name="FreezgramBadgeStyleSparkles">Large plane with sparkles</string>
     <string name="FreezgramBadgeStylePlain">Large plane without effects</string>
-    <string name="FreezgramBadgeStyleSeal">Translucent seal with sparkles</string>
+    <string name="FreezgramBadgeStyleSeal">Silver seal with sparkles</string>
+    <string name="FreezgramBadgeStyleBlue">Ice blue seal with sparkles</string>
+    <string name="FreezgramBadgeStyleLavender">Lavender seal with sparkles</string>
+    <string name="FreezgramBadgeStyleGraphite">Graphite seal with sparkles</string>
+    <string name="FreezgramBadgeStyleMint">Mint seal with sparkles</string>
     <string name="FreezgramBadgeOfficialChannel">Official Freezgram channel</string>
     <string name="FreezgramBadgeLocalInfo">Community badge. Visible only in Freezgram.</string>
 </resources>
