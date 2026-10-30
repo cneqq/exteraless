@@ -272,3 +272,12 @@ Appearance group changes dispatch row-key diffs instead of full dataset resets;
 settings row add/remove/move animations have softer timing. JVM regressions cover
 transition cleanup/cancellation and search alignment with typing, filters and RTL.
 These visual changes have not been verified on a device or compiled into an APK.
+
+
+Wallpaper under-sources can be shared by several glass shapes without going
+through createDrawable. Their cropped snapshot node must not be resized or moved
+after another parent display list retains it. SnapshotSource now allocates a new
+recording node when crop size/origin changes, while reusing an unchanged crop.
+A JVM regression reproduced the old retained-node geometry overwrite and passes
+with the fix. This can explain rectangular seams/bands; confirming the reported
+artifact is gone still requires a phone build. No APK was requested for this fix.

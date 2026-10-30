@@ -33,6 +33,7 @@ public final class SmallElementsGlass {
     private static final class SnapshotSource extends BlurredBackgroundSourceRenderNode {
         private final BlurredBackgroundSource input;
         private Bitmap lastBitmap;
+        private BlurredBackgroundSourceRenderNode recording;
         private int lastRevision = Integer.MIN_VALUE;
         private int lastLeft = Integer.MIN_VALUE, lastTop = Integer.MIN_VALUE;
         SnapshotSource(BlurredBackgroundSource source) { super(source); input = source; }
@@ -48,18 +49,24 @@ public final class SmallElementsGlass {
             int height = Math.max(1, (int) Math.ceil(bottom) - originY + padding);
             Bitmap bitmap = input instanceof BlurredBackgroundSourceBitmap ? ((BlurredBackgroundSourceBitmap) input).getBitmap() : null;
             int revision = LiquidGlassStyle.revision();
-            if (bitmap == null || bitmap != lastBitmap || revision != lastRevision || originX != lastLeft || originY != lastTop || needUpdateDisplayList(width, height)) {
+            boolean geometryChanged = recording == null || originX != lastLeft || originY != lastTop
+                    || recording.needUpdateDisplayList(width, height);
+            if (bitmap == null || bitmap != lastBitmap || revision != lastRevision || geometryChanged) {
+                // A shared wallpaper under-source can be recorded into several glass shapes.
+                // Keep previous nodes alive with their original geometry: the canvas retains
+                // references to them, not copies of their contents.
+                if (geometryChanged) recording = new BlurredBackgroundSourceRenderNode(input);
                 lastBitmap = bitmap; lastRevision = revision; lastLeft = originX; lastTop = originY;
-                Canvas capture = beginRecording(width, height);
+                Canvas capture = recording.beginRecording(width, height);
                 capture.translate(-originX, -originY);
                 input.draw(capture, originX, originY, originX + width, originY + height);
-                endRecording();
-                setBlur(AndroidUtilities.dpf2(LiquidGlassStyle.blurRadiusDp()), LiquidGlassStyle.enhanceColors()
+                recording.endRecording();
+                recording.setBlur(AndroidUtilities.dpf2(LiquidGlassStyle.blurRadiusDp()), LiquidGlassStyle.enhanceColors()
                         ? org.telegram.messenger.utils.RenderNodeEffects.getSaturationX3RenderEffect() : null);
             }
             canvas.save();
             canvas.translate(originX, originY);
-            super.draw(canvas, left - originX, top - originY, right - originX, bottom - originY);
+            recording.draw(canvas, left - originX, top - originY, right - originX, bottom - originY);
             canvas.restore();
         }
     }

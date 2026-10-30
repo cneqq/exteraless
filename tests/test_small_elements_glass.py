@@ -57,7 +57,7 @@ class PrivacyCheck {
  NESTED
  public static void main(String[] args){
   var input=new BlurredBackgroundSourceBitmap();var bridge=new SnapshotSource(input);var c=new Canvas();
-  bridge.draw(c,0,0,100,50);bridge.draw(c,0,0,100,50);
+  bridge.draw(c,0,0,100,50);var retained=c.nodes.get(0);bridge.draw(c,0,0,100,50);
   if(input.calls!=1)throw new AssertionError("Repeated static capture");
   input.bitmap=new Bitmap();bridge.draw(c,0,0,100,50);
   if(input.calls!=2)throw new AssertionError("New menu image ignored");
@@ -65,13 +65,19 @@ class PrivacyCheck {
   if(input.calls!=3)throw new AssertionError("Shared optics ignored");
   bridge.draw(c,0,0,200,50);
   if(input.calls!=4)throw new AssertionError("Resized capture ignored");
+  if(retained.w!=228||retained.h!=178||c.nodes.get(c.nodes.size()-1)==retained)
+   throw new AssertionError("A later crop resized a wallpaper node already retained by the canvas");
+  var resized=c.nodes.get(c.nodes.size()-1);bridge.draw(c,50,0,250,50);
+  if(c.nodes.get(c.nodes.size()-1)==resized)throw new AssertionError("Moving crop rewrote the old origin");
+  var moved=c.nodes.get(c.nodes.size()-1);bridge.draw(c,50,0,250,50);
+  if(c.nodes.get(c.nodes.size()-1)!=moved)throw new AssertionError("Unchanged crop should reuse its recording");
   var one=bridge.createDrawable();var two=bridge.createDrawable();
   if(one.source==two.source)throw new AssertionError("Reaction shapes must not share mutable recordings");
   var own=(SnapshotSource)one.source;own.draw(c,1000,2000,1100,2050);
-  if(own.w!=228||own.h!=178)throw new AssertionError("Capture should be cropped around the target, not the entire screen");
+  if(c.nodes.get(c.nodes.size()-1).w!=228||c.nodes.get(c.nodes.size()-1).h!=178)throw new AssertionError("Capture should be cropped around the target, not the entire screen");
  }
 }
-class Canvas{boolean isHardwareAccelerated(){return true;}void translate(float x,float y){}void save(){}void restore(){}}class Bitmap{}
+class Canvas{java.util.ArrayList<BlurredBackgroundSourceRenderNode> nodes=new java.util.ArrayList<>();boolean isHardwareAccelerated(){return true;}void translate(float x,float y){}void save(){}void restore(){}}class Bitmap{}
 class BlurredBackgroundDrawable{BlurredBackgroundSource source;}
 class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawable{BlurredBackgroundDrawableRenderNode(BlurredBackgroundSource source){this.source=source;}}
 interface BlurredBackgroundSource{void draw(Canvas c,float l,float t,float r,float b);}
@@ -84,7 +90,7 @@ class BlurredBackgroundSourceRenderNode implements BlurredBackgroundSource{
  BlurredBackgroundDrawable createDrawable(){return new BlurredBackgroundDrawable();}
  boolean needUpdateDisplayList(int width,int height){return !recorded||w!=width||h!=height;}
  Canvas beginRecording(int width,int height){w=width;h=height;return new Canvas();}void endRecording(){recorded=true;}
- void setBlur(float radius,Object effect){}public void draw(Canvas c,float l,float t,float r,float b){}
+ void setBlur(float radius,Object effect){}public void draw(Canvas c,float l,float t,float r,float b){c.nodes.add(this);}
 }
 class LiquidGlassStyle{static int rev;static int revision(){return rev;}static int blurRadiusDp(){return 6;}static boolean enhanceColors(){return true;}}
 class AndroidUtilities{static int dp(int n){return n;}static float dpf2(int n){return n;}}
