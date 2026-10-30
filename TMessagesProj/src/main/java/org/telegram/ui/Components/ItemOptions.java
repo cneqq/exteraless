@@ -1582,6 +1582,7 @@ public class ItemOptions {
             }
             if (liquid && layout instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
                 var popup = (ActionBarPopupWindow.ActionBarPopupWindowLayout) layout;
+                app.exteraless.appearance.GlassMenuHelper.applyDividers(popup, resourcesProvider);
                 if (popup.getSwipeBack() != null) {
                     BlurredBackgroundDrawable fill = app.exteraless.appearance.GlassMenuHelper.createFill(menuFactory, resourcesProvider, popup.getSwipeBack());
                     fill.setSourceOffset(X + this.translateX, Y + this.translateY);

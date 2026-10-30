@@ -217,3 +217,10 @@ elements. Their snapshots use the shared RenderNode material and visible contour
 Explicit custom/color backgrounds and custom blur factories retain their own
 styling. This changes menu surfaces, not their commands or button handlers.
 Device checks are needed for header scrolling/transitions and popup placement.
+
+
+**Separators in glass menus** toggles thin inset lines between adjacent visible
+menu rows. It defaults to on and is backed up; it only applies to the shared
+small-element glass style. Group gaps and hidden rows do not add duplicate lines.
+The overlay does not change row sizes or touch targets. Both message popups and
+ordinary ItemOptions menus use it.

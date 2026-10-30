@@ -128,4 +128,5 @@
     <string name="FreezgramAttachmentPanelsGlassInfo">The bottom selector and caption field when choosing attachments.</string>
     <string name="FreezgramComposerContentInset">Text and emoji edge inset</string>
     <string name="FreezgramDialogsHeaderGlass">Chat list header</string>
+    <string name="FreezgramGlassMenuDividers">Separators in glass menus</string>
 </resources>

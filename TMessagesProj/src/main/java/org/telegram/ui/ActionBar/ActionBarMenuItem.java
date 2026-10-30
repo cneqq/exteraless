@@ -498,6 +498,9 @@ public class ActionBarMenuItem extends FrameLayout {
                     .setColorProvider(subMenuProvider)
                     .setRadius(dp(12))
                     .setPadding(dp(8)));
+            if (app.freezgram.SmallElementsGlass.isEnabled()) {
+                app.exteraless.appearance.GlassMenuHelper.applyDividers(popupLayout, resourcesProvider);
+            }
         }
 
         popupLayout.setOnTouchListener((v, event) -> {
@@ -862,6 +865,9 @@ public class ActionBarMenuItem extends FrameLayout {
                     .setColorProvider(subMenuProvider)
                     .setRadius(dp(12))
                     .setPadding(dp(8)));
+            if (app.freezgram.SmallElementsGlass.isEnabled()) {
+                app.exteraless.appearance.GlassMenuHelper.applyDividers(popupLayout, resourcesProvider);
+            }
         }
     }
 

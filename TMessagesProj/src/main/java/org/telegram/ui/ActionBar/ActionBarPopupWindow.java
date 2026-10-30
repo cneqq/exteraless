@@ -128,6 +128,15 @@ public class ActionBarPopupWindow extends PopupWindow {
         private PopupSwipeBackLayout swipeBackLayout;
         @Nullable
         private ScrollView scrollView;
+        private java.util.function.BooleanSupplier glassDividersEnabled;
+        private final Paint glassDividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        public void setGlassDividers(java.util.function.BooleanSupplier enabled, int color) {
+            glassDividersEnabled = enabled;
+            glassDividerPaint.setColor(color);
+            if (linearLayout != null) linearLayout.invalidate();
+        }
+
         protected LinearLayout linearLayout;
 
         private int backgroundColor = Color.WHITE;
@@ -245,6 +254,24 @@ public class ActionBarPopupWindow extends PopupWindow {
                         }
                     }
                     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+                }
+
+                @Override
+                protected void dispatchDraw(Canvas canvas) {
+                    super.dispatchDraw(canvas);
+                    if (glassDividersEnabled == null || !glassDividersEnabled.getAsBoolean()) return;
+                    View previous = null;
+                    float inset = dp(16), thickness = Math.max(1f, AndroidUtilities.dpf2(.5f));
+                    for (int i = 0; i < getChildCount(); i++) {
+                        View child = getChildAt(i);
+                        if (child.getVisibility() != VISIBLE) continue;
+                        if (child instanceof GapView) { previous = null; continue; }
+                        if (previous != null) {
+                            float y = (previous.getBottom() + child.getTop()) / 2f;
+                            canvas.drawRect(inset, y, getWidth() - inset, y + thickness, glassDividerPaint);
+                        }
+                        previous = child;
+                    }
                 }
 
                 @Override

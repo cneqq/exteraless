@@ -134,11 +134,17 @@ public abstract class GlassMenuHelper {
         }
     }
 
+    public static void applyDividers(ActionBarPopupWindow.ActionBarPopupWindowLayout popup, Theme.ResourcesProvider provider) {
+        popup.setGlassDividers(() -> app.freezgram.SmallElementsGlass.isEnabled() && AppearanceConfig.glassMenuDividers(),
+                Theme.multAlpha(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, provider), .18f));
+    }
+
     /** Apply the same material to the main popup and its swipe-back panels. */
     public static void applyToPopup(BlurredBackgroundDrawableViewFactory factory,
                                     Theme.ResourcesProvider resourcesProvider,
                                     ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout) {
         popupLayout.setBackground(createPanelBackground(factory, resourcesProvider, popupLayout));
+        applyDividers(popupLayout, resourcesProvider);
         if (popupLayout.getSwipeBack() != null) {
             popupLayout.getSwipeBack().setGlassForeground(app.freezgram.SmallElementsGlass.isEnabled()
                     ? createFill(factory, resourcesProvider, popupLayout.getSwipeBack()) : null);
