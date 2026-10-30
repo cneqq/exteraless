@@ -320,3 +320,36 @@ class PrivacyCheck{
 class Panel{static int dp(int n){return n;}INSET}
 class AppearanceConfig{static int style,side;static int chatComposerStyle(){return style;}static int composerSideInset(){return side;}}
 '''.replace('CALL',call).replace('INSET',inset))
+
+    def test_send_glass_replaces_accent_fill_and_keeps_fallback(self):
+        text=(JAVA/'org/telegram/ui/Components/ChatActivityEnterView.java').read_text()
+        def inner(signature):
+            start=text.index(signature)
+            return text[start:text.index('\n        }',start)+len('\n        }')]
+        methods=inner('        private boolean useComposerGlass()')+'\n'+inner('        private boolean drawComposerGlassBackground(Canvas canvas)')
+        start=text.index('            final boolean glassSend = drawComposerGlassBackground(canvas);')
+        end=text.index('            final boolean inactive =',start)
+        paint=text[start:end]
+        run_java('''
+class PrivacyCheck{
+ boolean composerGlassButton,isNewDesignSendButton=true;Drawable blurredBackgroundDrawable;
+ Rect backgroundRect=new Rect();Object backgroundPaint;static int RADIUS=22;static int dp(int n){return n;}
+ METHODS
+ void render(Canvas canvas){PAINT}
+ public static void main(String[] args){
+  for(int style:new int[]{0,1,2})for(boolean opt:new boolean[]{false,true})for(boolean supported:new boolean[]{false,true})
+  for(boolean hardware:new boolean[]{false,true})for(boolean material:new boolean[]{false,true}){
+   var p=new PrivacyCheck();var c=new Canvas();c.hardware=hardware;p.composerGlassButton=opt;
+   AppearanceConfig.style=style;ChatComposerGlass.enabled=supported;p.blurredBackgroundDrawable=material?new Drawable():null;
+   p.render(c);boolean glass=style==1&&opt&&supported&&hardware&&material;
+   if(c.blue!=(glass?0:1)||(material?p.blurredBackgroundDrawable.draws:0)!=(glass?1:0))throw new AssertionError("Accent covers glass or fallback missing");
+  }
+ }
+}
+class Canvas{boolean hardware;int blue;boolean isHardwareAccelerated(){return hardware;}void drawRoundRect(Object r,int x,int y,Object paint){blue++;}}
+class Rect{void round(Object r){}}
+class Drawable{int draws;void setBounds(Object r){}void updateColors(){}void draw(Canvas c){draws++;}}
+class AndroidUtilities{static Object rectTmp2=new Object();}
+class AppearanceConfig{static int style;static int chatComposerStyle(){return style;}}
+class ChatComposerGlass{static boolean enabled;static boolean isEnabled(){return enabled;}static void refresh(Drawable d){}}
+'''.replace('METHODS',methods).replace('PAINT',paint).replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig').replace('app.freezgram.ChatComposerGlass','ChatComposerGlass'))

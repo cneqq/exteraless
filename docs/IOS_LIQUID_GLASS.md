@@ -242,3 +242,15 @@ One helper supplies the inset calculation to both passes; Default/Android styles
 continue to use zero panel inset. The regression checks matching wrap widths for
 0/16/48dp insets and narrow/normal screens. Clipping and height transitions still
 require device verification with multiline drafts and sender/reply controls.
+
+
+Side chat controls (scroll down, unread mentions/reactions and search arrows)
+follow Other small elements and use the shared weak capture with the common
+material/optics. The weak output is allocated even when small elements are the
+only opted-in surfaces. Counters and click handlers are unchanged.
+The main iOS composer send button receives its own glass drawable. Its accent
+fill is skipped only when that material can draw on a supported hardware canvas;
+Default/Android styles, disabled blur and power-saving retain the original fill.
+The icon uses the theme glass foreground. Sending, scheduling, loading, paid-send
+and locked-send logic is unchanged. JVM tests verify accent/glass exclusivity
+and fallback; device verification of the two button surfaces remains required.

@@ -3065,7 +3065,7 @@ public class ChatActivity extends BaseFragment implements
         navbarContentSourceWallpaper = new BlurredBackgroundSourceWrapped();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SharedConfig.chatBlurEnabled()) {
             scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(
-                    true, false, app.freezgram.IosLiquidGlassChatHeader.isRequested() || app.freezgram.ChatComposerGlass.isRequested());
+                    true, false, app.freezgram.IosLiquidGlassChatHeader.isRequested() || app.freezgram.ChatComposerGlass.isRequested() || app.exteraless.appearance.AppearanceConfig.smallElementsGlass());
 
             recommendedAdditionalSizeY = Math.max(0, dp(48) - Math.min(AndroidUtilities.navigationBarHeight, AndroidUtilities.statusBarHeight));
 
@@ -3098,7 +3098,7 @@ public class ChatActivity extends BaseFragment implements
             glassBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(navbarContentSourceWallpaper);
             glassBackgroundDrawableFactoryFrosted = new BlurredBackgroundDrawableViewFactory(navbarContentSourceWallpaper);
         }
-        if (scrollableViewNoiseSuppressor != null && (app.freezgram.IosLiquidGlassChatHeader.isRequested() || app.freezgram.ChatComposerGlass.isRequested())) {
+        if (scrollableViewNoiseSuppressor != null && (app.freezgram.IosLiquidGlassChatHeader.isRequested() || app.freezgram.ChatComposerGlass.isRequested() || app.exteraless.appearance.AppearanceConfig.smallElementsGlass())) {
             iosHeaderGlassSource = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
             iosHeaderGlassSource.setOnDrawablesRelativePositionChangeListener(this::invalidateMergedVisibleBlurredPositionsAndSourcesPositions);
             iosHeaderGlassSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
@@ -7955,7 +7955,14 @@ public class ChatActivity extends BaseFragment implements
         // topButtonsLayout.setGravity(Gravity.TOP | Gravity.RIGHT);
         // contentView.addView(topButtonsLayout, LayoutHelper.createFrame(57, 300, Gravity.RIGHT | Gravity.TOP));
 
-        sideControlsButtonsLayout = new ChatActivitySideControlsButtonsLayout(context, resourceProvider, blurredBackgroundColorProvider, glassBackgroundDrawableFactory);
+        BlurredBackgroundDrawableViewFactory sideButtonsFactory = glassBackgroundDrawableFactory;
+        org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundColorProvider sideButtonsColors = blurredBackgroundColorProvider;
+        if (app.freezgram.SmallElementsGlass.isEnabled() && iosHeaderGlassSource != null) {
+            sideButtonsFactory = iosHeaderGlassFactory.withSource(iosHeaderGlassSource);
+            sideButtonsFactory.setDrawableConfigurator(app.freezgram.LiquidGlassStyle::configure);
+            sideButtonsColors = app.freezgram.LiquidGlassStyle.surfaceColors(resourceProvider, app.freezgram.SmallElementsGlass::isEnabled);
+        }
+        sideControlsButtonsLayout = new ChatActivitySideControlsButtonsLayout(context, resourceProvider, sideButtonsColors, sideButtonsFactory);
         sideControlsButtonsLayout.setOnClickListener(this::onSideControlButtonOnClick);
         sideControlsButtonsLayout.setOnLongClickListener(this::onSideControlButtonOnLongClick);
         {
@@ -8889,6 +8896,12 @@ public class ChatActivity extends BaseFragment implements
         checkSendButtonBlockedByTyping(false);
 
         chatInputBubbleContainer.addView(chatActivityEnterView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 7, 0, 7, 0));
+        if (app.exteraless.appearance.AppearanceConfig.chatComposerStyle() == 1) {
+            ChatActivityEnterView.SendButton send = (ChatActivityEnterView.SendButton) chatActivityEnterView.getSendButtonInternal();
+            send.setComposerGlassBackground(composerGlassFactory.create(send,
+                    app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate, app.freezgram.ChatComposerGlass::isEnabled)));
+        }
+
 
         int chatListIndex = contentView.indexOfChild(chatListView);
         chatListIndex = chatListIndex < 0 ? contentView.getChildCount() : (chatListIndex + 1);
