@@ -318,3 +318,12 @@ the preview. The original toggle key/defaults are preserved and the new numeric
 settings are backed up. The local-dismissal regression checks account/chat
 isolation and non-contact action variants; geometry tests cover disable/opacity
 and narrow surfaces. No APK build or phone visual verification was performed.
+
+
+Appearance > Snow appearance now offers Snowflakes (the existing particle mix)
+and Dots (only round point particles). The snow enable switch and LiteMode gate
+are unchanged. SnowflakesEffect applies the selection to both batched and fallback
+rendering, including particles already alive when the setting changes. The style
+is backed up, defaults to the previous appearance and is shared by the app's
+existing snow effect surfaces. Java/XML syntax and resource names were checked;
+no APK build or phone visual verification was performed.

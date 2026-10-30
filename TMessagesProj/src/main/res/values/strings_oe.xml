@@ -132,4 +132,7 @@
     <string name="FreezgramGlassDividerWeight">Line thickness</string>
     <string name="FreezgramGlassDividerOpacity">Line opacity</string>
     <string name="FreezgramGlassDividerInset">Side inset</string>
+    <string name="FreezgramSnowStyle">Snow appearance</string>
+    <string name="FreezgramSnowStyleFlakes">Snowflakes</string>
+    <string name="FreezgramSnowStyleDots">Dots</string>
 </resources>

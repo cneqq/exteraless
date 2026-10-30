@@ -54,7 +54,7 @@ public class SnowflakesEffect {
         int type;
 
         public void draw(Canvas canvas) {
-            switch (type) {
+            switch (dotsOnly ? 0 : type) {
                 case 0: {
                     particlePaint.setAlpha((int) (255 * alpha));
                     canvas.drawPoint(x, y, particlePaint);
@@ -81,6 +81,7 @@ public class SnowflakesEffect {
     private final ArrayList<Particle> freeParticles = new ArrayList<>();
 
     private int color;
+    private boolean dotsOnly;
 
     public SnowflakesEffect(int viewType) {
         this.viewType = viewType;
@@ -166,6 +167,7 @@ public class SnowflakesEffect {
             return;
         }
 
+        dotsOnly = app.exteraless.appearance.AppearanceConfig.snowStyle() == 1;
         if (batchParticlesBuffer != null) {
             final int count = Math.min(maxCount, particles.size());
             final int texSize = dp(TEXTURE_SIZE_DP);
@@ -173,8 +175,9 @@ public class SnowflakesEffect {
             for (int a = 0; a < count; a++) {
                 Particle particle = particles.get(a);
                 final float x = particle.x, y = particle.y;
-                final float h = particle.type == 0 ? (texSize / 2f) : (texSize / 2f * particle.scale);
-                final float tx = particle.type == 0 ? texSize : 0;
+                final int type = dotsOnly ? 0 : particle.type;
+                final float h = type == 0 ? (texSize / 2f) : (texSize / 2f * particle.scale);
+                final float tx = type == 0 ? texSize : 0;
 
                 batchParticlesBuffer.setParticleColor(a, ColorUtils.setAlphaComponent(color, (int) (255 * Utilities.clamp01(particle.alpha))));
                 batchParticlesBuffer.setParticleVertexCords(a, x - h, y - h, x + h, y + h);

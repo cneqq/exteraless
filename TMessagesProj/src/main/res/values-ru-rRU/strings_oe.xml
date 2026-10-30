@@ -105,4 +105,7 @@
     <string name="FreezgramGlassDividerWeight">Толщина линии</string>
     <string name="FreezgramGlassDividerOpacity">Непрозрачность линии</string>
     <string name="FreezgramGlassDividerInset">Отступы по бокам</string>
+    <string name="FreezgramSnowStyle">Вид снега</string>
+    <string name="FreezgramSnowStyleFlakes">Снежинки</string>
+    <string name="FreezgramSnowStyleDots">Точки</string>
 </resources>

@@ -107,6 +107,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
     private int chatListHeaderRow;
     private int chatListPreviewRow;
     private int forceSnowRow;
+    private int snowStyleRow;
     private int centerTitleRow;
     // Material Design 3: сворачиваемая группа и пять вложенных стилей.
     private int md3GroupRow;
@@ -184,6 +185,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         chatListHeaderRow = addRow("chatListHeader");
         chatListPreviewRow = addRow("chatListPreview");
         forceSnowRow = addRow("forceSnow");
+        snowStyleRow = addRow("snowStyle");
         centerTitleRow = addRow("centerTitle");
         senderMiniAvatarsRow = addRow("senderMiniAvatars");
         titleTextRow = addRow("titleText");
@@ -749,6 +751,11 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
             };
             showTitleTextSelector(onTitleTextChanged);
             return;
+        } else if (position == snowStyleRow) {
+            showSelector(position, getString(R.string.FreezgramSnowStyle), new CharSequence[]{
+                    getString(R.string.FreezgramSnowStyleFlakes), getString(R.string.FreezgramSnowStyleDots)
+            }, AppearanceConfig.snowStyle, this::rebuildAll);
+            return;
         } else if (position == forceSnowRow) {
             boolean enabled = NekoConfig.actionBarDecoration.Int() != 1;
             NekoConfig.actionBarDecoration.setConfigInt(enabled ? 1 : 0);
@@ -1051,6 +1058,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                                 getString(R.string.FreezgramChatComposerIos), getString(R.string.FreezgramChatComposerAndroid)};
                         cell.setTextAndValue(getString(R.string.FreezgramChatComposerStyle),
                                 styles[AppearanceConfig.chatComposerStyle()], true);
+                    } else if (position == snowStyleRow) {
+                        cell.setTextAndValue(getString(R.string.FreezgramSnowStyle), getString(AppearanceConfig.snowStyle() == 1
+                                ? R.string.FreezgramSnowStyleDots : R.string.FreezgramSnowStyleFlakes), true);
                     } else if (position == dividerStyleRow) {
                         String[] v = {getString(R.string.OEAppearanceDividerHidden), getString(R.string.OEAppearanceDividerLine), getString(R.string.OEAppearanceDividerSegments)};
                         cell.setTextAndValue(getString(R.string.OEAppearanceDividerStyle), v[clamp(AppearanceConfig.dividerStyle.Int(), v.length)], false);
@@ -1175,7 +1185,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     || position == md3PlayerRow || position == md3MiniPlayerRow
                     || position == iosLiquidGlassRow) {
                 return TYPE_ROUND_CHECK;
-            } else if (position == dividerStyleRow || position == glassOutlineRow
+            } else if (position == snowStyleRow || position == dividerStyleRow || position == glassOutlineRow
                     || position == tabTitleStyleRow
                     || position == tabCounterRow || position == titleTextRow) {
                 return TYPE_SETTINGS;
