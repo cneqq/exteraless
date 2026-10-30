@@ -203,10 +203,15 @@ public class ChatInputViewsContainer extends FrameLayout {
 
     private int inputSideInset;
 
-    private void applyInputSideInsets(int width) {
+    /** Shared by the preliminary chat measurement and this container's final measurement. */
+    public int getInputSideInsetForWidth(int width) {
         int requested = app.exteraless.appearance.AppearanceConfig.chatComposerStyle() == 1
                 ? dp(app.exteraless.appearance.AppearanceConfig.composerSideInset()) : 0;
-        inputSideInset = Math.min(requested, Math.max(0, (width - dp(240)) / 2));
+        return Math.min(requested, Math.max(0, (width - dp(240)) / 2));
+    }
+
+    private void applyInputSideInsets(int width) {
+        inputSideInset = getInputSideInsetForWidth(width);
         LayoutParams params = (LayoutParams) inputIslandBubbleContainer.getLayoutParams();
         if (params.leftMargin != inputSideInset || params.rightMargin != inputSideInset) {
             params.leftMargin = params.rightMargin = inputSideInset;

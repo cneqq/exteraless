@@ -19805,7 +19805,10 @@ public class ChatActivity extends BaseFragment implements
             }
 
             int childCount = getChildCount();
-            measureChildWithMargins(chatActivityEnterView, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            // Match the nested panel width: measuring full-width first can repeatedly
+            // switch a draft between one and two lines and restart its height animation.
+            measureChildWithMargins(chatActivityEnterView, widthMeasureSpec,
+                    2 * chatInputViewsContainer.getInputSideInsetForWidth(widthSize), heightMeasureSpec, 0);
 
             if (inPreviewMode || isInsideContainer || shouldHideBottomFor3ButtonNav() || shouldHideBottomForGesture()) {
                 inputFieldHeight = 0;

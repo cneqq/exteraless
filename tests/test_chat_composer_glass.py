@@ -81,7 +81,7 @@ class AppearanceConfig{static int style,gap;static int chatComposerStyle(){retur
 
     def test_side_insets_are_symmetric_and_keep_minimum_input_width(self):
         text=(JAVA / 'org/telegram/ui/Components/chat/ChatInputViewsContainer.java').read_text()
-        apply=method(text, '    private void applyInputSideInsets(int width)').replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig')
+        apply=(method(text, '    public int getInputSideInsetForWidth(int width)')+'\n'+method(text, '    private void applyInputSideInsets(int width)')).replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig')
         run_java('''
 class PrivacyCheck {
  int inputSideInset;View inputIslandBubbleContainer=new View();static int dp(int n){return n*2;}
@@ -293,3 +293,30 @@ class AndroidUtilities{static float density=1;}
 class ChatComposerGlass{POLICY}
 class AppearanceConfig{static int chatComposerStyle(){return 1;}}
 '''.replace("METHODS",methods).replace("POLICY",policy).replace("app.freezgram.ChatComposerGlass", "ChatComposerGlass"))
+
+    def test_preliminary_measurement_uses_the_same_width_as_nested_composer(self):
+        container=(JAVA/'org/telegram/ui/Components/chat/ChatInputViewsContainer.java').read_text()
+        inset=method(container,'    public int getInputSideInsetForWidth(int width)').replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig')
+        chat=(JAVA/'org/telegram/ui/ChatActivity.java').read_text()
+        start=chat.index('            measureChildWithMargins(chatActivityEnterView, widthMeasureSpec,')
+        call=chat[start:chat.index(';',start)+1]
+        run_java('''
+class PrivacyCheck{
+ Object chatActivityEnterView=new Object();Panel chatInputViewsContainer=new Panel();int measuredWidth;
+ void measureChildWithMargins(Object v,int width,int used,int height,int extra){measuredWidth=width-used-14;}
+ void measure(int widthSize){int widthMeasureSpec=widthSize,heightMeasureSpec=1000;CALL}
+ public static void main(String[] args){
+  var p=new PrivacyCheck();
+  for(int style:new int[]{0,1,2})for(int side:new int[]{0,16,48})for(int width:new int[]{220,240,360,412}){
+   AppearanceConfig.style=style;AppearanceConfig.side=side;p.measure(width);
+   int nested=width-2*p.chatInputViewsContainer.getInputSideInsetForWidth(width)-14;
+   if(p.measuredWidth!=nested)throw new AssertionError("Draft has conflicting wrap widths");
+   // A draft just above the nested one-line width must wrap in both passes.
+   int draftWidth=nested+1;
+   if((draftWidth>p.measuredWidth)!=(draftWidth>nested))throw new AssertionError("Line count oscillates");
+  }
+ }
+}
+class Panel{static int dp(int n){return n;}INSET}
+class AppearanceConfig{static int style,side;static int chatComposerStyle(){return style;}static int composerSideInset(){return side;}}
+'''.replace('CALL',call).replace('INSET',inset))

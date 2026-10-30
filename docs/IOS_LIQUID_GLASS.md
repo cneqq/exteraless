@@ -233,3 +233,12 @@ this includes selected-chat actions. Disabling small-element glass restores thei
 original popup material. Explicitly supplied factories are preserved. JVM checks
 cover transparent-theme dispatch and automatic capture refresh/restoration;
 actual header and popup appearance still requires phone verification.
+
+
+The preliminary composer measurement in ChatActivity now subtracts the same
+symmetric panel insets as the nested ChatInputViewsContainer. Previously the two
+passes could wrap a draft differently and repeatedly retarget its height animator.
+One helper supplies the inset calculation to both passes; Default/Android styles
+continue to use zero panel inset. The regression checks matching wrap widths for
+0/16/48dp insets and narrow/normal screens. Clipping and height transitions still
+require device verification with multiline drafts and sender/reply controls.
