@@ -10641,7 +10641,7 @@ public class ChatActivity extends BaseFragment implements
 
     private boolean dismissAddContactSuggestion() {
         if (currentUser == null || currentUser.contact || currentUser.self || addToContactsButton == null
-                || addToContactsButton.getVisibility() != VISIBLE || addToContactsButtonArchive || addToContactsButton.getTag() != null) return false;
+                || addToContactsButton.getVisibility() != View.VISIBLE || addToContactsButtonArchive || addToContactsButton.getTag() != null) return false;
         long peer = currentEncryptedChat != null ? currentUser.id : dialog_id;
         MessagesController.getNotificationsSettings(currentAccount).edit()
                 .putBoolean("freezgram_hide_add_contact_" + peer, true).apply();

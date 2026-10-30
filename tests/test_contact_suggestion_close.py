@@ -12,7 +12,7 @@ class ContactCloseTests(unittest.TestCase):
   policy=source[start:source.index('\n',source.index('        showAdd &= ',start))]
   run_java('''
 class PrivacyCheck{
- static final int VISIBLE=0;User currentUser=new User();Button addToContactsButton=new Button();Object currentEncryptedChat;
+ User currentUser=new User();Button addToContactsButton=new Button();Object currentEncryptedChat;
  boolean addToContactsButtonArchive;long dialog_id=42;int currentAccount,updates;
  void updateTopPanel(boolean animated){updates++;}
  DISMISS
@@ -29,6 +29,7 @@ class PrivacyCheck{
   if(offered(MessagesController.getNotificationsSettings(1),99))throw new AssertionError("Encrypted peer key differs from read path");
  }
 }
+class View{static final int VISIBLE=0;}
 class User{boolean contact,self;long id=42;}
 class Button{boolean visible=true;Object tag;int getVisibility(){return visible?0:8;}Object getTag(){return tag;}}
 class MessagesController{static java.util.Map<Integer,Prefs> accounts=new java.util.HashMap<>();static Prefs getNotificationsSettings(int a){return accounts.computeIfAbsent(a,k->new Prefs());}}
