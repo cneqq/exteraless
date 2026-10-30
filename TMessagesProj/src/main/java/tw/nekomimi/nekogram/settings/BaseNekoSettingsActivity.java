@@ -106,10 +106,6 @@ public abstract class BaseNekoSettingsActivity extends BaseFragment {
     protected HashMap<Integer, String> rowMapReverse = new HashMap<>(20);
 
 
-    @Override
-    public android.animation.AnimatorSet onCustomTransitionAnimation(boolean isOpen, Runnable callback) {
-        return app.freezgram.SettingsMotion.transition(this, isOpen, callback);
-    }
 
     @Override
     public boolean onFragmentCreate() {
@@ -146,7 +142,7 @@ public abstract class BaseNekoSettingsActivity extends BaseFragment {
         itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
         itemAnimator.setDelayAnimations(false);
         itemAnimator.setSupportsChangeAnimations(false);
-        if (app.freezgram.SettingsMotion.appliesTo(this)) {
+        if (app.freezgram.SettingsMotion.appliesTo(this) && app.exteraless.appearance.AppearanceConfig.transitionStyle() == 1) {
             itemAnimator.setAddDuration(260);
             itemAnimator.setRemoveDuration(220);
             itemAnimator.setMoveDuration(300);

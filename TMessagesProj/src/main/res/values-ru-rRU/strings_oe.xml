@@ -110,4 +110,7 @@
     <string name="FreezgramSnowStyleDots">Точки</string>
     <string name="FreezgramChatHeaderGlassDim">Затемнять стекло шапки чата</string>
     <string name="FreezgramGiftCardsGlass">Карточки подарков в чатах</string>
+    <string name="FreezgramTransitionStyle">Анимации переходов</string>
+    <string name="FreezgramTransitionStandard">Стандартные</string>
+    <string name="FreezgramTransitionSmooth">Плавные</string>
 </resources>

@@ -77,6 +77,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
 
     // Appearance
     private int appearanceHeaderRow;
+    private int transitionStyleRow;
     private int fabShapeRow;
     private int useSystemFontsRow;
     private int gooeyAvatarRow;
@@ -209,6 +210,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         linksDividerRow = addRow();
 
         appearanceHeaderRow = addRow("appearanceHeader");
+        transitionStyleRow = addRow("transitionStyle");
         fabShapeRow = addRow("fabShape");
         useSystemFontsRow = addRow("useSystemFonts");
         // Material Design 3 — сворачиваемая группа, как у exteraGram
@@ -751,6 +753,11 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
             };
             showTitleTextSelector(onTitleTextChanged);
             return;
+        } else if (position == transitionStyleRow) {
+            showSelector(position, getString(R.string.FreezgramTransitionStyle), new CharSequence[]{
+                    getString(R.string.FreezgramTransitionStandard), getString(R.string.FreezgramTransitionSmooth)
+            }, AppearanceConfig.transitionStyle, null);
+            return;
         } else if (position == snowStyleRow) {
             showSelector(position, getString(R.string.FreezgramSnowStyle), new CharSequence[]{
                     getString(R.string.FreezgramSnowStyleFlakes), getString(R.string.FreezgramSnowStyleDots)
@@ -1058,6 +1065,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                                 getString(R.string.FreezgramChatComposerIos), getString(R.string.FreezgramChatComposerAndroid)};
                         cell.setTextAndValue(getString(R.string.FreezgramChatComposerStyle),
                                 styles[AppearanceConfig.chatComposerStyle()], true);
+                    } else if (position == transitionStyleRow) {
+                        cell.setTextAndValue(getString(R.string.FreezgramTransitionStyle), getString(AppearanceConfig.transitionStyle() == 1
+                                ? R.string.FreezgramTransitionSmooth : R.string.FreezgramTransitionStandard), true);
                     } else if (position == snowStyleRow) {
                         cell.setTextAndValue(getString(R.string.FreezgramSnowStyle), getString(AppearanceConfig.snowStyle() == 1
                                 ? R.string.FreezgramSnowStyleDots : R.string.FreezgramSnowStyleFlakes), true);
@@ -1185,7 +1195,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     || position == md3PlayerRow || position == md3MiniPlayerRow
                     || position == iosLiquidGlassRow) {
                 return TYPE_ROUND_CHECK;
-            } else if (position == snowStyleRow || position == dividerStyleRow || position == glassOutlineRow
+            } else if (position == transitionStyleRow || position == snowStyleRow || position == dividerStyleRow || position == glassOutlineRow
                     || position == tabTitleStyleRow
                     || position == tabCounterRow || position == titleTextRow) {
                 return TYPE_SETTINGS;

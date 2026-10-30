@@ -430,6 +430,11 @@ object AppearanceConfig {
     fun navigationPanelLift(): Int { ensureLoaded(); return navigationPanelLift.Int().coerceIn(0, 64) }
 
     @JvmField
+    val transitionStyle = addConfig("FreezgramTransitionStyle", ConfigItem.configTypeInt, 1)
+    @JvmStatic
+    fun transitionStyle(): Int { ensureLoaded(); return transitionStyle.Int().coerceIn(0, 1) }
+
+    @JvmField
     val snowStyle = addConfig("FreezgramSnowStyle", ConfigItem.configTypeInt, 0)
     @JvmStatic
     fun snowStyle(): Int { ensureLoaded(); return snowStyle.Int().coerceIn(0, 1) }

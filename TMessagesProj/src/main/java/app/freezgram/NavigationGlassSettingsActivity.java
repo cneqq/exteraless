@@ -26,10 +26,6 @@ import org.telegram.ui.Components.glass.GlassTabView;
 
 /** Local visual settings with sample background content and the actual navigation tabs. */
 public final class NavigationGlassSettingsActivity extends BaseFragment {
-    @Override
-    public android.animation.AnimatorSet onCustomTransitionAnimation(boolean isOpen, Runnable callback) {
-        return app.freezgram.SettingsMotion.transition(this, isOpen, callback);
-    }
 
     public static final int NAVIGATION = 0, SHARED = 1, COMPOSER = 2;
     private final int mode;

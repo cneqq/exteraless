@@ -3,16 +3,17 @@ package app.freezgram;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.Build;
 import android.view.View;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.SharedConfig;
+import app.exteraless.appearance.AppearanceConfig;
+import java.util.function.Consumer;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 
-/** Local transitions for Freezgram settings; system/app animation opt-outs remain authoritative. */
+/** Shared screen transitions. Native preview and specialized fragment transitions stay with their owners. */
 public final class SettingsMotion {
     private SettingsMotion() {}
 
@@ -21,19 +22,21 @@ public final class SettingsMotion {
         return name.startsWith("app.exteraless.settings.") || name.startsWith("app.freezgram.");
     }
 
-    public static AnimatorSet transition(BaseFragment fragment, boolean opening, Runnable completion) {
-        if (!appliesTo(fragment) || !SharedConfig.animationsEnabled()
-                || Build.VERSION.SDK_INT >= 26 && !ValueAnimator.areAnimatorsEnabled()) return null;
-        View content = fragment.getFragmentView();
-        if (content == null || !(content.getParent() instanceof View)) return null;
-        View container = (View) content.getParent();
+    public static AnimatorSet transition(View container, boolean opening, Runnable completion, Consumer<Float> progress) {
+        if (AppearanceConfig.transitionStyle() != 1 || !SharedConfig.animationsEnabled()
+                || Build.VERSION.SDK_INT >= 26 && !ValueAnimator.areAnimatorsEnabled() || container == null) return null;
         float travel = AndroidUtilities.dp(28);
         container.setAlpha(opening ? 0f : 1f);
         container.setTranslationX(opening ? travel : 0f);
+        ValueAnimator frames = ValueAnimator.ofFloat(0f, 1f);
+        frames.addUpdateListener(frame -> {
+            float value = (float) frame.getAnimatedValue();
+            container.setAlpha(opening ? value : 1f - value);
+            container.setTranslationX(travel * (opening ? 1f - value : value));
+            progress.accept(value);
+        });
         AnimatorSet animation = new AnimatorSet();
-        animation.playTogether(
-                ObjectAnimator.ofFloat(container, View.ALPHA, opening ? 0f : 1f, opening ? 1f : 0f),
-                ObjectAnimator.ofFloat(container, View.TRANSLATION_X, opening ? travel : 0f, opening ? 0f : travel));
+        animation.playTogether(frames);
         animation.setDuration(opening ? 320 : 280);
         animation.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
         animation.addListener(new AnimatorListenerAdapter() {

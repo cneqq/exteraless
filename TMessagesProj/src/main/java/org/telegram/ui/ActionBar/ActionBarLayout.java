@@ -2079,11 +2079,15 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         springRouteBackgroundDrawable = null;
         springRouteYRatio = 0f;
         if (containerView != null) {
+            containerView.setAlpha(1f);
+            containerView.setTranslationX(0f);
             containerView.setScaleX(1f);
             containerView.setScaleY(1f);
             containerView.setTranslationY(0f);
         }
         if (containerViewBack != null) {
+            containerViewBack.setAlpha(1f);
+            containerViewBack.setTranslationX(0f);
             containerViewBack.setScaleX(1f);
             containerViewBack.setScaleY(1f);
             containerViewBack.setTranslationY(0f);
@@ -2188,7 +2192,21 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         containerViewBack.setVisibility(View.INVISIBLE);
     }
 
+    private void dispatchSharedTransitionProgress(float progress) {
+        animationProgress = progress;
+        if (newFragment != null) newFragment.onTransitionAnimationProgress(true, progress);
+        if (oldFragment != null) oldFragment.onTransitionAnimationProgress(false, progress);
+    }
+
     private void startLayoutAnimation(final boolean open, final boolean first, final boolean preview) {
+        if (first && !preview && !predictiveBackInProgress) {
+            AnimatorSet shared = app.freezgram.SettingsMotion.transition(open ? containerView : containerViewBack, open,
+                    () -> onAnimationEndCheck(false), this::dispatchSharedTransitionProgress);
+            if (shared != null) {
+                currentAnimation = shared;
+                return;
+            }
+        }
         if (first) {
             animationProgress = 0.0f;
             lastFrameTime = System.nanoTime() / 1000000;

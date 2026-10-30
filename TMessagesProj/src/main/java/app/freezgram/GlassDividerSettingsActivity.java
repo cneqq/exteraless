@@ -24,9 +24,6 @@ import app.exteraless.appearance.AvatarCornersSeekBar;
 
 public final class GlassDividerSettingsActivity extends BaseFragment {
     private boolean changed;
-    @Override public android.animation.AnimatorSet onCustomTransitionAnimation(boolean open, Runnable done) {
-        return SettingsMotion.transition(this, open, done);
-    }
     @Override public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setTitle(LocaleController.getString(R.string.FreezgramGlassMenuDividers));

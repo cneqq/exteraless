@@ -137,4 +137,7 @@
     <string name="FreezgramSnowStyleDots">Dots</string>
     <string name="FreezgramChatHeaderGlassDim">Darken chat header glass</string>
     <string name="FreezgramGiftCardsGlass">Gift cards in chats</string>
+    <string name="FreezgramTransitionStyle">Screen transitions</string>
+    <string name="FreezgramTransitionStandard">Standard</string>
+    <string name="FreezgramTransitionSmooth">Smooth</string>
 </resources>
