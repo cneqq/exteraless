@@ -296,9 +296,20 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
      * notifyDataSetChanged недостаточно.
      */
     private void rebuildRowsAndNotify() {
+        final int oldCount = rowCount;
+        final java.util.HashMap<Integer, String> oldRows = new java.util.HashMap<>(rowMapReverse);
         updateRows();
         if (listAdapter != null) {
-            listAdapter.notifyDataSetChanged();
+            androidx.recyclerview.widget.DiffUtil.calculateDiff(new androidx.recyclerview.widget.DiffUtil.Callback() {
+                @Override public int getOldListSize() { return oldCount; }
+                @Override public int getNewListSize() { return rowCount; }
+                @Override public boolean areItemsTheSame(int oldPosition, int newPosition) {
+                    String key = oldRows.get(oldPosition);
+                    return key != null && key.equals(rowMapReverse.get(newPosition));
+                }
+                // Values and group counters may have changed, even for surviving keys.
+                @Override public boolean areContentsTheSame(int oldPosition, int newPosition) { return false; }
+            }, false).dispatchUpdatesTo(listAdapter);
         }
     }
 

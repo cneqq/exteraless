@@ -55,6 +55,11 @@ import xyz.nextalone.nagram.NaConfig;
  * «Плавающая». Хранит его {@link MainTabsLayout}.
  */
 public class OpenExteraAppNavigationActivity extends BaseFragment {
+    @Override
+    public android.animation.AnimatorSet onCustomTransitionAnimation(boolean isOpen, Runnable callback) {
+        return app.freezgram.SettingsMotion.transition(this, isOpen, callback);
+    }
+
 
     // id строк-настроек. Отрицательные, чтобы не пересечься с id пунктов меню,
     // которые совпадают с id самих MainMenuItem.

@@ -5419,8 +5419,24 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             contentView.addView(filterTabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36 + 7 + 7, Gravity.TOP, 4, 0, 4, 0));
         }
 
+        searchFieldGlassSource = null;
         if (fragmentSearchField != null) {
-            fragmentSearchField.setupBlurredBackground(iBlur3FactoryLiquidGlass.create(fragmentSearchField, BlurredBackgroundProviderImpl.topPanel(resourceProvider)));
+            fragmentSearchField.setCenteredPlaceholder(true);
+            if (app.exteraless.appearance.AppearanceConfig.dialogsHeaderGlass() && Build.VERSION.SDK_INT >= 33) {
+                searchFieldGlassSource = new BlurredBackgroundSourceRenderNode(iBlur3SourceColor);
+                searchFieldGlassSource.setUnderSource(iBlur3SourceColor);
+                searchFieldGlassSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
+                BlurredBackgroundDrawableViewFactory searchFactory = new BlurredBackgroundDrawableViewFactory(searchFieldGlassSource);
+                searchFactory.setSourceRootView(viewPositionWatcher, contentView);
+                searchFactory.setLiquidGlassEffectAllowed(true);
+                java.util.function.BooleanSupplier enabled = () -> SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
+                fragmentSearchField.setSharedGlass(enabled);
+                fragmentSearchField.setupBlurredBackground(searchFactory.create(fragmentSearchField,
+                        app.freezgram.LiquidGlassStyle.surfaceColors(resourceProvider, enabled)));
+            } else {
+                fragmentSearchField.setSharedGlass(null);
+                fragmentSearchField.setupBlurredBackground(iBlur3FactoryLiquidGlass.create(fragmentSearchField, BlurredBackgroundProviderImpl.topPanel(resourceProvider)));
+            }
         }
 
         dialogStoriesCell = new DialogStoriesCell(context, this, currentAccount, isArchive() ? DialogStoriesCell.TYPE_ARCHIVE : DialogStoriesCell.TYPE_DIALOGS) {
@@ -14835,6 +14851,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     /* Blur */
 
+    private BlurredBackgroundSourceRenderNode searchFieldGlassSource;
     private BlurredBackgroundSourceRenderNode dialogsHeaderGlassSource;
     private BlurredBackgroundDrawable dialogsHeaderGlassDrawable;
 
@@ -14915,6 +14932,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 foldersGlassDrawable.updateColors();
             }
         }
+        if (searchFieldGlassSource != null) searchFieldGlassSource.invalidateDisplayListForDrawables();
         if (dialogsHeaderGlassDrawable != null) {
             app.freezgram.LiquidGlassStyle.configure(dialogsHeaderGlassDrawable);
             dialogsHeaderGlassDrawable.updateColors();

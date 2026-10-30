@@ -107,6 +107,11 @@ public abstract class BaseNekoSettingsActivity extends BaseFragment {
 
 
     @Override
+    public android.animation.AnimatorSet onCustomTransitionAnimation(boolean isOpen, Runnable callback) {
+        return app.freezgram.SettingsMotion.transition(this, isOpen, callback);
+    }
+
+    @Override
     public boolean onFragmentCreate() {
         super.onFragmentCreate();
 
@@ -141,6 +146,12 @@ public abstract class BaseNekoSettingsActivity extends BaseFragment {
         itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
         itemAnimator.setDelayAnimations(false);
         itemAnimator.setSupportsChangeAnimations(false);
+        if (app.freezgram.SettingsMotion.appliesTo(this)) {
+            itemAnimator.setAddDuration(260);
+            itemAnimator.setRemoveDuration(220);
+            itemAnimator.setMoveDuration(300);
+            itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
+        }
         listView.setItemAnimator(itemAnimator);
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 

@@ -85,6 +85,12 @@ public class FragmentSearchField extends FrameLayout implements FactorAnimator.T
 
         editText = new EditTextBoldCursor(context) {
             @Override
+            protected void onFocusChanged(boolean focused, int direction, android.graphics.Rect previous) {
+                super.onFocusChanged(focused, direction, previous);
+                updatePlaceholderGravity();
+            }
+
+            @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
                 setPivotX(getPaddingLeft());
@@ -125,6 +131,7 @@ public class FragmentSearchField extends FrameLayout implements FactorAnimator.T
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
+                updatePlaceholderGravity();
                 if (!currentSearchFilters.isEmpty()) {
                     if (s.length() > 0 && selectedFilterIndex >= 0) {
                         selectedFilterIndex = -1;
@@ -195,12 +202,36 @@ public class FragmentSearchField extends FrameLayout implements FactorAnimator.T
         additionalIconsLayout.addView(icon);
     }
 
+    private boolean centeredPlaceholder;
+    private java.util.function.BooleanSupplier sharedGlassEnabled;
+
+    public void setCenteredPlaceholder(boolean enabled) {
+        centeredPlaceholder = enabled;
+        editText.setIncludeFontPadding(!enabled);
+        updatePlaceholderGravity();
+    }
+
+    private void updatePlaceholderGravity() {
+        if (editText == null) return;
+        boolean center = centeredPlaceholder && editText.length() == 0 && !editText.hasFocus() && currentSearchFilters.isEmpty();
+        editText.setGravity(Gravity.CENTER_VERTICAL | (center ? Gravity.CENTER_HORIZONTAL : LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT));
+    }
+
+    public void setSharedGlass(java.util.function.BooleanSupplier enabled) {
+        sharedGlassEnabled = enabled;
+        invalidate();
+    }
+
+    private boolean sharedGlassActive() {
+        return sharedGlassEnabled != null && sharedGlassEnabled.getAsBoolean();
+    }
+
     private Drawable bg;
 
     @Override
     protected void dispatchDraw(@NonNull Canvas canvas) {
         canvas.save();
-        if (bg != null) {
+        if (bg != null && !sharedGlassActive()) {
             bg.setBounds(
                 getPaddingLeft(),
                 getPaddingTop(),
@@ -210,6 +241,11 @@ public class FragmentSearchField extends FrameLayout implements FactorAnimator.T
             bg.draw(canvas);
         }
         if (blurredBackgroundDrawable != null) {
+            if (sharedGlassActive()) {
+                app.freezgram.LiquidGlassStyle.configure(blurredBackgroundDrawable);
+                blurredBackgroundDrawable.setAlpha(255);
+                blurredBackgroundDrawable.updateColors();
+            }
             blurredBackgroundDrawable.setBounds(
                     getPaddingLeft() - dp(4),
                     getPaddingTop() - dp(4),
@@ -228,6 +264,7 @@ public class FragmentSearchField extends FrameLayout implements FactorAnimator.T
     }
 
     public void setBlurredBackgroundVisibility(float visibility) {
+        if (sharedGlassActive()) visibility = 1f;
         final int alpha = (int) (255 * visibility);
         boolean changed = false;
         if (blurredBackgroundDrawable != null) {
@@ -429,6 +466,7 @@ public class FragmentSearchField extends FrameLayout implements FactorAnimator.T
     }
 
     private void onFiltersChanged() {
+        updatePlaceholderGravity();
         final boolean visible = !currentSearchFilters.isEmpty();
 
         animatorSearchIconVisible.setValue(!visible, true);

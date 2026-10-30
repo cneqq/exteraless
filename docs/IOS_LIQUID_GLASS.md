@@ -16,9 +16,8 @@ Available editors:
 - **Liquid Glass** is the shared optics editor with sample header, composer and
   navigation surfaces: blur, refraction, fill transparency and color enhancement.
 
-The iOS text and emoji insets are fixed at 16dp, including for existing installs
-with older spacing preferences. The obsolete spacing preferences are no longer
-read or exported. Each editor has its own preview. Navigation previews use the
+The iOS text and emoji share one 0–32dp content-inset setting (default 16dp).
+Older independent spacing preferences are no longer read or exported. Each editor has its own preview. Navigation previews use the
 actual MainTabsLayout measurement and GlassTabView components, rather than equal
 weighted placeholder columns. Reset affects only the current editor.
 
@@ -62,8 +61,8 @@ retain a stronger fallback capture until reopened.
 ## Composer geometry
 
 The iOS field is inset 50dp on either side, plus its existing 7dp transparent
-drawable padding. Text starts after that visible edge plus 16dp. Emoji has a
-fixed 16dp margin, and the edit field reserves space for its touch target.
+drawable padding. Text starts after that visible edge plus the configured content inset. Emoji uses
+the same inset, and the edit field reserves space for its touch target.
 Returning to replies, editing, voice recording, bot controls, or narrow layouts
 restores the original control arrangement. Existing send/attach/record handlers
 remain unchanged.
@@ -101,7 +100,7 @@ namespace identifiers and import compatibility descriptions are retained.
 
 Input settings also expose a single symmetric side-inset slider (0–48dp).
 The entire iOS island and its backdrop are inset together; text/emoji internal
-insets remain fixed at 16dp. Left and right always use the same value, limited
+insets use their separate symmetric 0–32dp setting. Left and right panel margins always use the same value, limited
 on narrow windows to retain at least 240dp for the input where possible.
 The preview, reset and settings backup include this parameter. Other input
 styles retain their existing horizontal geometry.
@@ -254,3 +253,22 @@ Default/Android styles, disabled blur and power-saving retain the original fill.
 The icon uses the theme glass foreground. Sending, scheduling, loading, paid-send
 and locked-send logic is unchanged. JVM tests verify accent/glass exclusivity
 and fallback; device verification of the two button surfaces remains required.
+
+
+The idle chat search placeholder is centered within the area remaining between
+the leading search icon and trailing controls (including proxy). Typing, focus
+and active filters retain normal LTR/RTL text alignment. Font padding is removed
+only for this opted-in chat list field to align its text vertically. With Chat
+list header glass enabled, the search pill uses the shared weak capture and
+material in both idle and expanded search, rather than hiding glass while idle.
+Power-saving/disabled blur retain the normal background. It shares the header
+preference and does not add another toggle.
+
+Freezgram settings screens use a short 28dp fade/slide with a gentle easing curve
+(320ms open, 280ms close). The transition completes once and restores container
+alpha/translation after completion or cancellation. App/system animation opt-outs
+remain authoritative; unrelated Neko/Telegram settings keep their old transitions.
+Appearance group changes dispatch row-key diffs instead of full dataset resets;
+settings row add/remove/move animations have softer timing. JVM regressions cover
+transition cleanup/cancellation and search alignment with typing, filters and RTL.
+These visual changes have not been verified on a device or compiled into an APK.
