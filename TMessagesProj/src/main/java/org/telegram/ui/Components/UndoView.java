@@ -209,6 +209,18 @@ public class UndoView extends FrameLayout {
 
     private CharSequence infoText;
     private int hideAnimationType = 1;
+    private final app.freezgram.SmallElementsGlass.NotificationBackdrop smallElementBackdrop = new app.freezgram.SmallElementsGlass.NotificationBackdrop();
+    @Override public void draw(Canvas canvas) {
+        if (AndroidUtilities.makingGlobalBlurBitmap && app.freezgram.SmallElementsGlass.isEnabled()) return;
+        super.draw(canvas);
+    }
+    @Override protected void onDetachedFromWindow() {
+        smallElementBackdrop.release(); super.onDetachedFromWindow();
+    }
+    private void drawNoticeBackground(Canvas canvas) {
+        if (!smallElementBackdrop.draw(canvas, this, backgroundDrawable.getBounds(), resourcesProvider, 10)) backgroundDrawable.draw(canvas);
+    }
+
     Drawable backgroundDrawable;
     private final Theme.ResourcesProvider resourcesProvider;
 
@@ -474,6 +486,7 @@ public class UndoView extends FrameLayout {
     }
 
     public void showWithAction(ArrayList<Long> dialogIds, int action, Object infoObject, Object infoObject2, Runnable actionRunnable, Runnable cancelRunnable) {
+        smallElementBackdrop.release();
         if (!AndroidUtilities.shouldShowClipboardToast() && (currentAction == ACTION_MESSAGE_COPIED || currentAction == ACTION_USERNAME_COPIED || currentAction == ACTION_HASHTAG_COPIED || currentAction == ACTION_TEXT_COPIED || currentAction == ACTION_LINK_COPIED || currentAction == ACTION_PHONE_COPIED || currentAction == ACTION_EMAIL_COPIED || currentAction == ACTION_VOIP_LINK_COPIED)) {
             return;
         }
@@ -1664,10 +1677,10 @@ public class UndoView extends FrameLayout {
                 canvas.clipRect(0, 0, getMeasuredWidth(), bottom);
                 super.dispatchDraw(canvas);
             }
-            backgroundDrawable.draw(canvas);
+            drawNoticeBackground(canvas);
             canvas.restore();
         } else {
-            backgroundDrawable.draw(canvas);
+            drawNoticeBackground(canvas);
         }
 
         if (currentAction == ACTION_DELETE || currentAction == ACTION_LEAVE || currentAction == ACTION_CLEAR || currentAction == ACTION_DELETE_FEW || currentAction == ACTION_CLEAR_FEW || currentAction == ACTION_CLEAR_DATES || currentAction == ACTION_SHARED_FOLDER_DELETED) {

@@ -123,4 +123,5 @@
     <string name="FreezgramComposerSideInset">Side inset</string>
     <string name="FreezgramGlassWallpaperDim">Apply wallpaper dimming</string>
     <string name="FreezgramSmallElementsGlass">Other small elements</string>
+    <string name="FreezgramSmallElementsInfo">In-app notices, message action menus and the share button.</string>
 </resources>

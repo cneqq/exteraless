@@ -79,6 +79,10 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 smallElements.setChecked(AppearanceConfig.smallElementsGlass()); geometryChanged = true;
             });
             content.addView(smallElements);
+            TextView smallInfo = new TextView(context);
+            smallInfo.setText(text(R.string.FreezgramSmallElementsInfo)); smallInfo.setTextSize(14);
+            smallInfo.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText));
+            smallInfo.setPadding(dp(22), 0, dp(22), dp(12)); content.addView(smallInfo);
             enhanceColors = new org.telegram.ui.Cells.TextCheckCell(context);
             enhanceColors.setTextAndCheck(text(R.string.FreezgramGlassEnhanceColors), LiquidGlassStyle.enhanceColors(), false);
             enhanceColors.setOnClickListener(v -> {

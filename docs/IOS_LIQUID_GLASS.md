@@ -141,8 +141,8 @@ The icon uses the glass foreground color. Recording handlers and the active
 recording animation are unchanged; Default/Android styling retains its policy.
 
 **Other small elements** is an independent opt-in under shared Liquid Glass
-settings, included in backup and disabled by default. Its first target is the
-share button beside a message; saved-message navigation, discussion and sponsor
+settings, included in backup and disabled by default. It covers ordinary Bulletin/UndoView notices, message action menus/reactions,
+and the share button beside a message; saved-message navigation, discussion and sponsor
 controls retain their previous appearance. The button uses shared optics over
 a wallpaper-only source, avoiding recursive capture of the cell itself. The
 source is recorded once per chat drawing frame and reuses glass drawables for
@@ -151,3 +151,17 @@ Android below 13, software drawing, disabled blur or power saving retains the
 standard button background. Touch and sharing handlers are unchanged.
 No APK build was requested for this addition; GPU and scrolling behavior need
 phone verification when a build is requested.
+
+For small-element notices the backdrop is a temporary in-memory snapshot, captured
+without Bulletin/UndoView contents to avoid feedback. The bitmap is never saved
+or sent anywhere. It is released on detach and before reusing an UndoView for a
+new notice. Explicit custom/color-coded Bulletin backgrounds keep their existing
+appearance. System notifications are outside this setting. Legacy blurred notice
+animation is bypassed while this style is active so it does not replace the glass
+with an opaque bitmap. The usual position/alpha animation remains.
+Message menus bridge their existing capture into the RenderNode/AGSL renderer;
+shared optics apply to the menu and main reactions surface. The older independent
+message-menu glass preference remains available when the small-elements toggle
+is off. Existing opaque swipe-back submenu surfaces are still not converted.
+No APK build was requested; snapshot placement, contrast and GPU performance
+require device verification.

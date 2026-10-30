@@ -85,6 +85,22 @@ public class BlurredBackgroundDrawableViewFactory {
         isLiquidGlassEffectAllowed = liquidGlassEffectAllowed;
     }
 
+    public BlurredBackgroundSource getSource() { return source; }
+
+    public BlurredBackgroundDrawable createWithSource(BlurredBackgroundSource replacement, View view,
+            BlurredBackgroundColorProvider provider, boolean multiwindow) {
+        return withSource(replacement).create(view, provider, multiwindow);
+    }
+
+    public BlurredBackgroundDrawableViewFactory withSource(BlurredBackgroundSource replacement) {
+        BlurredBackgroundDrawableViewFactory factory = new BlurredBackgroundDrawableViewFactory(replacement);
+        factory.outsetX = outsetX; factory.outsetY = outsetY;
+        factory.linkedDrawables = linkedDrawables; factory.linkedViews = linkedViews;
+        factory.viewPositionWatcher = viewPositionWatcher; factory.parent = parent; factory.engine = engine;
+        factory.setLiquidGlassEffectAllowed(true);
+        return factory;
+    }
+
     public BlurredBackgroundDrawable create() {
         return create(null);
     }

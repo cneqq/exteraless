@@ -1775,6 +1775,7 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         glassBackgroundFactory = factory;
         glassBackgroundColorProvider = provider;
         glassBackground = factory.create(this, true).setColorProvider(provider);
+        if (app.freezgram.SmallElementsGlass.isEnabled()) app.freezgram.LiquidGlassStyle.configure(glassBackground);
         invalidate();
     }
 

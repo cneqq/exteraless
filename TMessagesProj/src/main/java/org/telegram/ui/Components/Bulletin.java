@@ -774,6 +774,22 @@ public class Bulletin {
 
         protected Bulletin bulletin;
         Drawable background;
+        private final app.freezgram.SmallElementsGlass.NotificationBackdrop smallElementBackdrop = new app.freezgram.SmallElementsGlass.NotificationBackdrop();
+        private int smallElementRadius = 16;
+
+        @Override public void draw(Canvas canvas) {
+            if (AndroidUtilities.makingGlobalBlurBitmap && app.freezgram.SmallElementsGlass.isEnabled()) return;
+            super.draw(canvas);
+        }
+
+        @Override protected void onDetachedFromWindow() {
+            smallElementBackdrop.release(); super.onDetachedFromWindow();
+        }
+
+        private void drawNoticeBackground(Canvas canvas) {
+            if (hasCustomBackground || !smallElementBackdrop.draw(canvas, this, background.getBounds(), resourcesProvider, smallElementRadius)) background.draw(canvas);
+        }
+
         public boolean top;
 
         public boolean isTransitionRunning() {
@@ -813,6 +829,7 @@ public class Bulletin {
         }
 
         public void setBackground(int color, int rounding) {
+            smallElementRadius = rounding;
             if (!hasCustomBackground) {
                 background = Theme.createRoundRectDrawable(dp(rounding), color);
             }
@@ -1192,7 +1209,7 @@ public class Bulletin {
 
         @Override
         protected void dispatchDraw(Canvas canvas) {
-            if (bulletin != null && bulletin.allowBlurAnimation) {
+            if (bulletin != null && bulletin.allowBlurAnimation && !app.freezgram.SmallElementsGlass.isEnabled()) {
                 if (blurVisibilityDrawable == null) {
                     blurVisibilityDrawable = new BlurVisibilityDrawable(this::dispatchDrawImplBlur);
                 }
@@ -1233,7 +1250,7 @@ public class Bulletin {
                 if (hasSavedAlpha) {
                     canvas.saveLayerAlpha(0, 0, getWidth(), getHeight(), alpha, Canvas.ALL_SAVE_FLAG);
                 }
-                background.draw(canvas);
+                drawNoticeBackground(canvas);
                 super.dispatchDraw(canvas);
                 if (clip) {
                     if (clipPaint == null) {
@@ -1261,7 +1278,7 @@ public class Bulletin {
                 canvas.restore();
                 invalidate();
             } else {
-                background.draw(canvas);
+                drawNoticeBackground(canvas);
                 super.dispatchDraw(canvas);
             }
         }

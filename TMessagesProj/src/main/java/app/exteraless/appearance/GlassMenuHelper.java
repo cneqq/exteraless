@@ -35,7 +35,7 @@ public abstract class GlassMenuHelper {
     }
 
     public static boolean isEnabled(int currentAccount, Theme.ResourcesProvider resourcesProvider) {
-        return AppearanceConfig.glassMessageMenu()
+        return (AppearanceConfig.glassMessageMenu() || app.freezgram.SmallElementsGlass.isEnabled())
             && BlurredBackgroundProviderImpl.checkBlurEnabled(currentAccount, resourcesProvider);
     }
 
@@ -54,6 +54,7 @@ public abstract class GlassMenuHelper {
     }
 
     public static BlurredBackgroundProvider scrimMenuBackground(Theme.ResourcesProvider resourcesProvider) {
+        if (app.freezgram.SmallElementsGlass.isEnabled()) return app.freezgram.LiquidGlassStyle.colors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled);
         return scrimMenuGlass(resourcesProvider)
             .setShadowColor(0x26000000, 0)
             .setShadowLayer(AndroidUtilities.dpf2(4.0f), 0.0f, 0.0f)
@@ -61,6 +62,7 @@ public abstract class GlassMenuHelper {
     }
 
     public static BlurredBackgroundProvider scrimMenuBackgroundFill(Theme.ResourcesProvider resourcesProvider) {
+        if (app.freezgram.SmallElementsGlass.isEnabled()) return app.freezgram.LiquidGlassStyle.colors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled);
         return scrimMenuGlass(resourcesProvider)
             .setShadowColor(0, 0)
             .build();
@@ -69,8 +71,11 @@ public abstract class GlassMenuHelper {
     public static BlurredBackgroundDrawable createPanelBackground(BlurredBackgroundDrawableViewFactory factory,
                                                                   Theme.ResourcesProvider resourcesProvider,
                                                                   View view) {
-        return factory.create(view, true)
-            .setColorProvider(scrimMenuBackground(resourcesProvider))
+        BlurredBackgroundDrawable drawable = app.freezgram.SmallElementsGlass.isEnabled()
+                ? factory.createWithSource(app.freezgram.SmallElementsGlass.createSource(factory.getSource()), view, scrimMenuBackground(resourcesProvider), true)
+                : factory.create(view, true).setColorProvider(scrimMenuBackground(resourcesProvider));
+        if (app.freezgram.SmallElementsGlass.isEnabled()) app.freezgram.LiquidGlassStyle.configure(drawable);
+        return drawable
             .setRadius(AndroidUtilities.dp(12.0f))
             .setPadding(AndroidUtilities.dp(8.0f))
             .setHasPadding(true);
@@ -79,6 +84,10 @@ public abstract class GlassMenuHelper {
     public static BlurredBackgroundDrawable createFill(BlurredBackgroundDrawableViewFactory factory,
                                                        Theme.ResourcesProvider resourcesProvider,
                                                        View view) {
+        if (app.freezgram.SmallElementsGlass.isEnabled()) {
+            BlurredBackgroundDrawable drawable = factory.createWithSource(app.freezgram.SmallElementsGlass.createSource(factory.getSource()), view, scrimMenuBackgroundFill(resourcesProvider), true);
+            app.freezgram.LiquidGlassStyle.configure(drawable); return drawable;
+        }
         return factory.create(view, true).setColorProvider(scrimMenuBackgroundFill(resourcesProvider));
     }
 
@@ -142,6 +151,7 @@ public abstract class GlassMenuHelper {
     public static void applyToReactions(BlurredBackgroundDrawableViewFactory factory,
                                         Theme.ResourcesProvider resourcesProvider,
                                         ReactionsContainerLayout reactionsContainerLayout) {
+        if (app.freezgram.SmallElementsGlass.isEnabled()) factory = factory.withSource(app.freezgram.SmallElementsGlass.createSource(factory.getSource()));
         reactionsContainerLayout.setGlassBackground(factory, scrimMenuBackgroundFill(resourcesProvider));
     }
 
@@ -174,6 +184,14 @@ public abstract class GlassMenuHelper {
     public static void captureBlur(final BlurredBackgroundSourceBitmap sourceBitmap,
                                    final BlurredBackgroundDrawableViewFactory factory,
                                    final View view) {
+        if (app.freezgram.SmallElementsGlass.isEnabled()) {
+            AndroidUtilities.makeGlobalBlurBitmap(bitmap -> {
+                sourceBitmap.setBitmap(bitmap);
+                Blur3Utils.checkBitmapSourceMatrixScale(sourceBitmap, view);
+                factory.invalidateAllLinkedViews();
+            }, 4f, 0, null, null);
+            return;
+        }
         ScrimOptions.makeGlobalBlurBitmaps((bitmapBg, bitmapOptions) -> {
             sourceBitmap.setBitmap(bitmapOptions);
             Blur3Utils.checkBitmapSourceMatrixScale(sourceBitmap, view);
