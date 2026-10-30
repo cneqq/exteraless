@@ -14841,7 +14841,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private boolean isDialogsHeaderGlassEnabled() {
         return dialogsHeaderGlassDrawable != null && app.exteraless.appearance.AppearanceConfig.dialogsHeaderGlass()
                 && Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied()
-                && !inPreviewMode && searchAnimationProgress == 0 && progressToActionMode == 0;
+                && !inPreviewMode && searchAnimationProgress == 0;
     }
 
     private ViewPositionWatcher viewPositionWatcher;

@@ -2572,7 +2572,8 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
             glassDrawableMenu.draw(canvas);
         }
 
-        if (blurredBackground && actionBarColor != Color.TRANSPARENT && !drawBlurBackgroundOverride(canvas)) {
+        final boolean customBlurBackground = blurredBackground && drawBlurBackgroundOverride(canvas);
+        if (blurredBackground && !customBlurBackground && actionBarColor != Color.TRANSPARENT) {
             rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
             blurScrimPaint.setColor(actionBarColor);
             if (adaptiveBackground) {
@@ -2884,7 +2885,9 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
 
     // --- Spring Animation ---
     public void onDrawCrossfadeBackground(Canvas canvas) {
-        if (blurredBackground && actionBarColor != Color.TRANSPARENT && !drawBlurBackgroundOverride(canvas)) {
+        final boolean customBlurBackground = blurredBackground && drawBlurBackgroundOverride(canvas);
+        if (customBlurBackground) return;
+        if (blurredBackground && !customBlurBackground && actionBarColor != Color.TRANSPARENT) {
             rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
             blurScrimPaint.setColor(actionBarColor);
             contentView.drawBlurRect(canvas, getY(), rectTmp, blurScrimPaint, true);

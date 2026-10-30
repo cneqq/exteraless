@@ -854,10 +854,40 @@ public class ActionBarMenuItem extends FrameLayout {
         xOffset = offset;
     }
 
+    private boolean automaticSmallGlass;
+    private org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceBitmap automaticGlassSnapshot;
+
+    private void refreshAutomaticSmallGlass() {
+        if (popupLayout == null) return;
+        if (!app.freezgram.SmallElementsGlass.isEnabled()) {
+            if (automaticSmallGlass) {
+                app.exteraless.appearance.GlassMenuHelper.applyToReusedMenu(subMenuFactory, automaticGlassSnapshot,
+                        resourcesProvider, popupLayout, getRootView(), false);
+                subMenuFactory = null; subMenuProvider = null;
+                automaticGlassSnapshot = null; automaticSmallGlass = false;
+            }
+            return;
+        }
+        // Preserve explicitly supplied capture sources, such as chat message menus.
+        if (subMenuFactory != null && !automaticSmallGlass) return;
+        View root = getRootView();
+        if (!(root instanceof ViewGroup)) return;
+        automaticGlassSnapshot = new org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceBitmap();
+        BlurredBackgroundDrawableViewFactory factory = new BlurredBackgroundDrawableViewFactory(automaticGlassSnapshot);
+        factory.setSourceRootView(new org.telegram.ui.Components.chat.ViewPositionWatcher((ViewGroup) root), (ViewGroup) root);
+        app.exteraless.appearance.GlassMenuHelper.captureBlur(automaticGlassSnapshot, factory, root);
+        subMenuFactory = factory;
+        subMenuProvider = app.freezgram.LiquidGlassStyle.surfaceColors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled);
+        app.exteraless.appearance.GlassMenuHelper.applyToPopup(factory, resourcesProvider, popupLayout);
+        automaticSmallGlass = true;
+    }
+
     private BlurredBackgroundDrawableViewFactory subMenuFactory;
     private BlurredBackgroundProvider subMenuProvider;
 
     public void setBlurredBackgroundFactory(BlurredBackgroundDrawableViewFactory subMenuFactory, BlurredBackgroundProvider subMenuProvider) {
+        automaticSmallGlass = false;
+        automaticGlassSnapshot = null;
         this.subMenuFactory = subMenuFactory;
         this.subMenuProvider = subMenuProvider;
         if (popupLayout != null && subMenuFactory != null) {
@@ -896,6 +926,7 @@ public class ActionBarMenuItem extends FrameLayout {
         if (subMenuDelegate != null) {
             subMenuDelegate.onShowSubMenu();
         }
+        refreshAutomaticSmallGlass();
         if (popupLayout.getParent() != null) {
             ((ViewGroup) popupLayout.getParent()).removeView(popupLayout);
         }

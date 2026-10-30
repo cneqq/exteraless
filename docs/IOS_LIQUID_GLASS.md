@@ -207,8 +207,7 @@ Device verification of slow scrolling and system-saver transitions is required.
 The shared editor also provides **Chat list header**, independently from folder
 and small-element glass and off by default. It uses the weak capture output for
 the ActionBar above folders; the original opaque underlay is excluded only from
-that rectangle. The ActionBar draws the material once. Search, selection mode,
-previews, software drawing, unsupported platforms and power saving retain the
+that rectangle. The ActionBar draws the material once. Search, previews, software drawing, unsupported platforms and power saving retain the
 original background path. Shared optics and source recordings are refreshed on
 scroll and style changes. The preference is included in backup.
 
@@ -224,3 +223,13 @@ menu rows. It defaults to on and is backed up; it only applies to the shared
 small-element glass style. Group gaps and hidden rows do not add duplicate lines.
 The overlay does not change row sizes or touch targets. Both message popups and
 ordinary ItemOptions menus use it.
+
+
+The chat-list header also stays glass in chat-selection mode. The ActionBar
+attempts the explicit material independently of its legacy background color,
+including transparent themes. Ordinary ActionBarMenuItem popups without an
+explicit capture factory now obtain a fresh in-memory glass snapshot when opened;
+this includes selected-chat actions. Disabling small-element glass restores their
+original popup material. Explicitly supplied factories are preserved. JVM checks
+cover transparent-theme dispatch and automatic capture refresh/restoration;
+actual header and popup appearance still requires phone verification.

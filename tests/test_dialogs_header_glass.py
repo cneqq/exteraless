@@ -8,7 +8,7 @@ JAVA = Path(__file__).resolve().parents[1] / 'TMessagesProj/src/main/java'
 
 @unittest.skipUnless(shutil.which('java'), 'Java source launcher required')
 class DialogsHeaderGlassTests(unittest.TestCase):
-    def test_header_is_independent_and_keeps_search_action_mode_and_power_fallback(self):
+    def test_header_keeps_glass_in_selection_and_preserves_search_and_power_fallback(self):
         gate = method((JAVA/'org/telegram/ui/DialogsActivity.java').read_text(), '    private boolean isDialogsHeaderGlassEnabled()')
         gate = gate.replace('app.exteraless.appearance.AppearanceConfig', 'AppearanceConfig')
         run_java('''
@@ -22,7 +22,7 @@ class PrivacyCheck {
    SharedConfig.blur=(bits&4)!=0;LiteMode.saver=(bits&8)!=0;p.inPreviewMode=(bits&16)!=0;
    p.searchAnimationProgress=(bits&32)!=0?.5f:0;p.progressToActionMode=(bits&64)!=0?1:0;
    p.dialogsHeaderGlassDrawable=(bits&128)!=0?new Object():null;
-   boolean expected=bits==135;
+   boolean expected=bits==135||bits==199;
    if(p.isDialogsHeaderGlassEnabled()!=expected)throw new AssertionError("Wrong header fallback: "+bits);
   }
  }
@@ -71,3 +71,60 @@ class PrivacyCheck{
 }
 class SmallElementsGlass{static boolean enabled;static boolean isEnabled(){return enabled;}}
 '''.replace('GATE',gate).replace('app.freezgram.SmallElementsGlass','SmallElementsGlass'))
+
+    def test_transparent_theme_still_attempts_custom_backdrop(self):
+        source=(JAVA/'org/telegram/ui/ActionBar/ActionBar.java').read_text()
+        start=source.index('        final boolean customBlurBackground =')
+        end=source.index('\n',source.index('        if (blurredBackground && !customBlurBackground',start))
+        dispatch=source[start:end]+' fallback++; }'
+        run_java('''
+class PrivacyCheck{
+ boolean blurredBackground=true,enabled;int actionBarColor,fallback,attempts;
+ boolean drawBlurBackgroundOverride(Canvas c){attempts++;return enabled;}
+ void draw(Canvas canvas){DISPATCH}
+ public static void main(String[] args){
+  for(int color:new int[]{0,0xff111111})for(boolean enabled:new boolean[]{false,true}){
+   var p=new PrivacyCheck();p.actionBarColor=color;p.enabled=enabled;p.draw(new Canvas());
+   if(p.attempts!=1||p.fallback!=(!enabled&&color!=0?1:0))throw new AssertionError("Theme color suppressed explicit glass");
+  }
+ }
+}
+class Canvas{}class Color{static final int TRANSPARENT=0;}
+'''.replace('DISPATCH',dispatch))
+
+    def test_automatic_menu_capture_refreshes_and_preserves_explicit_factories(self):
+        source=(JAVA/'org/telegram/ui/ActionBar/ActionBarMenuItem.java').read_text()
+        refresh=method(source,'    private void refreshAutomaticSmallGlass()')
+        for name in ('org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceBitmap', 'org.telegram.ui.Components.chat.ViewPositionWatcher', 'app.exteraless.appearance.GlassMenuHelper', 'app.freezgram.SmallElementsGlass', 'app.freezgram.LiquidGlassStyle'):
+            refresh=refresh.replace(name,name.rsplit('.',1)[1])
+        run_java('''
+class PrivacyCheck{
+ Object popupLayout=new Object(),resourcesProvider,subMenuProvider;
+ boolean automaticSmallGlass;BlurredBackgroundSourceBitmap automaticGlassSnapshot;BlurredBackgroundDrawableViewFactory subMenuFactory;
+ View root=new ViewGroup();View getRootView(){return root;}
+ REFRESH
+ public static void main(String[] args){
+  var p=new PrivacyCheck();SmallElementsGlass.enabled=true;p.refreshAutomaticSmallGlass();
+  if(!p.automaticSmallGlass||GlassMenuHelper.captures!=1)throw new AssertionError("Ordinary menu skipped");
+  var first=p.automaticGlassSnapshot;p.refreshAutomaticSmallGlass();
+  if(first==p.automaticGlassSnapshot||GlassMenuHelper.captures!=2)throw new AssertionError("Stale menu snapshot");
+  SmallElementsGlass.enabled=false;p.refreshAutomaticSmallGlass();
+  if(p.automaticSmallGlass||p.subMenuFactory!=null||p.automaticGlassSnapshot!=null||GlassMenuHelper.resets!=1)throw new AssertionError("Style not restored");
+  var custom=new BlurredBackgroundDrawableViewFactory(null);p.subMenuFactory=custom;
+  SmallElementsGlass.enabled=true;p.refreshAutomaticSmallGlass();
+  if(p.subMenuFactory!=custom||GlassMenuHelper.captures!=2)throw new AssertionError("Explicit source replaced");
+ }
+}
+class View{}class ViewGroup extends View{}
+class BlurredBackgroundSourceBitmap{}
+class BlurredBackgroundDrawableViewFactory{BlurredBackgroundDrawableViewFactory(Object source){}void setSourceRootView(Object watcher,ViewGroup root){}}
+class ViewPositionWatcher{ViewPositionWatcher(ViewGroup root){}}
+class SmallElementsGlass{static boolean enabled;static boolean isEnabled(){return enabled;}}
+class LiquidGlassStyle{static Object surfaceColors(Object r,java.util.function.BooleanSupplier enabled){return null;}}
+class GlassMenuHelper{
+ static int captures,resets;
+ static void captureBlur(Object s,Object f,View v){captures++;}
+ static void applyToPopup(Object f,Object r,Object p){}
+ static void applyToReusedMenu(Object f,Object s,Object r,Object p,View root,boolean on){resets++;}
+}
+'''.replace('REFRESH',refresh))
