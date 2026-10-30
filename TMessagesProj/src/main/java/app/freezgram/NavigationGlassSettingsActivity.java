@@ -31,7 +31,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
     public NavigationGlassSettingsActivity() { this(NAVIGATION); }
     public NavigationGlassSettingsActivity(int mode) { this.mode = mode; }
     private GlassPreview preview;
-    private AvatarCornersSeekBar blur, intensity, transparency, width, lift, composerLift, composerSide;
+    private AvatarCornersSeekBar blur, intensity, transparency, width, lift, composerLift, composerSide, composerContent;
     private boolean geometryChanged;
     private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors, wallpaperDim;
 
@@ -167,6 +167,10 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                         preview.updateGeometry();
                     }).show());
             content.addView(style);
+            composerContent = slider(context, content, R.string.FreezgramComposerContentInset, 32,
+                    AppearanceConfig.composerContentInset(), value -> {
+                        AppearanceConfig.composerContentInset.setConfigInt(value); geometryChanged = true; preview.invalidate();
+                    });
             composerSide = slider(context, content, R.string.FreezgramComposerSideInset, 48,
                     AppearanceConfig.composerSideInset(), value -> {
                         AppearanceConfig.composerSideInset.setConfigInt(value); geometryChanged = true; preview.invalidate();
@@ -198,7 +202,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             } else {
                 AppearanceConfig.composerBottomLift.setConfigInt(0);
                 AppearanceConfig.composerSideInset.setConfigInt(0);
-                composerLift.setValue(0); composerSide.setValue(0);
+                AppearanceConfig.composerContentInset.setConfigInt(16);
+                composerContent.setValue(16); composerLift.setValue(0); composerSide.setValue(0);
             }
             geometryChanged = true;
             preview.invalidate();

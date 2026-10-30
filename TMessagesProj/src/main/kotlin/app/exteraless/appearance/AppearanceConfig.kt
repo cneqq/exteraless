@@ -406,6 +406,11 @@ object AppearanceConfig {
     }
 
     @JvmField
+    val composerContentInset = addConfig("FreezgramComposerContentInset", ConfigItem.configTypeInt, 16)
+    @JvmStatic
+    fun composerContentInset(): Int { ensureLoaded(); return composerContentInset.Int().coerceIn(0, 32) }
+
+    @JvmField
     val composerSideInset = addConfig("FreezgramComposerSideInset", ConfigItem.configTypeInt, 0)
     @JvmStatic
     fun composerSideInset(): Int { ensureLoaded(); return composerSideInset.Int().coerceIn(0, 48) }

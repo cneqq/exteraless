@@ -126,4 +126,5 @@
     <string name="FreezgramSmallElementsInfo">In-app notices, message menus and reactions, callback buttons and sharing.</string>
     <string name="FreezgramAttachmentPanelsGlass">Attachment menu panels</string>
     <string name="FreezgramAttachmentPanelsGlassInfo">The bottom selector and caption field when choosing attachments.</string>
+    <string name="FreezgramComposerContentInset">Text and emoji edge inset</string>
 </resources>

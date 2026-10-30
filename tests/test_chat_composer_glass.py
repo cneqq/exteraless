@@ -24,7 +24,7 @@ class PrivacyCheck {
  public static void main(String[] args){
   var view=new PrivacyCheck();
   for(int repeat=0;repeat<3;repeat++){
-   int text=16,emoji=16;
+   int text=repeat*16,emoji=text;
    AppearanceConfig.text=text;AppearanceConfig.emoji=emoji;view.iosComposerLayout=true;
    view.applyIosComposerSpacing();
    if(view.messageEditText.params.leftMargin!=57+text||view.emojiButton.params.rightMargin!=emoji)
@@ -41,7 +41,7 @@ class View{FrameLayout.LayoutParams params=new FrameLayout.LayoutParams();Object
 class MarginLayoutParams{int leftMargin,rightMargin;}
 class FrameLayout{static class LayoutParams extends MarginLayoutParams{}}
 class ChatComposerGlass{HELPERS}
-class AppearanceConfig{static int text,emoji;static int composerTextInset(){return text;}static int composerEmojiInset(){return emoji;}}
+class AppearanceConfig{static int composerContentInset(){return text;}static int text,emoji;static int composerTextInset(){return text;}static int composerEmojiInset(){return emoji;}}
 '''.replace('SPACING',spacing).replace('HELPERS',helpers))
 
     def test_bottom_gap_moves_surface_and_controls_and_reserves_space(self):
