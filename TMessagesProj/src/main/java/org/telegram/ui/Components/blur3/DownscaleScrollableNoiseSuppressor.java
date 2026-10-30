@@ -507,11 +507,11 @@ public class DownscaleScrollableNoiseSuppressor {
     }
 
     private static int roundDown(float value, int N) {
-        return Math.round(value - value % N);
+        return (int) (Math.floor(value / N) * N);
     }
 
     public static int roundUp(float value, int N) {
-        return Math.round(value + (N - value % N));
+        return (int) (Math.ceil(value / N) * N);
     }
 
 
@@ -522,28 +522,32 @@ public class DownscaleScrollableNoiseSuppressor {
         return rectRenderNodesCount;
     }
 
+    private final ArrayList<RectF> alignedCapturePositions = new ArrayList<>();
+    private final ArrayList<RectF> mergedCapturePositions = new ArrayList<>();
+
+    private void alignCapturePosition(int index, RectF position) {
+        while (alignedCapturePositions.size() <= index) alignedCapturePositions.add(new RectF());
+        alignedCapturePositions.get(index).set(roundDown(position.left, 16), roundDown(position.top, 16),
+                roundUp(position.right, 16), roundUp(position.bottom, 16));
+    }
+
+    private void finishCaptureSetup(int count) {
+        // Outward alignment can make previously disjoint regions overlap. Merge after
+        // alignment so a translucent backdrop is never composited twice at their seam.
+        rectRenderNodesCount = org.telegram.messenger.utils.RectFMergeBounding.mergeOverlapping(
+                alignedCapturePositions, count, mergedCapturePositions);
+        while (rectRenderNodesCount > rectRenderNodes.size()) rectRenderNodes.add(new SourcePart());
+        for (int a = 0; a < rectRenderNodesCount; a++) rectRenderNodes.get(a).setPosition(mergedCapturePositions.get(a));
+    }
+
     public void setupRenderNodes(GlassPositionsArray positions) {
-        rectRenderNodesCount = positions.size();
-
-        while (rectRenderNodesCount > rectRenderNodes.size()) {
-            rectRenderNodes.add(new SourcePart());
-        }
-
-        for (int a = 0; a < rectRenderNodesCount; a++) {
-            rectRenderNodes.get(a).setPosition(positions.get(a));
-        }
+        for (int a = 0; a < positions.size(); a++) alignCapturePosition(a, positions.get(a));
+        finishCaptureSetup(positions.size());
     }
 
     public void setupRenderNodes(List<RectF> positions, int count) {
-        rectRenderNodesCount = count;
-
-        while (rectRenderNodesCount > rectRenderNodes.size()) {
-            rectRenderNodes.add(new SourcePart());
-        }
-
-        for (int a = 0; a < rectRenderNodesCount; a++) {
-            rectRenderNodes.get(a).setPosition(positions.get(a));
-        }
+        for (int a = 0; a < count; a++) alignCapturePosition(a, positions.get(a));
+        finishCaptureSetup(count);
     }
 
     private int recordingIndex;

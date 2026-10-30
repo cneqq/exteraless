@@ -281,3 +281,24 @@ recording node when crop size/origin changes, while reusing an unchanged crop.
 A JVM regression reproduced the old retained-node geometry overwrite and passes
 with the fix. This can explain rectangular seams/bands; confirming the reported
 artifact is gone still requires a phone build. No APK was requested for this fix.
+
+
+A follow-up review of shared glass capture found two further geometry defects:
+- DownscaleScrollableNoiseSuppressor aligned capture rectangles after callers had
+  merged them. Alignment could introduce overlaps, causing translucent captures
+  to be composited twice. Both setup APIs now align first and merge again before
+  allocating/updating source parts. Floor/ceil alignment handles negative scroll
+  coordinates and leaves exact grid boundaries unchanged.
+- BlurredBackgroundSourceBitmap allocated height from width and compared cached
+  width against height. Rectangular captures now use the requested height and
+  independently validate both dimensions; existing scale behavior is retained.
+
+Actual Java geometry tests cover both capture APIs, overlap after alignment,
+negative/fractional coordinates, grid idempotence, empty captures and portrait/
+landscape/scaled bitmap dimensions. The existing snapshot ownership, scroll,
+header and composer regressions were also run. Reaction shapes already have
+separate drawables; PopupSwipeBackLayout only displays one foreground submenu at
+once, so no speculative ownership change was made there. These shared fixes cover
+capture used by headers, folders, navigation, composer and side buttons. GPU
+rendering and elimination of every reported seam remain unverified on a phone.
+No APK build was started for this follow-up.
