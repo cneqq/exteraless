@@ -133,3 +133,9 @@ Text-send transition endpoints subtract only the input field's collapsible
 height above 44dp. The fixed iOS bottom gap remains in the target list padding;
 it is not part of the height change animated away after sending. The regression
 covers single/multiline fields and 0/16/64dp gaps at 2× density.
+
+The idle voice/video recording button background follows the iOS style rather
+than eligibility for the split layout. Group sender controls, replies and narrow
+layouts can retain the whole composer without restoring the opaque accent circle.
+The icon uses the glass foreground color. Recording handlers and the active
+recording animation are unchanged; Default/Android styling retains its policy.

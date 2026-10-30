@@ -125,6 +125,26 @@ class PrivacyCheck {
 class Container{int gap;int getInputLiftPx(){return gap;}}
 '''.replace('COLLAPSE',collapse))
 
+    def test_ios_record_button_stays_transparent_when_group_controls_change_layout(self):
+        source=(JAVA / 'app/freezgram/ChatComposerGlass.java').read_text()
+        methods=method(source,'    public static boolean shouldDrawRecordButtonBackground(')+'\n'+method(source,'    public static boolean useIosLayout(')
+        run_java('''
+class PrivacyCheck {
+ METHODS
+ public static void main(String[] args){
+  for(int style:new int[]{0,1,2})for(boolean forbidden:new boolean[]{false,true})for(boolean menu:new boolean[]{false,true}){
+   AppearanceConfig.style=style;
+   if(shouldDrawRecordButtonBackground(forbidden,menu)!=(style!=1&&!forbidden&&!menu))throw new AssertionError("Wrong background policy");
+   if(style==1){
+    if(useIosLayout(true,320)||useIosLayout(false,200))throw new AssertionError("Fallback layout changed");
+    if(shouldDrawRecordButtonBackground(false,false))throw new AssertionError("Group/narrow fallback must not restore blue recording surface");
+   }
+  }
+ }
+}
+class AppearanceConfig{static int style;static int chatComposerStyle(){return style;}}
+'''.replace('METHODS',methods))
+
     def test_policy_and_surface_bounds(self):
         source = (JAVA / "app/freezgram/ChatComposerGlass.java").read_text()
         methods = "\n".join(method(source, sig) for sig in (

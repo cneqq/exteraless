@@ -3358,7 +3358,7 @@ public class ChatActivityEnterView extends FrameLayout implements
             @Override
             protected void dispatchDraw(@NonNull Canvas canvas) {
                 boolean isMenuState = isAudioVideoSendButtonInMenuState();
-                if (!audioVideoButtonContainerForbidden && !isMenuState && !useIosComposerLayout()) {
+                if (app.freezgram.ChatComposerGlass.shouldDrawRecordButtonBackground(audioVideoButtonContainerForbidden, isMenuState)) {
                     float s = 1;
                     if (expandStickersButton != null) {
                         if (expandStickersButton.getVisibility() == View.VISIBLE) {
@@ -11837,7 +11837,7 @@ public class ChatActivityEnterView extends FrameLayout implements
             return;
         }
         boolean isMenuState = isAudioVideoSendButtonInMenuState();
-        int color = audioVideoButtonContainerForbidden || isMenuState || useIosComposerLayout()
+        int color = !app.freezgram.ChatComposerGlass.shouldDrawRecordButtonBackground(audioVideoButtonContainerForbidden, isMenuState)
                 ? getThemedColor(Theme.key_glass_defaultIcon)
                 : Color.WHITE;
         setIconColorFilter(audioVideoSendButton, new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));

@@ -28,6 +28,11 @@ public final class ChatComposerGlass {
         return AppearanceConfig.chatComposerStyle() == 1 && !complexState && widthDp >= 240;
     }
 
+    /** Keep recording controls transparent in iOS style even when extra group controls require the whole layout. */
+    public static boolean shouldDrawRecordButtonBackground(boolean forbidden, boolean menuState) {
+        return !forbidden && !menuState && AppearanceConfig.chatComposerStyle() != 1;
+    }
+
     /** Visible field starts 50dp + 7dp drawable padding from the left edge. */
     public static int textLeftInsetDp() {
         return 57 + 16;
