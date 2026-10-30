@@ -3072,7 +3072,7 @@ public class ChatActivity extends BaseFragment implements
             glassBackgroundSourceFrostedRenderNode = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
             glassBackgroundSourceFrostedRenderNode.setOnDrawablesRelativePositionChangeListener(this::invalidateMergedVisibleBlurredPositionsAndSourcesPositions);
             glassBackgroundSourceFrostedRenderNode.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_FROSTED_GLASS);
-            glassBackgroundSourceFrostedRenderNode.setUnderSource(navbarContentSourceWallpaper);
+            glassBackgroundSourceFrostedRenderNode.setUnderSource(app.freezgram.SmallElementsGlass.createSource(navbarContentSourceWallpaper));
 
             glassBackgroundDrawableFactoryFrosted = new BlurredBackgroundDrawableViewFactory(glassBackgroundSourceFrostedRenderNode);
             glassBackgroundDrawableFactoryFrosted.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
@@ -3081,7 +3081,7 @@ public class ChatActivity extends BaseFragment implements
                 glassBackgroundSourceRenderNode = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
                 glassBackgroundSourceRenderNode.setOnDrawablesRelativePositionChangeListener(this::invalidateMergedVisibleBlurredPositionsAndSourcesPositions);
                 glassBackgroundSourceRenderNode.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
-                glassBackgroundSourceRenderNode.setUnderSource(navbarContentSourceWallpaper);
+                glassBackgroundSourceRenderNode.setUnderSource(app.freezgram.SmallElementsGlass.createSource(navbarContentSourceWallpaper));
                 glassBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(glassBackgroundSourceRenderNode);
                 glassBackgroundDrawableFactory.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
             } else {
@@ -3102,7 +3102,7 @@ public class ChatActivity extends BaseFragment implements
             iosHeaderGlassSource = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
             iosHeaderGlassSource.setOnDrawablesRelativePositionChangeListener(this::invalidateMergedVisibleBlurredPositionsAndSourcesPositions);
             iosHeaderGlassSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
-            iosHeaderGlassSource.setUnderSource(navbarContentSourceWallpaper);
+            iosHeaderGlassSource.setUnderSource(app.freezgram.SmallElementsGlass.createSource(navbarContentSourceWallpaper));
             iosHeaderGlassFactory = new BlurredBackgroundDrawableViewFactory(iosHeaderGlassSource);
         } else {
             iosHeaderGlassSource = null;
