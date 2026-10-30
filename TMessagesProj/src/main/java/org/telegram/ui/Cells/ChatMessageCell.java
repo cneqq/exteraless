@@ -571,6 +571,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     }
 
     public interface ChatMessageCellDelegate {
+        default boolean drawShareButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds) { return false; }
+
         default boolean isReplyOrSelf() {
             return false;
         }
@@ -1728,6 +1730,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
 
     private boolean hideSideButtonByQuickShare;
+    private org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable shareGlassBackground;
+    public org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable getShareGlassBackground() { return shareGlassBackground; }
+    public void setShareGlassBackground(org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable drawable) { shareGlassBackground = drawable; }
     private int drawSideButton;
     private boolean sideButtonVisible;
     private int drawSideButton2;
@@ -6500,6 +6505,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (shareGlassBackground != null) { shareGlassBackground.setCallback(null); shareGlassBackground = null; }
 
         if (observersGroup != null) {
             observersGroup.removeAllObservers();
@@ -13592,7 +13598,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     @Override
     protected boolean verifyDrawable(@NonNull Drawable who) {
-        if (super.verifyDrawable(who) || who == selectorDrawable[0] || who == animatedInfoLayout || who == selectorDrawable[1] || who == linkPreviewSelector || who == nameLayoutSelector || who == replySelector || reactionsLayoutInBubble != null && reactionsLayoutInBubble.verifyDrawable(who) || who instanceof LoadingDrawable) {
+        if (who == shareGlassBackground || super.verifyDrawable(who) || who == selectorDrawable[0] || who == animatedInfoLayout || who == selectorDrawable[1] || who == linkPreviewSelector || who == nameLayoutSelector || who == replySelector || reactionsLayoutInBubble != null && reactionsLayoutInBubble.verifyDrawable(who) || who instanceof LoadingDrawable) {
             return true;
         }
         if (pollAddButtonDrawable != null && pollAddButtonDrawable.verifyDrawable(who)) {
@@ -18827,6 +18833,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     }
 
     public void setDelegate(ChatMessageCellDelegate chatMessageCellDelegate) {
+        if (delegate != chatMessageCellDelegate && shareGlassBackground != null) {
+            shareGlassBackground.setCallback(null); shareGlassBackground = null;
+        }
         delegate = chatMessageCellDelegate;
     }
 
@@ -22440,45 +22449,49 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 restoreToSponosoredAlpha = canvas.saveLayerAlpha(sideStartX, sideStartY, sideStartX + dp(32), sideStartY + dp(64), sponosoredAlpha);
             }
 
-            applyServiceShaderMatrix();
-            if (drawSideButton == SIDE_BUTTON_SPONSORED_CLOSE && drawSideButton2 == SIDE_BUTTON_SPONSORED_MORE && sideButtonPressed) {
-                if (sideButtonPath1 == null) {
-                    sideButtonPath1 = new Path();
-                } else {
-                    sideButtonPath1.rewind();
-                }
-                if (sideButtonPath2 == null) {
-                    sideButtonPath2 = new Path();
-                } else {
-                    sideButtonPath2.rewind();
-                }
-                if (sideButtonPathCorners1 == null) {
-                    sideButtonPathCorners1 = new float[8];
-                    sideButtonPathCorners1[0] = sideButtonPathCorners1[1] = sideButtonPathCorners1[2] = sideButtonPathCorners1[3] = dp(16);
-                }
-                if (sideButtonPathCorners2 == null) {
-                    sideButtonPathCorners2 = new float[8];
-                    sideButtonPathCorners2[4] = sideButtonPathCorners2[5] = sideButtonPathCorners2[6] = sideButtonPathCorners2[7] = dp(16);
-                }
-                AndroidUtilities.rectTmp.set(sideStartX, sideStartY, sideStartX + dp(32), sideStartY + dp(32));
-                sideButtonPath1.addRoundRect(AndroidUtilities.rectTmp, sideButtonPathCorners1, Path.Direction.CW);
+            boolean glassShare = drawSideButton == 1 && app.exteraless.appearance.AppearanceConfig.smallElementsGlass()
+                    && delegate != null && delegate.drawShareButtonGlass(this, canvas, rect);
+            if (!glassShare) {
+                applyServiceShaderMatrix();
+                if (drawSideButton == SIDE_BUTTON_SPONSORED_CLOSE && drawSideButton2 == SIDE_BUTTON_SPONSORED_MORE && sideButtonPressed) {
+                    if (sideButtonPath1 == null) {
+                        sideButtonPath1 = new Path();
+                    } else {
+                        sideButtonPath1.rewind();
+                    }
+                    if (sideButtonPath2 == null) {
+                        sideButtonPath2 = new Path();
+                    } else {
+                        sideButtonPath2.rewind();
+                    }
+                    if (sideButtonPathCorners1 == null) {
+                        sideButtonPathCorners1 = new float[8];
+                        sideButtonPathCorners1[0] = sideButtonPathCorners1[1] = sideButtonPathCorners1[2] = sideButtonPathCorners1[3] = dp(16);
+                    }
+                    if (sideButtonPathCorners2 == null) {
+                        sideButtonPathCorners2 = new float[8];
+                        sideButtonPathCorners2[4] = sideButtonPathCorners2[5] = sideButtonPathCorners2[6] = sideButtonPathCorners2[7] = dp(16);
+                    }
+                    AndroidUtilities.rectTmp.set(sideStartX, sideStartY, sideStartX + dp(32), sideStartY + dp(32));
+                    sideButtonPath1.addRoundRect(AndroidUtilities.rectTmp, sideButtonPathCorners1, Path.Direction.CW);
 
-                AndroidUtilities.rectTmp.set(sideStartX, sideStartY + dp(32), sideStartX + dp(32), sideStartY + dp(64));
-                sideButtonPath2.addRoundRect(AndroidUtilities.rectTmp, sideButtonPathCorners2, Path.Direction.CW);
-                if (pressedSideButton == SIDE_BUTTON_SPONSORED_CLOSE) {
-                    canvas.drawPath(sideButtonPath1, getThemedPaint(Theme.key_paint_chatActionBackgroundSelected));
-                    canvas.drawPath(sideButtonPath2, getThemedPaint(Theme.key_paint_chatActionBackground));
+                    AndroidUtilities.rectTmp.set(sideStartX, sideStartY + dp(32), sideStartX + dp(32), sideStartY + dp(64));
+                    sideButtonPath2.addRoundRect(AndroidUtilities.rectTmp, sideButtonPathCorners2, Path.Direction.CW);
+                    if (pressedSideButton == SIDE_BUTTON_SPONSORED_CLOSE) {
+                        canvas.drawPath(sideButtonPath1, getThemedPaint(Theme.key_paint_chatActionBackgroundSelected));
+                        canvas.drawPath(sideButtonPath2, getThemedPaint(Theme.key_paint_chatActionBackground));
+                    } else {
+                        canvas.drawPath(sideButtonPath1, getThemedPaint(Theme.key_paint_chatActionBackground));
+                        canvas.drawPath(sideButtonPath2, getThemedPaint(Theme.key_paint_chatActionBackgroundSelected));
+                    }
                 } else {
-                    canvas.drawPath(sideButtonPath1, getThemedPaint(Theme.key_paint_chatActionBackground));
-                    canvas.drawPath(sideButtonPath2, getThemedPaint(Theme.key_paint_chatActionBackgroundSelected));
+                    canvas.drawRoundRect(rect, dp(16), dp(16), getThemedPaint(sideButtonPressed ? Theme.key_paint_chatActionBackgroundSelected : Theme.key_paint_chatActionBackground));
                 }
-            } else {
-                canvas.drawRoundRect(rect, dp(16), dp(16), getThemedPaint(sideButtonPressed ? Theme.key_paint_chatActionBackgroundSelected : Theme.key_paint_chatActionBackground));
-            }
-            if (hasGradientService()) {
-                canvas.drawRoundRect(rect, dp(16), dp(16), Theme.chat_actionBackgroundGradientDarkenPaint);
-            }
+                if (hasGradientService()) {
+                    canvas.drawRoundRect(rect, dp(16), dp(16), Theme.chat_actionBackgroundGradientDarkenPaint);
+                }
 
+            }
             if (drawSideButton == 2) {
                 Drawable goIconDrawable = getThemedDrawable(Theme.key_drawable_goIcon);
                 setDrawableBounds(goIconDrawable, sideStartX + dp(16) - goIconDrawable.getIntrinsicWidth() / 2f, sideStartY + dp(16) - goIconDrawable.getIntrinsicHeight() / 2f);
@@ -27498,7 +27511,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     public float getEventX(MotionEvent event) {
         return event.getX();
     }
-    
+
     public float getEventY(MotionEvent event) {
         return event.getY() - starsPriceTopPadding - topicSeparatorTopPadding - suggestionOfferTopPadding;
     }
@@ -29682,7 +29695,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     changed = true;
                 }
             }
-            
+
             if (mediaOffsetY != lastMediaOffsetY) {
                 animateFromMediaOffsetY = lastMediaOffsetY;
                 animateMediaOffsetY = true;

@@ -122,4 +122,5 @@
     <string name="FreezgramFoldersGlass">Chat folders: Liquid Glass</string>
     <string name="FreezgramComposerSideInset">Side inset</string>
     <string name="FreezgramGlassWallpaperDim">Apply wallpaper dimming</string>
+    <string name="FreezgramSmallElementsGlass">Other small elements</string>
 </resources>

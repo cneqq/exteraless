@@ -139,3 +139,15 @@ than eligibility for the split layout. Group sender controls, replies and narrow
 layouts can retain the whole composer without restoring the opaque accent circle.
 The icon uses the glass foreground color. Recording handlers and the active
 recording animation are unchanged; Default/Android styling retains its policy.
+
+**Other small elements** is an independent opt-in under shared Liquid Glass
+settings, included in backup and disabled by default. Its first target is the
+share button beside a message; saved-message navigation, discussion and sponsor
+controls retain their previous appearance. The button uses shared optics over
+a wallpaper-only source, avoiding recursive capture of the cell itself. The
+source is recorded once per chat drawing frame and reuses glass drawables for
+visible cells. References/callbacks are released on detach or delegate change.
+Android below 13, software drawing, disabled blur or power saving retains the
+standard button background. Touch and sharing handlers are unchanged.
+No APK build was requested for this addition; GPU and scrolling behavior need
+phone verification when a build is requested.

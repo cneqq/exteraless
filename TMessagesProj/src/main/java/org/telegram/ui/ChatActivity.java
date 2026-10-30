@@ -42321,7 +42321,47 @@ public class ChatActivity extends BaseFragment implements
         return msg;
     }
 
+    private BlurredBackgroundSourceRenderNode smallElementsSource;
+    private long smallElementsFrame = Long.MIN_VALUE;
+    private int smallElementsRevision = Integer.MIN_VALUE;
+    private final RectF smallElementsCellBounds = new RectF();
+
     private class ChatMessageCellDelegate implements ChatMessageCell.ChatMessageCellDelegate {
+        @Override
+        public boolean drawShareButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds) {
+            if (Build.VERSION.SDK_INT < 33 || !canvas.isHardwareAccelerated() || contentView == null
+                    || !SharedConfig.chatBlurEnabled() || LiteMode.isPowerSaverApplied()) return false;
+            if (!ViewPositionWatcher.computeRectInParent(cell, contentView, smallElementsCellBounds)) return false;
+            int width = contentView.getWidth(), height = contentView.getHeight();
+            if (width <= 0 || height <= 0) return false;
+            if (smallElementsSource == null) smallElementsSource = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
+            long frame = contentView.getDrawingTime();
+            int revision = app.freezgram.LiquidGlassStyle.revision();
+            if (smallElementsFrame != frame || smallElementsRevision != revision || smallElementsSource.needUpdateDisplayList(width, height)) {
+                smallElementsFrame = frame; smallElementsRevision = revision;
+                Canvas capture = smallElementsSource.beginRecording(width, height);
+                // Wallpaper only: capturing cells here would recursively capture this share button.
+                navbarContentSourceWallpaper.draw(capture, 0, 0, width, height);
+                smallElementsSource.endRecording();
+                smallElementsSource.setBlur(AndroidUtilities.dpf2(app.freezgram.LiquidGlassStyle.blurRadiusDp()),
+                        app.freezgram.LiquidGlassStyle.enhanceColors() ? org.telegram.messenger.utils.RenderNodeEffects.getSaturationX3RenderEffect() : null);
+                smallElementsSource.invalidateDisplayListForDrawables();
+            }
+            BlurredBackgroundDrawable drawable = cell.getShareGlassBackground();
+            if (drawable == null) {
+                drawable = smallElementsSource.createDrawable();
+                drawable.setColorProvider(app.freezgram.LiquidGlassStyle.colors(themeDelegate, () -> true));
+                drawable.setRadius(dp(16)); drawable.setCallback(cell);
+                cell.setShareGlassBackground(drawable);
+            }
+            drawable.setSourceOffset(smallElementsCellBounds.left, smallElementsCellBounds.top);
+            drawable.setBounds((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom);
+            app.freezgram.LiquidGlassStyle.configure(drawable);
+            ((org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawableRenderNode) drawable).setLiquidGlassEffectAllowed(true);
+            drawable.updateColors(); drawable.draw(canvas);
+            return true;
+        }
+
         @Override
         public boolean isReplyOrSelf() {
             return UserObject.isReplyUser(currentUser) || UserObject.isUserSelf(currentUser);

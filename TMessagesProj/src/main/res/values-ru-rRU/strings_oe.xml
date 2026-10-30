@@ -95,4 +95,5 @@
     <string name="FreezgramFoldersGlass">Папки чатов: Liquid Glass</string>
     <string name="FreezgramComposerSideInset">Отступ по бокам</string>
     <string name="FreezgramGlassWallpaperDim">Учитывать затемнение обоев</string>
+    <string name="FreezgramSmallElementsGlass">Прочие мелкие элементы</string>
 </resources>

@@ -72,6 +72,13 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 folders.setChecked(AppearanceConfig.foldersLiquidGlass()); geometryChanged = true; preview.invalidate();
             });
             content.addView(folders);
+            org.telegram.ui.Cells.TextCheckCell smallElements = new org.telegram.ui.Cells.TextCheckCell(context);
+            smallElements.setTextAndCheck(text(R.string.FreezgramSmallElementsGlass), AppearanceConfig.smallElementsGlass(), false);
+            smallElements.setOnClickListener(v -> {
+                AppearanceConfig.smallElementsGlass.setConfigBool(!AppearanceConfig.smallElementsGlass());
+                smallElements.setChecked(AppearanceConfig.smallElementsGlass()); geometryChanged = true;
+            });
+            content.addView(smallElements);
             enhanceColors = new org.telegram.ui.Cells.TextCheckCell(context);
             enhanceColors.setTextAndCheck(text(R.string.FreezgramGlassEnhanceColors), LiquidGlassStyle.enhanceColors(), false);
             enhanceColors.setOnClickListener(v -> {
