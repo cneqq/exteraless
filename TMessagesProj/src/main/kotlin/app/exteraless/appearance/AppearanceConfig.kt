@@ -463,6 +463,11 @@ object AppearanceConfig {
     fun attachmentPanelsGlass(): Boolean { ensureLoaded(); return attachmentPanelsGlass.Bool() }
 
     @JvmField
+    val giftCardsGlass = addConfig("FreezgramGiftCardsGlass", ConfigItem.configTypeBool, true)
+    @JvmStatic
+    fun giftCardsGlass(): Boolean { ensureLoaded(); return giftCardsGlass.Bool() }
+
+    @JvmField
     val smallElementsGlass = addConfig("FreezgramSmallElementsGlass", ConfigItem.configTypeBool, false)
     @JvmStatic
     fun smallElementsGlass(): Boolean { ensureLoaded(); return smallElementsGlass.Bool() }

@@ -5317,6 +5317,14 @@ public class ChatActivity extends BaseFragment implements
         glassBackgroundDrawableFactoryFrosted.setSourceRootView(viewPositionWatcher, parentView);
         iosHeaderGlassFactory.setSourceRootView(viewPositionWatcher, parentView);
         composerGlassFactory.setSourceRootView(viewPositionWatcher, parentView);
+        actionGlassFactory = null;
+        if (Build.VERSION.SDK_INT >= 33) {
+            actionGlassFactory = new BlurredBackgroundDrawableViewFactory(app.freezgram.SmallElementsGlass.createSource(navbarContentSourceWallpaper));
+            actionGlassFactory.setSourceRootView(viewPositionWatcher, parentView);
+            actionGlassFactory.setLiquidGlassEffectAllowed(true);
+            actionGlassFactory.setLinkedViewsRef(glassAttachedViews);
+        }
+
         navbarContentDrawableFactory.setSourceRootView(viewPositionWatcher, parentView);
         scrimBlur3Factory.setSourceRootView(viewPositionWatcher, parentView);
 
@@ -7903,6 +7911,7 @@ public class ChatActivity extends BaseFragment implements
                 setVisibility(alpha > 0 ? View.VISIBLE : INVISIBLE);
             }
         };
+        floatingDateView.setServiceGlassFactory(actionGlassFactory);
         floatingDateView.setCustomDate((int) (System.currentTimeMillis() / 1000), false, false);
         floatingDateView.setAlpha(0.0f);
         floatingDateView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -7957,7 +7966,9 @@ public class ChatActivity extends BaseFragment implements
 
         BlurredBackgroundDrawableViewFactory sideButtonsFactory = glassBackgroundDrawableFactory;
         org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundColorProvider sideButtonsColors = blurredBackgroundColorProvider;
-        if (app.freezgram.SmallElementsGlass.isEnabled() && iosHeaderGlassSource != null) {
+        // Keep a restorable source even when the chat opens while power saving is active.
+        if (app.exteraless.appearance.AppearanceConfig.smallElementsGlass() && Build.VERSION.SDK_INT >= 33
+                && SharedConfig.chatBlurEnabled() && iosHeaderGlassSource != null) {
             sideButtonsFactory = iosHeaderGlassFactory.withSource(iosHeaderGlassSource);
             sideButtonsFactory.setDrawableConfigurator(app.freezgram.LiquidGlassStyle::configure);
             sideButtonsColors = app.freezgram.LiquidGlassStyle.surfaceColors(resourceProvider, app.freezgram.SmallElementsGlass::isEnabled);
@@ -40376,6 +40387,7 @@ public class ChatActivity extends BaseFragment implements
                         info.setVisibleToUser(true);
                     }
                 };
+                ((ChatActionCell) view).setServiceGlassFactory(actionGlassFactory);
                 ((ChatActionCell) view).setInvalidateColors(true);
                 ((ChatActionCell) view).setDelegate(new ChatActionCell.ChatActionCellDelegate() {
                     @Override
@@ -42361,6 +42373,7 @@ public class ChatActivity extends BaseFragment implements
         return msg;
     }
 
+    private BlurredBackgroundDrawableViewFactory actionGlassFactory;
     private BlurredBackgroundSourceRenderNode smallElementsSource;
     private long smallElementsFrame = Long.MIN_VALUE;
     private int smallElementsRevision = Integer.MIN_VALUE;

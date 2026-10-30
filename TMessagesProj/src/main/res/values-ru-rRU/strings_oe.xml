@@ -96,7 +96,7 @@
     <string name="FreezgramComposerSideInset">Отступ по бокам</string>
     <string name="FreezgramGlassWallpaperDim">Учитывать затемнение обоев</string>
     <string name="FreezgramSmallElementsGlass">Прочие мелкие элементы</string>
-    <string name="FreezgramSmallElementsInfo">Уведомления, меню сообщения и реакции, кнопки ботов и кнопка «Поделиться».</string>
+    <string name="FreezgramSmallElementsInfo">Даты, служебные сообщения, уведомления, меню, кнопки ботов, «Поделиться» и боковые кнопки со счётчиками.</string>
     <string name="FreezgramAttachmentPanelsGlass">Панели меню вложений</string>
     <string name="FreezgramAttachmentPanelsGlassInfo">Нижняя панель выбора и поле подписи при отправке файлов.</string>
     <string name="FreezgramComposerContentInset">Отступ текста и эмодзи от краёв</string>
@@ -109,4 +109,5 @@
     <string name="FreezgramSnowStyleFlakes">Снежинки</string>
     <string name="FreezgramSnowStyleDots">Точки</string>
     <string name="FreezgramChatHeaderGlassDim">Затемнять стекло шапки чата</string>
+    <string name="FreezgramGiftCardsGlass">Карточки подарков в чатах</string>
 </resources>

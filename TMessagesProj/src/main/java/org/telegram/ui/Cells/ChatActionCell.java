@@ -1223,6 +1223,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        releaseServiceGlass();
         attachedToWindow = false;
         DownloadController.getInstance(currentAccount).removeLoadingFileObserver(this);
         imageReceiver.onDetachedFromWindow();
@@ -3529,6 +3530,46 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         backgroundRight = (int) Math.max(backgroundRight, rect.right);
     }
 
+    private org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory serviceGlassFactory;
+    private final org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable[] serviceGlass = new org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable[2];
+    private final RectF serviceGlassBounds = new RectF();
+
+    public void setServiceGlassFactory(org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory factory) {
+        releaseServiceGlass(); serviceGlassFactory = factory;
+    }
+    private void releaseServiceGlass() {
+        for (int i = 0; i < serviceGlass.length; i++) {
+            if (serviceGlass[i] != null) serviceGlass[i].setCallback(null);
+            serviceGlass[i] = null;
+        }
+    }
+    private boolean drawServiceGlass(Canvas canvas, Path path, RectF rect, float radius, boolean gift, boolean fromParent) {
+        boolean enabled = gift ? app.freezgram.SmallElementsGlass.areGiftCardsEnabled() : app.freezgram.SmallElementsGlass.isEnabled();
+        if (!enabled || serviceGlassFactory == null || overrideBackground >= 0 || !canvas.isHardwareAccelerated()) return false;
+        if (gift && (currentMessageObject == null || !(currentMessageObject.isStarGiftAction()
+                || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM_CHANNEL
+                || currentMessageObject.type == MessageObject.TYPE_GIFT_STARS || currentMessageObject.type == MessageObject.TYPE_GIFT_OFFER))) return false;
+        int slot = gift ? 1 : 0;
+        if (serviceGlass[slot] == null) {
+            serviceGlass[slot] = serviceGlassFactory.create(this, app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate,
+                    gift ? app.freezgram.SmallElementsGlass::areGiftCardsEnabled : app.freezgram.SmallElementsGlass::isEnabled));
+            serviceGlass[slot].setCallback(this);
+        }
+        if (path != null) path.computeBounds(serviceGlassBounds, true); else serviceGlassBounds.set(rect);
+        if (serviceGlassBounds.isEmpty()) return false;
+        if (gift && starGiftLayout != null) starGiftLayout.setGlassBackground(true);
+        var drawable = serviceGlass[slot];
+        drawable.setBounds((int) Math.floor(serviceGlassBounds.left), (int) Math.floor(serviceGlassBounds.top),
+                (int) Math.ceil(serviceGlassBounds.right), (int) Math.ceil(serviceGlassBounds.bottom));
+        drawable.setRadius(radius);
+        drawable.setAlpha((int) (255 * (fromParent ? getAlpha() : 1f) * (isFloating() ? .75f : 1f)));
+        app.freezgram.LiquidGlassStyle.configure(drawable); drawable.updateColors();
+        canvas.save();
+        if (path != null) canvas.clipPath(path);
+        drawable.draw(canvas); canvas.restore();
+        return true;
+    }
+
     public void drawBackground(Canvas canvas, boolean fromParent) {
         if (canDrawInParent) {
             if (hasGradientService() && !fromParent) {
@@ -3538,6 +3579,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
                 return;
             }
         }
+        if (starGiftLayout != null) starGiftLayout.setGlassBackground(false);
         Paint backgroundPaint = getThemedPaint(Theme.key_paint_chatActionBackground);
         Paint darkenBackgroundPaint = getThemedPaint(Theme.key_paint_chatActionBackgroundDarken);
         textPaint = (TextPaint) getThemedPaint(Theme.key_paint_chatActionText);
@@ -3727,17 +3769,19 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             darkenBackgroundPaint.setAlpha((int) (oldAlpha2 * (isFloating() ? .75f : 1f)));
         }
         if (currentMessageObject == null || !currentMessageObject.isRepostPreview) {
-            canvas.drawPath(backgroundPath, backgroundPaint);
-            if (hasGradientService() && darkenBackgroundPaint.getAlpha() > 0) {
-                canvas.drawPath(backgroundPath, darkenBackgroundPaint);
-            }
-            if (dimAmount > 0) {
-                int wasAlpha = dimPaint.getAlpha();
-                if (fromParent) {
-                    dimPaint.setAlpha((int) (wasAlpha * getAlpha()));
+            if (!drawServiceGlass(canvas, backgroundPath, null, dp(11), false, fromParent)) {
+                canvas.drawPath(backgroundPath, backgroundPaint);
+                if (hasGradientService() && darkenBackgroundPaint.getAlpha() > 0) {
+                    canvas.drawPath(backgroundPath, darkenBackgroundPaint);
                 }
-                canvas.drawPath(backgroundPath, dimPaint);
-                dimPaint.setAlpha(wasAlpha);
+                if (dimAmount > 0) {
+                    int wasAlpha = dimPaint.getAlpha();
+                    if (fromParent) {
+                        dimPaint.setAlpha((int) (wasAlpha * getAlpha()));
+                    }
+                    canvas.drawPath(backgroundPath, dimPaint);
+                    dimPaint.setAlpha(wasAlpha);
+                }
             }
         }
 
@@ -3777,10 +3821,12 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
                 backgroundRect = new RectF();
             }
             backgroundRect.set(AndroidUtilities.rectTmp);
-            canvas.drawRoundRect(backgroundRect, dp(16), dp(16), backgroundPaint);
+            if (!drawServiceGlass(canvas, null, backgroundRect, dp(16), true, fromParent)) {
+                canvas.drawRoundRect(backgroundRect, dp(16), dp(16), backgroundPaint);
 
-            if (hasGradientService()) {
-                canvas.drawRoundRect(backgroundRect, dp(16), dp(16), darkenBackgroundPaint);
+                if (hasGradientService()) {
+                    canvas.drawRoundRect(backgroundRect, dp(16), dp(16), darkenBackgroundPaint);
+                }
             }
         } else if (birthdayLayout != null) {
             final float w = birthdayLayout.width();
@@ -3813,26 +3859,28 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             }
             backgroundRect.set(AndroidUtilities.rectTmp);
 
-            boolean backgroundDrawn = false;
-            if (messageObject != null && (messageObject.type == MessageObject.TYPE_GIFT_OFFER || messageObject.type == MessageObject.TYPE_SHARING_OFFER)) {
-                if (botInlineButtons != null) {
-                    Arrays.fill(radii, dp(16));
-                    radii[4] = radii[5] = radii[6] = radii[7] = dp(6);
-                    backgroundPath2.rewind();
-                    backgroundPath2.addRoundRect(backgroundRect, radii, Path.Direction.CW);
-                    canvas.drawPath(backgroundPath2, backgroundPaint);
-                    if (hasGradientService()) {
-                        canvas.drawPath(backgroundPath2, darkenBackgroundPaint);
+            if (!drawServiceGlass(canvas, null, backgroundRect, dp(20), true, fromParent)) {
+                boolean backgroundDrawn = false;
+                if (messageObject != null && (messageObject.type == MessageObject.TYPE_GIFT_OFFER || messageObject.type == MessageObject.TYPE_SHARING_OFFER)) {
+                    if (botInlineButtons != null) {
+                        Arrays.fill(radii, dp(16));
+                        radii[4] = radii[5] = radii[6] = radii[7] = dp(6);
+                        backgroundPath2.rewind();
+                        backgroundPath2.addRoundRect(backgroundRect, radii, Path.Direction.CW);
+                        canvas.drawPath(backgroundPath2, backgroundPaint);
+                        if (hasGradientService()) {
+                            canvas.drawPath(backgroundPath2, darkenBackgroundPaint);
+                        }
+                        backgroundDrawn = true;
                     }
-                    backgroundDrawn = true;
                 }
-            }
 
-            if (!backgroundDrawn) {
-                canvas.drawRoundRect(backgroundRect, dp(20), dp(20), backgroundPaint);
+                if (!backgroundDrawn) {
+                    canvas.drawRoundRect(backgroundRect, dp(20), dp(20), backgroundPaint);
 
-                if (hasGradientService()) {
-                    canvas.drawRoundRect(backgroundRect, dp(20), dp(20), darkenBackgroundPaint);
+                    if (hasGradientService()) {
+                        canvas.drawRoundRect(backgroundRect, dp(20), dp(20), darkenBackgroundPaint);
+                    }
                 }
             }
         }
@@ -4350,7 +4398,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
 
     @Override
     protected boolean verifyDrawable(@NonNull Drawable who) {
-        return who == wallpaperPreviewDrawable || super.verifyDrawable(who);
+        return serviceGlass != null && (who == serviceGlass[0] || who == serviceGlass[1]) || who == wallpaperPreviewDrawable || super.verifyDrawable(who);
     }
 
     public boolean isFloating() {

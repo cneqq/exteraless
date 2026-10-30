@@ -338,3 +338,28 @@ above the material and are not dimmed. Navigation/composer materials and ordinar
 fallback colors remain unchanged. The header sample previews it. Regression
 checks cover black tint, disabling, cache refresh and isolation from navigation;
 no APK build or phone verification was performed.
+
+
+Other small elements now also covers ChatActionCell date/service text backgrounds,
+including floating dates, via a wallpaper-only glass factory. A separate **Gift
+cards in chats** switch (default on, backed up) controls gift card materials.
+Service text and card backgrounds own distinct drawables; native service paths
+are clipped without changing text or hit targets. Explicit background overrides,
+software rendering, disabled blur and power saving retain original backgrounds.
+Wallet/birthday/non-gift cards keep their own appearance. Unique gift cards skip
+their opaque gradient only after a glass backing was actually drawn; gift artwork,
+patterns, links, prices, buttons and message handling remain unchanged.
+
+Side-control counters receive their own tracked glass drawables. Both normal and
+count-replacement animation paths skip the accent/gradient fill only when the
+glass callback succeeds, preserving fallback. Counter text uses the glass icon
+color while active. Side icons already use the shared weak capture. JVM tests
+cover service/card recording independence, alpha, explicit overrides, eligibility,
+cleanup and counter fallback. Device verification of gift visuals and counters is
+still needed; an ordinary personal APK build is requested for these changes.
+
+Side controls now select their restorable glass factory from the stored opt-in
+and supported capture configuration, not the current saver state at construction.
+Their live material gate still disables effects in saver and restores afterward.
+A regression opens controls while saver is active, then verifies restoration
+without recreating the chat. Counter glyph colors follow the glass foreground.

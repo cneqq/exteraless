@@ -99,6 +99,13 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             smallInfo.setText(text(R.string.FreezgramSmallElementsInfo)); smallInfo.setTextSize(14);
             smallInfo.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText));
             smallInfo.setPadding(dp(22), 0, dp(22), dp(12)); content.addView(smallInfo);
+            org.telegram.ui.Cells.TextCheckCell gifts = new org.telegram.ui.Cells.TextCheckCell(context);
+            gifts.setTextAndCheck(text(R.string.FreezgramGiftCardsGlass), AppearanceConfig.giftCardsGlass(), false);
+            gifts.setOnClickListener(v -> {
+                AppearanceConfig.giftCardsGlass.setConfigBool(!AppearanceConfig.giftCardsGlass());
+                gifts.setChecked(AppearanceConfig.giftCardsGlass()); geometryChanged = true;
+            });
+            content.addView(gifts);
             org.telegram.ui.Cells.TextCheckCell attachments = new org.telegram.ui.Cells.TextCheckCell(context);
             attachments.setTextAndCheck(text(R.string.FreezgramAttachmentPanelsGlass), AppearanceConfig.attachmentPanelsGlass(), false);
             attachments.setOnClickListener(v -> {

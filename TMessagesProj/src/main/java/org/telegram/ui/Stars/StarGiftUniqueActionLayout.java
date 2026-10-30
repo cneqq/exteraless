@@ -61,6 +61,9 @@ public class StarGiftUniqueActionLayout {
     public final ImageReceiver imageReceiver;
     private final AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable emoji;
 
+    private boolean glassBackground;
+    public void setGlassBackground(boolean enabled) { glassBackground = enabled; }
+
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private int gradientRadius;
     private RadialGradient gradient;
@@ -512,7 +515,7 @@ public class StarGiftUniqueActionLayout {
         canvas.scale(s, s, backgroundRect.centerX(), backgroundRect.centerY());
         canvas.save();
         canvas.clipPath(backgroundPath);
-        canvas.drawPaint(backgroundPaint);
+        if (!glassBackground) canvas.drawPaint(backgroundPaint);
 
         canvas.save();
         canvas.translate(cx, dp(10 + 55));

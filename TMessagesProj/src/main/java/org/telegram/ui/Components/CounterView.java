@@ -67,7 +67,23 @@ public class CounterView extends View {
         return Theme.getColor(key, resourcesProvider);
     }
 
+    public void setGlassBackground(org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory factory,
+            org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundColorProvider provider) {
+        final var glass = factory.create(this, provider);
+        counterDrawable.backgroundDrawer = (canvas, bounds, radius) -> {
+            if (!app.freezgram.SmallElementsGlass.isEnabled() || !canvas.isHardwareAccelerated()) return false;
+            org.telegram.messenger.AndroidUtilities.rectTmp.set(bounds);
+            org.telegram.messenger.AndroidUtilities.rectTmp.round(org.telegram.messenger.AndroidUtilities.rectTmp2);
+            glass.setBounds(org.telegram.messenger.AndroidUtilities.rectTmp2); glass.setRadius(radius);
+            app.freezgram.LiquidGlassStyle.configure(glass); glass.updateColors(); glass.draw(canvas);
+            return true;
+        };
+    }
+
     public static class CounterDrawable {
+
+        public interface BackgroundDrawer { boolean draw(Canvas canvas, RectF bounds, float radius); }
+        public BackgroundDrawer backgroundDrawer;
 
         private final static int ANIMATION_TYPE_IN = 0;
         private final static int ANIMATION_TYPE_OUT = 1;
@@ -158,8 +174,9 @@ public class CounterView extends View {
                     canvas.scale(circleScale, circleScale, rectF.centerX(), rectF.centerY());
                     needRestore = true;
                 }
-                canvas.drawRoundRect(rectF, radius * AndroidUtilities.density, radius * AndroidUtilities.density, circlePaint);
-                if (addServiceGradient && Theme.hasGradientService()) {
+                boolean glassDrawn = backgroundDrawer != null && backgroundDrawer.draw(canvas, rectF, radius * AndroidUtilities.density);
+                if (!glassDrawn) canvas.drawRoundRect(rectF, radius * AndroidUtilities.density, radius * AndroidUtilities.density, circlePaint);
+                if (!glassDrawn && addServiceGradient && Theme.hasGradientService()) {
                     canvas.drawRoundRect(rectF, radius * AndroidUtilities.density, radius * AndroidUtilities.density, Theme.chat_actionBackgroundGradientDarkenPaint);
                 }
                 if (needRestore) {
@@ -310,7 +327,8 @@ public class CounterView extends View {
 
         public void draw(Canvas canvas) {
             if (type != TYPE_CHAT_PULLING_DOWN && type != TYPE_CHAT_REACTIONS) {
-                int textColor = getThemedColor(textColorKey);
+                int textColor = getThemedColor(backgroundDrawer != null && app.freezgram.SmallElementsGlass.isEnabled()
+                        ? Theme.key_glass_defaultIcon : textColorKey);
                 int circleColor = getThemedColor(circleColorKey);
                 if (this.textColor != textColor) {
                     this.textColor = textColor;
@@ -365,8 +383,9 @@ public class CounterView extends View {
                         canvas.scale(circleScale, circleScale, rectF.centerX(), rectF.centerY());
                     }
                     if (drawBackground && circlePaint != null) {
-                        canvas.drawRoundRect(rectF, radius * AndroidUtilities.density, radius * AndroidUtilities.density, circlePaint);
-                        if (addServiceGradient && Theme.hasGradientService()) {
+                        boolean glassDrawn = backgroundDrawer != null && backgroundDrawer.draw(canvas, rectF, radius * AndroidUtilities.density);
+                        if (!glassDrawn) canvas.drawRoundRect(rectF, radius * AndroidUtilities.density, radius * AndroidUtilities.density, circlePaint);
+                        if (!glassDrawn && addServiceGradient && Theme.hasGradientService()) {
                             canvas.drawRoundRect(rectF, radius * AndroidUtilities.density, radius * AndroidUtilities.density, Theme.chat_actionBackgroundGradientDarkenPaint);
                         }
                     }

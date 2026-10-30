@@ -25,6 +25,11 @@ public final class SmallElementsGlass {
                 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
     }
 
+    public static boolean areGiftCardsEnabled() {
+        return AppearanceConfig.giftCardsGlass() && Build.VERSION.SDK_INT >= 33
+                && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
+    }
+
     /** Bridge existing bitmap captures into the same AGSL renderer used by the panels. */
     public static BlurredBackgroundSource createSource(BlurredBackgroundSource source) {
         return source instanceof SnapshotSource ? source : new SnapshotSource(source);

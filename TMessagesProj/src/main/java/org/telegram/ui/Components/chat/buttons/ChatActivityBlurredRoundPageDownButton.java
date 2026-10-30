@@ -25,6 +25,8 @@ public class ChatActivityBlurredRoundPageDownButton extends FrameLayout {
 
     private ChatActivityBlurredRoundButton buttonView;
     private CounterView counterView;
+    private BlurredBackgroundDrawableViewFactory counterGlassFactory;
+    private BlurredBackgroundColorProvider counterGlassColors;
 
     public ChatActivityBlurredRoundPageDownButton(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -51,6 +53,7 @@ public class ChatActivityBlurredRoundPageDownButton extends FrameLayout {
         if (counterView == null) {
             counterView = new CounterView(getContext(), resourcesProvider);
             counterView.setReverse(reversedCounter);
+            if (counterGlassFactory != null) counterView.setGlassBackground(counterGlassFactory, counterGlassColors);
             addView(counterView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 28, Gravity.TOP));
         }
 
@@ -96,6 +99,8 @@ public class ChatActivityBlurredRoundPageDownButton extends FrameLayout {
     ) {
         ChatActivityBlurredRoundPageDownButton button = new ChatActivityBlurredRoundPageDownButton(context, resourcesProvider);
         button.addButtonView(ChatActivityBlurredRoundButton.create(context, factory, colorProvider, resourcesProvider, res, iconSize), size);
+        button.counterGlassFactory = factory;
+        button.counterGlassColors = colorProvider;
         ScaleStateListAnimator.apply(button, .13f, 2f);
 
         return button;
