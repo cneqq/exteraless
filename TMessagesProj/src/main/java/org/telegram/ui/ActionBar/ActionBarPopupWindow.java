@@ -261,14 +261,13 @@ public class ActionBarPopupWindow extends PopupWindow {
                     super.dispatchDraw(canvas);
                     if (glassDividersEnabled == null || !glassDividersEnabled.getAsBoolean()) return;
                     View previous = null;
-                    float inset = dp(16), thickness = Math.max(1f, AndroidUtilities.dpf2(.5f));
                     for (int i = 0; i < getChildCount(); i++) {
                         View child = getChildAt(i);
                         if (child.getVisibility() != VISIBLE) continue;
                         if (child instanceof GapView) { previous = null; continue; }
                         if (previous != null) {
                             float y = (previous.getBottom() + child.getTop()) / 2f;
-                            canvas.drawRect(inset, y, getWidth() - inset, y + thickness, glassDividerPaint);
+                            app.freezgram.GlassDividers.draw(canvas, 0, getWidth(), y, 1f, glassDividerPaint.getColor());
                         }
                         previous = child;
                     }

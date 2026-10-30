@@ -302,3 +302,19 @@ once, so no speculative ownership change was made there. These shared fixes cove
 capture used by headers, folders, navigation, composer and side buttons. GPU
 rendering and elimination of every reported seam remain unverified on a phone.
 No APK build was started for this follow-up.
+
+
+The close button on the plain Add to contacts suggestion is kept visible even
+when translation is also offered. Closing this suggestion stores a local
+per-account/per-peer dismissal flag and refreshes the top panel, without calling
+hidePeerSettingsBar or hiding translation/spam controls. Archive/share/invite
+variants retain their original close behavior. Adding the person via their
+profile remains possible. The dismissal survives reopening the chat.
+
+Liquid Glass now links to a dedicated divider editor with a live glass preview:
+enable, weight (1–4), opacity (0–100%) and symmetric side inset (0–32dp).
+Popup menus and iOS chat top panels use the same GlassDividers drawing helper as
+the preview. The original toggle key/defaults are preserved and the new numeric
+settings are backed up. The local-dismissal regression checks account/chat
+isolation and non-contact action variants; geometry tests cover disable/opacity
+and narrow surfaces. No APK build or phone visual verification was performed.

@@ -77,12 +77,9 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 folders.setChecked(AppearanceConfig.foldersLiquidGlass()); geometryChanged = true; preview.invalidate();
             });
             content.addView(folders);
-            org.telegram.ui.Cells.TextCheckCell dividers = new org.telegram.ui.Cells.TextCheckCell(context);
-            dividers.setTextAndCheck(text(R.string.FreezgramGlassMenuDividers), AppearanceConfig.glassMenuDividers(), false);
-            dividers.setOnClickListener(v -> {
-                AppearanceConfig.glassMenuDividers.setConfigBool(!AppearanceConfig.glassMenuDividers());
-                dividers.setChecked(AppearanceConfig.glassMenuDividers()); geometryChanged = true;
-            });
+            org.telegram.ui.Cells.TextSettingsCell dividers = new org.telegram.ui.Cells.TextSettingsCell(context);
+            dividers.setText(text(R.string.FreezgramGlassMenuDividers), false);
+            dividers.setOnClickListener(v -> presentFragment(new GlassDividerSettingsActivity()));
             content.addView(dividers);
             org.telegram.ui.Cells.TextCheckCell header = new org.telegram.ui.Cells.TextCheckCell(context);
             header.setTextAndCheck(text(R.string.FreezgramDialogsHeaderGlass), AppearanceConfig.dialogsHeaderGlass(), false);

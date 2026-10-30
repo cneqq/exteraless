@@ -101,5 +101,8 @@
     <string name="FreezgramAttachmentPanelsGlassInfo">Нижняя панель выбора и поле подписи при отправке файлов.</string>
     <string name="FreezgramComposerContentInset">Отступ текста и эмодзи от краёв</string>
     <string name="FreezgramDialogsHeaderGlass">Шапка списка чатов</string>
-    <string name="FreezgramGlassMenuDividers">Разделители в стеклянных меню</string>
+    <string name="FreezgramGlassMenuDividers">Разделители в стеклянных плашках</string>
+    <string name="FreezgramGlassDividerWeight">Толщина линии</string>
+    <string name="FreezgramGlassDividerOpacity">Непрозрачность линии</string>
+    <string name="FreezgramGlassDividerInset">Отступы по бокам</string>
 </resources>

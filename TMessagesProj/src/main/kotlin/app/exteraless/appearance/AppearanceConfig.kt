@@ -430,6 +430,19 @@ object AppearanceConfig {
     fun navigationPanelLift(): Int { ensureLoaded(); return navigationPanelLift.Int().coerceIn(0, 64) }
 
     @JvmField
+    val glassDividerWeight = addConfig("FreezgramGlassDividerWeight", ConfigItem.configTypeInt, 1)
+    @JvmStatic
+    fun glassDividerWeight(): Int { ensureLoaded(); return glassDividerWeight.Int().coerceIn(1, 4) }
+    @JvmField
+    val glassDividerOpacity = addConfig("FreezgramGlassDividerOpacity", ConfigItem.configTypeInt, 18)
+    @JvmStatic
+    fun glassDividerOpacity(): Int { ensureLoaded(); return glassDividerOpacity.Int().coerceIn(0, 100) }
+    @JvmField
+    val glassDividerInset = addConfig("FreezgramGlassDividerInset", ConfigItem.configTypeInt, 16)
+    @JvmStatic
+    fun glassDividerInset(): Int { ensureLoaded(); return glassDividerInset.Int().coerceIn(0, 32) }
+
+    @JvmField
     val glassMenuDividers = addConfig("FreezgramGlassMenuDividers", ConfigItem.configTypeBool, true)
     @JvmStatic
     fun glassMenuDividers(): Boolean { ensureLoaded(); return glassMenuDividers.Bool() }

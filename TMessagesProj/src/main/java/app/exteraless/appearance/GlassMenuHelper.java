@@ -136,7 +136,7 @@ public abstract class GlassMenuHelper {
 
     public static void applyDividers(ActionBarPopupWindow.ActionBarPopupWindowLayout popup, Theme.ResourcesProvider provider) {
         popup.setGlassDividers(() -> app.freezgram.SmallElementsGlass.isEnabled() && AppearanceConfig.glassMenuDividers(),
-                Theme.multAlpha(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, provider), .18f));
+                Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, provider));
     }
 
     /** Apply the same material to the main popup and its swipe-back panels. */

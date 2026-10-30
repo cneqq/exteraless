@@ -10628,6 +10628,16 @@ public class ChatActivity extends BaseFragment implements
         }
     }
 
+    private boolean dismissAddContactSuggestion() {
+        if (currentUser == null || currentUser.contact || currentUser.self || addToContactsButton == null
+                || addToContactsButton.getVisibility() != VISIBLE || addToContactsButtonArchive || addToContactsButton.getTag() != null) return false;
+        long peer = currentEncryptedChat != null ? currentUser.id : dialog_id;
+        MessagesController.getNotificationsSettings(currentAccount).edit()
+                .putBoolean("freezgram_hide_add_contact_" + peer, true).apply();
+        updateTopPanel(true);
+        return true;
+    }
+
     private void createTopPanel() {
         if (contentView == null || topChatPanelView != null || getContext() == null) {
             return;
@@ -10808,6 +10818,7 @@ public class ChatActivity extends BaseFragment implements
         closeReportSpam.setScaleType(ImageView.ScaleType.CENTER);
         topChatPanelView.addView(closeReportSpam, LayoutHelper.createFrame(34, 34, Gravity.RIGHT | Gravity.TOP, 0, 5, 5, 0));
         closeReportSpam.setOnClickListener(v -> {
+            if (dismissAddContactSuggestion()) return;
             long did = dialog_id;
             if (currentEncryptedChat != null) {
                 did = currentUser.id;
@@ -31191,6 +31202,7 @@ public class ChatActivity extends BaseFragment implements
         boolean showReport = preferences.getBoolean("dialog_bar_report" + did, false) || DEBUG_TOP_PANELS;
         boolean showBlock = preferences.getBoolean("dialog_bar_block" + did, false) || DEBUG_TOP_PANELS;
         boolean showAdd = preferences.getBoolean("dialog_bar_add" + did, false) || DEBUG_TOP_PANELS;
+        showAdd &= !preferences.getBoolean("freezgram_hide_add_contact_" + did, false);
         boolean showArchive = preferences.getBoolean("dialog_bar_archived" + dialog_id, false) || DEBUG_TOP_PANELS;
         boolean showGeo = preferences.getBoolean("dialog_bar_location" + did, false);
         String chatWithAdmin = preferences.getString("dialog_bar_chat_with_admin_title" + did, null);
@@ -31426,7 +31438,7 @@ public class ChatActivity extends BaseFragment implements
             reportSpamButton.setVisibility(showReport || showBlock || showGeo ? View.VISIBLE : View.GONE);
         }
         if (closeReportSpam != null) {
-            closeReportSpam.setVisibility(showRestartTopic1 || (showTranslate || showBizBot) && !(showReport || showBlock || showGeo) ? View.GONE : View.VISIBLE);
+            closeReportSpam.setVisibility(showRestartTopic1 || (showTranslate || showBizBot) && !(showReport || showBlock || showGeo || showAdd) ? View.GONE : View.VISIBLE);
         }
         if (topPanelLayout != null) {
             topPanelLayout.setViewVisible(restartTopicButton, showRestartTopic1, animated);
