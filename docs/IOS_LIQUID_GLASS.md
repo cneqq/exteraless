@@ -1,9 +1,9 @@
 # Freezgram Liquid Glass
 
-The **iOS Design** group contains only two switches (0/2): chat header and
-input panel. An enabled input switch exposes a Configure row. The separate
+The **iOS Design** group contains three switches (0/3): navigation panel,
+chat header and input panel. An enabled input switch exposes a Configure row. The separate
 **Liquid Glass settings** entry opens shared optics, navigation settings and a
-chat-folder glass switch. The navigation style does not count toward iOS 0/2.
+chat-folder glass switch. The navigation switch is also available directly in iOS Design; its geometry remains in the Liquid Glass editor.
 
 Available editors:
 

@@ -229,7 +229,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         }
         iosGroupRow = addRow("iosStyles");
         if (iosExpanded) {
-            iosNavBarRow = -1;
+            iosNavBarRow = addRow("iosNavBar");
             iosLiquidGlassRow = -1;
             iosPanelSettingsRow = -1;
             iosChatHeaderRow = addRow("iosChatHeader");
@@ -632,7 +632,8 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
             return;
         } else if (position == iosNavBarRow) {
             boolean enable = !AppearanceConfig.iosNavigationBarStyle.Bool();
-                if (enable) {
+            AppearanceConfig.iosNavigationBarStyle.setConfigBool(enable);
+            if (enable) {
                 AppearanceConfig.newNavigationBarStyle.setConfigBool(false);
                 notifyRow(md3NavBarRow);
             }
@@ -935,7 +936,9 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     // иначе строка, побывавшая заблокированной, останется полупрозрачной.
                     cell.setEnabled(position != separateHeadersRow
                             || !AppearanceConfig.sectionsSeparatedHeadersForced(), null);
-                    if (position == chatComposerStyleRow) {
+                    if (position == iosNavBarRow) {
+                        cell.setTextAndCheck(getString(R.string.OEAppearanceIosNavigationBarStyle), AppearanceConfig.iosNavigationBarStyle.Bool(), false);
+                    } else if (position == chatComposerStyleRow) {
                         cell.setTextAndCheck(getString(R.string.FreezgramComposerSettings), AppearanceConfig.chatComposerStyle() == 1, false);
                     } else if (position == iosChatHeaderRow) {
                         cell.setTextAndCheck(getString(R.string.OEAppearanceIosChatHeader), AppearanceConfig.iosChatHeader.Bool(), false);
@@ -1159,7 +1162,7 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
                     || position == md3SwitchRow || position == md3ChatHeaderRow
                     || position == md3NavBarRow || position == md3ListItemsRow
                     || position == md3PlayerRow || position == md3MiniPlayerRow
-                    || position == iosNavBarRow || position == iosLiquidGlassRow) {
+                    || position == iosLiquidGlassRow) {
                 return TYPE_ROUND_CHECK;
             } else if (position == dividerStyleRow || position == glassOutlineRow
                     || position == tabTitleStyleRow
@@ -1223,10 +1226,11 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
         }
     }
 
-    private static final int IOS_STYLE_COUNT = 2;
+    private static final int IOS_STYLE_COUNT = 3;
 
     private int iosSelectedCount() {
         int n = 0;
+        if (AppearanceConfig.iosNavigationBarStyle.Bool()) n++;
         if (AppearanceConfig.iosChatHeader.Bool()) n++;
         if (AppearanceConfig.chatComposerStyle() == 1) n++;
         return n;
@@ -1234,6 +1238,8 @@ public class OpenExteraAppearanceActivity extends BaseNekoSettingsActivity {
 
     private void toggleAllIosStyles() {
         boolean enable = iosSelectedCount() == 0;
+        AppearanceConfig.iosNavigationBarStyle.setConfigBool(enable);
+        if (enable) AppearanceConfig.newNavigationBarStyle.setConfigBool(false);
         AppearanceConfig.iosChatHeader.setConfigBool(enable);
         if (enable || AppearanceConfig.chatComposerStyle() == 1) AppearanceConfig.chatComposerStyle.setConfigInt(enable ? 1 : 0);
         rebuildAll();
