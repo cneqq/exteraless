@@ -42,6 +42,10 @@ public class PopupSwipeBackLayout extends FrameLayout {
     private boolean isAnimationInProgress;
     private boolean isSwipeDisallowed;
     private Paint overlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable glassForeground;
+    public void setGlassForeground(org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable drawable) {
+        glassForeground = drawable; invalidate();
+    }
     private Paint foregroundPaint = new Paint();
     private int foregroundColor = 0;
 
@@ -139,7 +143,12 @@ public class PopupSwipeBackLayout extends FrameLayout {
             } else {
                 foregroundPaint.setColor(foregroundColor);
             }
-            canvas.drawRect(child.getX(), 0, child.getX() + child.getMeasuredWidth(), getMeasuredHeight(), foregroundPaint);
+            if (glassForeground != null && app.freezgram.SmallElementsGlass.isEnabled()) {
+                mRect.set(child.getX(), 0, child.getX() + child.getMeasuredWidth(), getMeasuredHeight());
+                app.exteraless.appearance.GlassMenuHelper.draw(glassForeground, canvas, mRect, AndroidUtilities.dp(12), 255);
+            } else {
+                canvas.drawRect(child.getX(), 0, child.getX() + child.getMeasuredWidth(), getMeasuredHeight(), foregroundPaint);
+            }
         }
         boolean b = super.drawChild(canvas, child, drawingTime);
         if (i == 0) {

@@ -26,13 +26,22 @@ public final class LiquidGlassStyle {
         drawable.setIntensity(AppearanceConfig.navigationGlassIntensity() / 100f);
     }
     public static BlurredBackgroundProvider colors(Theme.ResourcesProvider resourcesProvider, BooleanSupplier enabled) {
+        return colors(resourcesProvider, enabled, false);
+    }
+
+    /** Popups need a visible surface behind labels even at 100% panel transparency. */
+    public static BlurredBackgroundProvider surfaceColors(Theme.ResourcesProvider resourcesProvider, BooleanSupplier enabled) {
+        return colors(resourcesProvider, enabled, true);
+    }
+
+    private static BlurredBackgroundProvider colors(Theme.ResourcesProvider resourcesProvider, BooleanSupplier enabled, boolean surface) {
         return new BlurredBackgroundProviderBuilder(resourcesProvider)
                 .setBackgroundColor((r, dark) -> Theme.multAlpha(Theme.getColor(Theme.key_windowBackgroundWhite, r),
-                        enabled.getAsBoolean() ? overlayAlpha(dark)
+                        enabled.getAsBoolean() ? (surface ? Math.max(overlayAlpha(dark), dark ? .24f : .18f) : overlayAlpha(dark))
                                 : org.telegram.messenger.LiteMode.isGlassPowerSaverApplied() ? 1f : .82f))
-                .setStrokeColorTop(0x66ffffff, 0x4dffffff)
-                .setStrokeColorBottom(0x24000000, 0x26ffffff)
-                .setStrokeWidth(AndroidUtilities.dpf2(.9f), AndroidUtilities.dpf2(.5f))
+                .setStrokeColorTop(surface ? 0x99ffffff : 0x66ffffff, surface ? 0x99ffffff : 0x4dffffff)
+                .setStrokeColorBottom(surface ? 0x40000000 : 0x24000000, surface ? 0x55ffffff : 0x26ffffff)
+                .setStrokeWidth(AndroidUtilities.dpf2(surface ? 1.2f : .9f), AndroidUtilities.dpf2(surface ? .8f : .5f))
                 .setShadowColor(0x24000000, 0x33000000)
                 .setShadowLayer(AndroidUtilities.dpf2(6), 0, AndroidUtilities.dpf2(2)).build();
     }

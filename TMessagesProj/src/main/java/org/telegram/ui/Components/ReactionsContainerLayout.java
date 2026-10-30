@@ -159,6 +159,7 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
     private final Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     // openExtera: матовое стекло под панелью реакций
     private BlurredBackgroundDrawable glassBackground;
+    private BlurredBackgroundDrawable glassBigBubbleBackground, glassSmallBubbleBackground;
     private BlurredBackgroundProvider glassBackgroundColorProvider;
     private BlurredBackgroundDrawableViewFactory glassBackgroundFactory;
     private final Paint leftShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG),
@@ -734,7 +735,7 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         if (type != TYPE_STORY) {
             shadow.setAlpha((int) (Utilities.clamp(1f - (customEmojiReactionsEnterProgress / 0.05f), 1f, 0f) * 255));
             shadow.setBounds((int) (getPaddingLeft() + (getWidth() - getPaddingRight() + shadowPad.right) * lt - shadowPad.left), getPaddingTop() - shadowPad.top - (int) expandSize, (int) ((getWidth() - getPaddingRight() + shadowPad.right) * rt), getHeight() - getPaddingBottom() + shadowPad.bottom + (int) expandSize);
-            if (blurredBackgroundDrawable == null) {
+            if (blurredBackgroundDrawable == null && glassBackground == null) {
                 shadow.draw(canvas);
             }
         }
@@ -944,13 +945,13 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         shadow.setAlpha(alpha);
         bgPaint.setAlpha(alpha);
         shadow.setBounds((int) (cx - br - sPad * cPr), (int) (cy - br - sPad * cPr), (int) (cx + br + sPad * cPr), (int) (cy + br + sPad * cPr));
-        shadow.draw(canvas);
+        if (glassBigBubbleBackground == null) shadow.draw(canvas);
         if (delegate.drawBackground()) {
             rectF.set(cx - br, cy - br, cx + br, cy + br);
             delegate.drawRoundRect(canvas, rectF, br, getX(), getY(), alpha, false);
-        } else if (glassBackground != null) {
+        } else if (glassBigBubbleBackground != null) {
             rectF.set(cx - br, cy - br, cx + br, cy + br);
-            GlassMenuHelper.draw(glassBackground, canvas, rectF, br, alpha);
+            GlassMenuHelper.draw(glassBigBubbleBackground, canvas, rectF, br, alpha);
         } else {
             if (blurredBackgroundDrawable1 != null) {
                 AndroidUtilities.rectTmp.set(cx - br, cy - br, cx + br, cy + br);
@@ -971,13 +972,13 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         cy = AndroidUtilities.lerp(cy, smallCircleRadius + sPad - expandSize(), CubicBezierInterpolator.DEFAULT.getInterpolation(flipVerticalProgress));
         sPad = -dp(1);
         shadow.setBounds((int) (cx - br - sPad * cPr), (int) (cy - br - sPad * cPr), (int) (cx + br + sPad * cPr), (int) (cy + br + sPad * cPr));
-        shadow.draw(canvas);
+        if (glassSmallBubbleBackground == null) shadow.draw(canvas);
         if (delegate.drawBackground()) {
             rectF.set(cx - sr, cy - sr, cx + sr, cy + sr);
             delegate.drawRoundRect(canvas, rectF, sr, getX(), getY(), alpha, false);
-        } else if (glassBackground != null) {
+        } else if (glassSmallBubbleBackground != null) {
             rectF.set(cx - sr, cy - sr, cx + sr, cy + sr);
-            GlassMenuHelper.draw(glassBackground, canvas, rectF, sr, alpha);
+            GlassMenuHelper.draw(glassSmallBubbleBackground, canvas, rectF, sr, alpha);
         } else {
             if (blurredBackgroundDrawable2 != null) {
                 AndroidUtilities.rectTmp.set(cx - sr, cy - sr, cx + sr, cy + sr);
@@ -1775,7 +1776,15 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         glassBackgroundFactory = factory;
         glassBackgroundColorProvider = provider;
         glassBackground = factory.create(this, true).setColorProvider(provider);
-        if (app.freezgram.SmallElementsGlass.isEnabled()) app.freezgram.LiquidGlassStyle.configure(glassBackground);
+        // RenderNodes are retained by the canvas: mutating one drawable for all three
+        // shapes would replace the already-recorded main panel with the last bubble.
+        glassBigBubbleBackground = factory.create(this, true).setColorProvider(provider);
+        glassSmallBubbleBackground = factory.create(this, true).setColorProvider(provider);
+        if (app.freezgram.SmallElementsGlass.isEnabled()) {
+            app.freezgram.LiquidGlassStyle.configure(glassBackground);
+            app.freezgram.LiquidGlassStyle.configure(glassBigBubbleBackground);
+            app.freezgram.LiquidGlassStyle.configure(glassSmallBubbleBackground);
+        }
         invalidate();
     }
 

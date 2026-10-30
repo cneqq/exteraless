@@ -80,6 +80,8 @@ public class BlurredBackgroundDrawableViewFactory {
 
 
     private boolean isLiquidGlassEffectAllowed;
+    private java.util.function.Consumer<BlurredBackgroundDrawable> drawableConfigurator;
+    public void setDrawableConfigurator(java.util.function.Consumer<BlurredBackgroundDrawable> configurator) { drawableConfigurator = configurator; }
 
     public void setLiquidGlassEffectAllowed(boolean liquidGlassEffectAllowed) {
         isLiquidGlassEffectAllowed = liquidGlassEffectAllowed;
@@ -97,6 +99,7 @@ public class BlurredBackgroundDrawableViewFactory {
         factory.outsetX = outsetX; factory.outsetY = outsetY;
         factory.linkedDrawables = linkedDrawables; factory.linkedViews = linkedViews;
         factory.viewPositionWatcher = viewPositionWatcher; factory.parent = parent; factory.engine = engine;
+        factory.drawableConfigurator = drawableConfigurator;
         factory.setLiquidGlassEffectAllowed(true);
         return factory;
     }
@@ -151,6 +154,7 @@ public class BlurredBackgroundDrawableViewFactory {
             linkedDrawables.add(drawable);
         }
 
+        if (drawableConfigurator != null) drawableConfigurator.accept(drawable);
         return drawable;
     }
 }

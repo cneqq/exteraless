@@ -70,12 +70,25 @@ class BotButton {
         this.invalidateRunnable = invalidateRunnable;
     }
 
+    public interface GlassBackgroundRenderer {
+        org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable draw(Canvas canvas, RectF bounds, float[] radii,
+                org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable cached);
+    }
+    private org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable glassBackground;
+    public boolean verifyGlass(android.graphics.drawable.Drawable drawable) {
+        return drawable == glassBackground;
+    }
+    public void releaseGlass() {
+        if (glassBackground != null) { glassBackground.setCallback(null); glassBackground = null; }
+    }
+
     public boolean draw(
         Canvas canvas,
         RectF rect,
         boolean drawProgress,
         boolean drawBuyCard,
-        Theme.ResourcesProvider resourcesProvider
+        Theme.ResourcesProvider resourcesProvider,
+        GlassBackgroundRenderer glassRenderer
     ) {
         boolean invalidate = false;
         final float s = getPressScale();
@@ -92,32 +105,7 @@ class BotButton {
             radii[4] = radii[5] = dp(SharedConfig.bubbleRadius);
         }
 
-        path.rewind();
-        path.addRoundRect(rect, radii, Path.Direction.CW);
-        canvas.drawPath(path, Theme.getThemePaint(Theme.key_paint_chatActionBackground, resourcesProvider));
-
-        final BotInlineKeyboard.BackgroundColor bgColor =
-            buttonImpl != null ? buttonImpl.getColor() :
-            BotInlineKeyboard.BackgroundColor.NONE;
-
-        if (bgColor != BotInlineKeyboard.BackgroundColor.NONE) {
-            switch (bgColor) {
-                case DANGER:
-                    paint.setColor(Theme.multAlpha(Theme.getColor(Theme.key_botKeyboard_button_danger, resourcesProvider), 0.7f));
-                    break;
-                case SUCCESS:
-                    paint.setColor(Theme.multAlpha(Theme.getColor(Theme.key_botKeyboard_button_success, resourcesProvider), 0.7f));
-                    break;
-                case PRIMARY:
-                    paint.setColor(Theme.multAlpha(Theme.getColor(Theme.key_botKeyboard_button_primary, resourcesProvider), 0.7f));
-                    break;
-            }
-            canvas.drawPath(path, paint);
-        }
-        final boolean hasGradientService = resourcesProvider != null ? resourcesProvider.hasGradientService() : Theme.hasGradientService();
-        if (hasGradientService && (bgColor == BotInlineKeyboard.BackgroundColor.NONE || resourcesProvider != null && resourcesProvider.isDark())) {
-            canvas.drawPath(path, Theme.chat_actionBackgroundGradientDarkenPaint);
-        }
+        drawButtonBackground(canvas, rect, resourcesProvider, glassRenderer);
 
 //        boolean drawProgress = (button instanceof TLRPC.TL_keyboardButtonCallback_layer228 || button instanceof TLRPC.TL_keyboardButtonGame || button instanceof TLRPC.TL_keyboardButtonBuy_layer228 || button instanceof TLRPC.TL_keyboardButtonUrlAuth_layer228) && SendMessagesHelper.getInstance(currentAccount).isSendingCallback(currentMessageObject, button)
 //                || button instanceof TLRPC.TL_keyboardButtonRequestGeoLocation && SendMessagesHelper.getInstance(currentAccount).isSendingCurrentLocation(currentMessageObject, button)
@@ -284,4 +272,41 @@ class BotButton {
         }
         return 0.96f + 0.04f * (1f - pressT);
     }
+    private void drawButtonBackground(Canvas canvas, RectF rect, Theme.ResourcesProvider resourcesProvider, GlassBackgroundRenderer glassRenderer) {
+        path.rewind();
+        path.addRoundRect(rect, radii, Path.Direction.CW);
+        boolean glass = false;
+        if (glassRenderer != null && button != null && TLKeyboardHelper.isType(button, TL_keyboard.TL_inlineButtonTypeCallback.class)) {
+            glassBackground = glassRenderer.draw(canvas, rect, radii, glassBackground);
+            glass = glassBackground != null;
+        } else {
+            releaseGlass();
+        }
+        if (!glass) canvas.drawPath(path, Theme.getThemePaint(Theme.key_paint_chatActionBackground, resourcesProvider));
+
+        final BotInlineKeyboard.BackgroundColor bgColor =
+            buttonImpl != null ? buttonImpl.getColor() :
+            BotInlineKeyboard.BackgroundColor.NONE;
+
+        if (bgColor != BotInlineKeyboard.BackgroundColor.NONE) {
+            switch (bgColor) {
+                case DANGER:
+                    paint.setColor(Theme.multAlpha(Theme.getColor(Theme.key_botKeyboard_button_danger, resourcesProvider), glass ? 0.52f : 0.7f));
+                    break;
+                case SUCCESS:
+                    paint.setColor(Theme.multAlpha(Theme.getColor(Theme.key_botKeyboard_button_success, resourcesProvider), glass ? 0.52f : 0.7f));
+                    break;
+                case PRIMARY:
+                    paint.setColor(Theme.multAlpha(Theme.getColor(Theme.key_botKeyboard_button_primary, resourcesProvider), glass ? 0.52f : 0.7f));
+                    break;
+            }
+            canvas.drawPath(path, paint);
+        }
+        final boolean hasGradientService = resourcesProvider != null ? resourcesProvider.hasGradientService() : Theme.hasGradientService();
+        if (!glass && hasGradientService && (bgColor == BotInlineKeyboard.BackgroundColor.NONE || resourcesProvider != null && resourcesProvider.isDark())) {
+            canvas.drawPath(path, Theme.chat_actionBackgroundGradientDarkenPaint);
+        }
+
+    }
+
 }

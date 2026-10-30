@@ -96,5 +96,7 @@
     <string name="FreezgramComposerSideInset">Отступ по бокам</string>
     <string name="FreezgramGlassWallpaperDim">Учитывать затемнение обоев</string>
     <string name="FreezgramSmallElementsGlass">Прочие мелкие элементы</string>
-    <string name="FreezgramSmallElementsInfo">Уведомления внутри приложения, меню действий сообщения и кнопка «Поделиться».</string>
+    <string name="FreezgramSmallElementsInfo">Уведомления, меню сообщения и реакции, кнопки ботов и кнопка «Поделиться».</string>
+    <string name="FreezgramAttachmentPanelsGlass">Панели меню вложений</string>
+    <string name="FreezgramAttachmentPanelsGlassInfo">Нижняя панель выбора и поле подписи при отправке файлов.</string>
 </resources>

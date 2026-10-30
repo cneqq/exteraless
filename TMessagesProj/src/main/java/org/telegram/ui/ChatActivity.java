@@ -5321,7 +5321,13 @@ public class ChatActivity extends BaseFragment implements
         scrimBlur3Factory.setSourceRootView(viewPositionWatcher, parentView);
 
         if (headerItem != null) {
-            headerItem.setBlurredBackgroundFactory(scrimBlur3Factory, BlurredBackgroundProviderImpl.messageMenuBackground(resourceProvider));
+            if (app.freezgram.SmallElementsGlass.isEnabled()) {
+                BlurredBackgroundDrawableViewFactory menuFactory = scrimBlur3Factory.withSource(app.freezgram.SmallElementsGlass.createSource(scrimBlur3Factory.getSource()));
+                menuFactory.setDrawableConfigurator(app.freezgram.LiquidGlassStyle::configure);
+                headerItem.setBlurredBackgroundFactory(menuFactory, app.freezgram.LiquidGlassStyle.surfaceColors(resourceProvider, app.freezgram.SmallElementsGlass::isEnabled));
+            } else {
+                headerItem.setBlurredBackgroundFactory(scrimBlur3Factory, BlurredBackgroundProviderImpl.messageMenuBackground(resourceProvider));
+            }
         }
 
         contentView.setOccupyStatusBar(!inBubbleMode && !isInsideContainer && !inPreviewMode);
@@ -13053,6 +13059,10 @@ public class ChatActivity extends BaseFragment implements
     }
 
     private void updateScrimSourceBitmap() {
+        if (app.freezgram.SmallElementsGlass.isEnabled()) {
+            GlassMenuHelper.captureBlur(scrimBlur3SourceBitmap, scrimBlur3Factory, fragmentView);
+            return;
+        }
         ScrimOptions.makeGlobalBlurBitmaps((bitmapBg, bitmapOptions) -> {
             scrimBlur3SourceBitmap.setBitmap(bitmapOptions);
             Blur3Utils.checkBitmapSourceMatrixScale(scrimBlur3SourceBitmap, fragmentView);
@@ -33231,10 +33241,12 @@ public class ChatActivity extends BaseFragment implements
 
             updateScrimSourceBitmap();
 
-            popupLayout.setBackground(scrimBlur3Factory.create(popupLayout, true)
-                .setColorProvider(BlurredBackgroundProviderImpl.messageMenuBackground(resourceProvider))
-                .setRadius(dp(12))
-                .setPadding(dp(8)));
+            if (!glassMenu) {
+                popupLayout.setBackground(scrimBlur3Factory.create(popupLayout, true)
+                    .setColorProvider(BlurredBackgroundProviderImpl.messageMenuBackground(resourceProvider))
+                    .setRadius(dp(12))
+                    .setPadding(dp(8)));
+            }
 
             boolean addGap = false;
 
@@ -42327,13 +42339,14 @@ public class ChatActivity extends BaseFragment implements
     private final RectF smallElementsCellBounds = new RectF();
 
     private class ChatMessageCellDelegate implements ChatMessageCell.ChatMessageCellDelegate {
-        @Override
-        public boolean drawShareButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds) {
+        private BlurredBackgroundDrawable drawCellElementGlass(ChatMessageCell cell, Canvas canvas, RectF bounds,
+                BlurredBackgroundDrawable cached, float[] radii) {
+            if (!app.freezgram.SmallElementsGlass.isEnabled()) return null;
             if (Build.VERSION.SDK_INT < 33 || !canvas.isHardwareAccelerated() || contentView == null
-                    || !SharedConfig.chatBlurEnabled() || LiteMode.isGlassPowerSaverApplied()) return false;
-            if (!ViewPositionWatcher.computeRectInParent(cell, contentView, smallElementsCellBounds)) return false;
+                    || !SharedConfig.chatBlurEnabled() || LiteMode.isGlassPowerSaverApplied()) return null;
+            if (!ViewPositionWatcher.computeRectInParent(cell, contentView, smallElementsCellBounds)) return null;
             int width = contentView.getWidth(), height = contentView.getHeight();
-            if (width <= 0 || height <= 0) return false;
+            if (width <= 0 || height <= 0) return null;
             if (smallElementsSource == null) smallElementsSource = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
             long frame = contentView.getDrawingTime();
             int revision = app.freezgram.LiquidGlassStyle.revision();
@@ -42347,19 +42360,32 @@ public class ChatActivity extends BaseFragment implements
                         app.freezgram.LiquidGlassStyle.enhanceColors() ? org.telegram.messenger.utils.RenderNodeEffects.getSaturationX3RenderEffect() : null);
                 smallElementsSource.invalidateDisplayListForDrawables();
             }
-            BlurredBackgroundDrawable drawable = cell.getShareGlassBackground();
+            BlurredBackgroundDrawable drawable = cached;
             if (drawable == null) {
                 drawable = smallElementsSource.createDrawable();
-                drawable.setColorProvider(app.freezgram.LiquidGlassStyle.colors(themeDelegate, () -> true));
+                drawable.setColorProvider(app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate, app.freezgram.SmallElementsGlass::isEnabled));
                 drawable.setRadius(dp(16)); drawable.setCallback(cell);
-                cell.setShareGlassBackground(drawable);
             }
+            if (radii != null) drawable.setRadius(radii[0], radii[2], radii[4], radii[6]);
             drawable.setSourceOffset(smallElementsCellBounds.left, smallElementsCellBounds.top);
             drawable.setBounds((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom);
             app.freezgram.LiquidGlassStyle.configure(drawable);
             ((org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawableRenderNode) drawable).setLiquidGlassEffectAllowed(true);
             drawable.updateColors(); drawable.draw(canvas);
-            return true;
+            return drawable;
+        }
+
+        @Override
+        public boolean drawShareButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds) {
+            BlurredBackgroundDrawable drawable = drawCellElementGlass(cell, canvas, bounds, cell.getShareGlassBackground(), null);
+            if (drawable == null) return false;
+            cell.setShareGlassBackground(drawable); return true;
+        }
+
+        @Override
+        public BlurredBackgroundDrawable drawBotButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds,
+                float[] radii, BlurredBackgroundDrawable cached) {
+            return drawCellElementGlass(cell, canvas, bounds, cached, radii);
         }
 
         @Override
@@ -49635,11 +49661,11 @@ public class ChatActivity extends BaseFragment implements
 
             scrimPopupContainerLayout.setClipToOutline(true);
             scrimPopupContainerLayout.setOutlineProvider(ViewOutlineProviderImpl.boundsWithPaddingRoundRect(dp(8), dp(12)));
-            scrimPopupContainerLayout.setBackground(scrimBlur3Factory.create(scrimPopupContainerLayout, true)
-                .setColorProvider(BlurredBackgroundProviderImpl.scrimMenuBackground(resourceProvider))
-                .setRadius(dp(12))
-                .setPadding(dp(8))
-                .setHasPadding(true));
+            scrimPopupContainerLayout.setBackground(app.freezgram.SmallElementsGlass.isEnabled()
+                    ? GlassMenuHelper.createPanelBackground(scrimBlur3Factory, resourceProvider, scrimPopupContainerLayout)
+                    : scrimBlur3Factory.create(scrimPopupContainerLayout, true)
+                        .setColorProvider(BlurredBackgroundProviderImpl.scrimMenuBackground(resourceProvider))
+                        .setRadius(dp(12)).setPadding(dp(8)).setHasPadding(true));
 
             float bottom = reactionsLayoutInBubble.y + button.y + AndroidUtilities.dp(28);
             float left = reactionsLayoutInBubble.x + button.x;

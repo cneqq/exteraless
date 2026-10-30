@@ -27,6 +27,26 @@ class SharedConfig{static boolean blur;static boolean chatBlurEnabled(){return b
 class LiteMode{static boolean saver;static boolean isGlassPowerSaverApplied(){return saver;}}
 '''.replace('GATE', gate))
 
+    def test_message_menu_opt_in_is_not_overridden_by_legacy_gate(self):
+        # SOURCE is .../java/app/freezgram/SmallElementsGlass.java.
+        path=SOURCE.parent.parent/'exteraless/appearance/GlassMenuHelper.java'
+        gate=method(path.read_text(),'    public static boolean isEnabled(int currentAccount, Theme.ResourcesProvider resourcesProvider)').replace('app.freezgram.SmallElementsGlass','SmallElementsGlass')
+        run_java('''
+class PrivacyCheck{
+ GATE
+ public static void main(String[] args){
+  for(boolean small:new boolean[]{false,true})for(boolean old:new boolean[]{false,true})for(boolean allowed:new boolean[]{false,true}){
+   SmallElementsGlass.enabled=small;AppearanceConfig.old=old;BlurredBackgroundProviderImpl.allowed=allowed;
+   if(isEnabled(0,null)!=(small||(old&&allowed)))throw new AssertionError("Explicit glass choice suppressed by legacy flags");
+  }
+ }
+}
+class SmallElementsGlass{static boolean enabled;static boolean isEnabled(){return enabled;}}
+class AppearanceConfig{static boolean old;static boolean glassMessageMenu(){return old;}}
+class Theme{static class ResourcesProvider{}}
+class BlurredBackgroundProviderImpl{static boolean allowed;static boolean checkBlurEnabled(int account,Theme.ResourcesProvider provider){return allowed;}}
+'''.replace('GATE',gate))
+
     def test_snapshot_bridge_updates_when_bitmap_or_settings_change(self):
         source=SOURCE.read_text()
         start=source.index('    private static final class SnapshotSource')
@@ -45,9 +65,15 @@ class PrivacyCheck {
   if(input.calls!=3)throw new AssertionError("Shared optics ignored");
   bridge.draw(c,0,0,200,50);
   if(input.calls!=4)throw new AssertionError("Resized capture ignored");
+  var one=bridge.createDrawable();var two=bridge.createDrawable();
+  if(one.source==two.source)throw new AssertionError("Reaction shapes must not share mutable recordings");
+  var own=(SnapshotSource)one.source;own.draw(c,1000,2000,1100,2050);
+  if(own.w!=228||own.h!=178)throw new AssertionError("Capture should be cropped around the target, not the entire screen");
  }
 }
-class Canvas{}class Bitmap{}
+class Canvas{boolean isHardwareAccelerated(){return true;}void translate(float x,float y){}void save(){}void restore(){}}class Bitmap{}
+class BlurredBackgroundDrawable{BlurredBackgroundSource source;}
+class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawable{BlurredBackgroundDrawableRenderNode(BlurredBackgroundSource source){this.source=source;}}
 interface BlurredBackgroundSource{void draw(Canvas c,float l,float t,float r,float b);}
 class BlurredBackgroundSourceBitmap implements BlurredBackgroundSource{
  Bitmap bitmap=new Bitmap();int calls;Bitmap getBitmap(){return bitmap;}
@@ -55,6 +81,7 @@ class BlurredBackgroundSourceBitmap implements BlurredBackgroundSource{
 }
 class BlurredBackgroundSourceRenderNode implements BlurredBackgroundSource{
  int w,h;boolean recorded;BlurredBackgroundSourceRenderNode(BlurredBackgroundSource fallback){}
+ BlurredBackgroundDrawable createDrawable(){return new BlurredBackgroundDrawable();}
  boolean needUpdateDisplayList(int width,int height){return !recorded||w!=width||h!=height;}
  Canvas beginRecording(int width,int height){w=width;h=height;return new Canvas();}void endRecording(){recorded=true;}
  void setBlur(float radius,Object effect){}public void draw(Canvas c,float l,float t,float r,float b){}
@@ -79,3 +106,26 @@ class PrivacyCheck{
 }
 class Source{Object value=new Object();void setBitmap(Object o){value=o;}}
 '''.replace('RELEASE',release))
+
+    def test_reaction_panel_and_bubbles_keep_independent_retained_drawables(self):
+        path=SOURCE.parents[2]/'org/telegram/ui/Components/ReactionsContainerLayout.java'
+        configure=method(path.read_text(),'    public void setGlassBackground(')
+        run_java('''
+class PrivacyCheck{
+ BlurredBackgroundDrawable glassBackground,glassBigBubbleBackground,glassSmallBubbleBackground;
+ BlurredBackgroundProvider glassBackgroundColorProvider;BlurredBackgroundDrawableViewFactory glassBackgroundFactory;
+ void invalidate(){}
+ CONFIGURE
+ public static void main(String[] args){
+  var p=new PrivacyCheck();p.setGlassBackground(new BlurredBackgroundDrawableViewFactory(),new BlurredBackgroundProvider());
+  p.glassBackground.size=300;p.glassBigBubbleBackground.size=30;p.glassSmallBubbleBackground.size=12;
+  if(p.glassBackground.size!=300||p.glassBigBubbleBackground.size!=30||p.glassSmallBubbleBackground.size!=12)
+   throw new AssertionError("A bubble overwrote the retained main-panel drawing");
+ }
+}
+class BlurredBackgroundDrawable{int size;BlurredBackgroundDrawable setColorProvider(BlurredBackgroundProvider p){return this;}}
+class BlurredBackgroundProvider{}
+class BlurredBackgroundDrawableViewFactory{BlurredBackgroundDrawable create(Object v,boolean popup){return new BlurredBackgroundDrawable();}}
+class SmallElementsGlass{static boolean isEnabled(){return true;}}
+class LiquidGlassStyle{static void configure(BlurredBackgroundDrawable d){}}
+'''.replace('CONFIGURE',configure).replace('app.freezgram.',''))

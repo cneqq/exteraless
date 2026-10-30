@@ -571,6 +571,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     }
 
     public interface ChatMessageCellDelegate {
+        default org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable drawBotButtonGlass(ChatMessageCell cell, Canvas canvas,
+                RectF bounds, float[] radii, org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable cached) { return null; }
         default boolean drawShareButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds) { return false; }
 
         default boolean isReplyOrSelf() {
@@ -6506,6 +6508,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (shareGlassBackground != null) { shareGlassBackground.setCallback(null); shareGlassBackground = null; }
+        releaseBotGlass();
 
         if (observersGroup != null) {
             observersGroup.removeAllObservers();
@@ -13604,6 +13607,11 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (pollAddButtonDrawable != null && pollAddButtonDrawable.verifyDrawable(who)) {
             return true;
         }
+        for (BotButton button : botButtons) if (button.verifyGlass(who)) return true;
+        if (transitionParams != null) {
+            for (BotButton button : transitionParams.transitionBotButtons) if (button.verifyGlass(who)) return true;
+            for (BotButton button : transitionParams.lastDrawBotButtons) if (button.verifyGlass(who)) return true;
+        }
         for (PollButton button : pollButtons) {
             if (button.selectorDrawable == who || button.pollButtonDrawable != null && button.pollButtonDrawable.verifyDrawable(who)) {
                 return true;
@@ -17015,7 +17023,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 }
             }
 
-            if (button.draw(canvas, rect, drawProgress, hasInvoicePreview && hasInvoicePrice, resourcesProvider)) {
+            if (button.draw(canvas, rect, drawProgress, hasInvoicePreview && hasInvoicePrice, resourcesProvider,
+                    delegate != null && app.freezgram.SmallElementsGlass.isEnabled()
+                            ? (c, bounds, radii, cached) -> delegate.drawBotButtonGlass(this, c, bounds, radii, cached) : null)) {
                 invalidate = true;
             }
         }
@@ -18832,7 +18842,16 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
     }
 
+    private void releaseBotGlass() {
+        for (BotButton button : botButtons) button.releaseGlass();
+        if (transitionParams != null) {
+            for (BotButton button : transitionParams.transitionBotButtons) button.releaseGlass();
+            for (BotButton button : transitionParams.lastDrawBotButtons) button.releaseGlass();
+        }
+    }
+
     public void setDelegate(ChatMessageCellDelegate chatMessageCellDelegate) {
+        if (delegate != chatMessageCellDelegate) releaseBotGlass();
         if (delegate != chatMessageCellDelegate && shareGlassBackground != null) {
             shareGlassBackground.setCallback(null); shareGlassBackground = null;
         }

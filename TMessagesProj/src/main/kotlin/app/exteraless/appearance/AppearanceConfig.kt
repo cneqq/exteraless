@@ -425,6 +425,11 @@ object AppearanceConfig {
     fun navigationPanelLift(): Int { ensureLoaded(); return navigationPanelLift.Int().coerceIn(0, 64) }
 
     @JvmField
+    val attachmentPanelsGlass = addConfig("FreezgramAttachmentPanelsGlass", ConfigItem.configTypeBool, false)
+    @JvmStatic
+    fun attachmentPanelsGlass(): Boolean { ensureLoaded(); return attachmentPanelsGlass.Bool() }
+
+    @JvmField
     val smallElementsGlass = addConfig("FreezgramSmallElementsGlass", ConfigItem.configTypeBool, false)
     @JvmStatic
     fun smallElementsGlass(): Boolean { ensureLoaded(); return smallElementsGlass.Bool() }

@@ -23,11 +23,9 @@ import org.telegram.ui.Components.blur3.utils.Blur3Utils;
 /**
  * Матовое стекло под меню сообщения и панелью реакций.
  *
- * <p>Ключ — {@link AppearanceConfig#glassMessageMenu()} (дефолт true, как в exteraGram).
- * Стекло включается только когда блюр реально доступен: тот же гейт, что и в exteraGram —
- * {@code BlurredBackgroundProviderImpl.checkBlurEnabled} (SharedConfig.chatBlurEnabled плюс
- * серверные флаги disableBlurInLight/DarkTheme). Если блюр недоступен — вызывающий код
- * должен оставить обычный popup, поведение при этом ровно прежнее.
+ * <p>Freezgram SmallElementsGlass selects the shared Liquid Glass material when supported.
+ * Otherwise {@link AppearanceConfig#glassMessageMenu()} retains the legacy frosted menu
+ * and its server-controlled blur policy.
  */
 public abstract class GlassMenuHelper {
 
@@ -35,13 +33,12 @@ public abstract class GlassMenuHelper {
     }
 
     public static boolean isEnabled(int currentAccount, Theme.ResourcesProvider resourcesProvider) {
-        return (AppearanceConfig.glassMessageMenu() || app.freezgram.SmallElementsGlass.isEnabled())
-            && BlurredBackgroundProviderImpl.checkBlurEnabled(currentAccount, resourcesProvider);
+        return app.freezgram.SmallElementsGlass.isEnabled()
+                || AppearanceConfig.glassMessageMenu() && BlurredBackgroundProviderImpl.checkBlurEnabled(currentAccount, resourcesProvider);
     }
 
     /**
-     * Отличие от апстримного {@code BlurredBackgroundProviderImpl.scrimMenuBackground} —
-     * обводки нет совсем.
+     * Legacy frosted menu colors; the optional Liquid Glass path below adds a visible surface and contour.
      */
     private static BlurredBackgroundProviderBuilder scrimMenuGlass(Theme.ResourcesProvider resourcesProvider) {
         return new BlurredBackgroundProviderBuilder(resourcesProvider)
@@ -54,7 +51,7 @@ public abstract class GlassMenuHelper {
     }
 
     public static BlurredBackgroundProvider scrimMenuBackground(Theme.ResourcesProvider resourcesProvider) {
-        if (app.freezgram.SmallElementsGlass.isEnabled()) return app.freezgram.LiquidGlassStyle.colors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled);
+        if (app.freezgram.SmallElementsGlass.isEnabled()) return app.freezgram.LiquidGlassStyle.surfaceColors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled);
         return scrimMenuGlass(resourcesProvider)
             .setShadowColor(0x26000000, 0)
             .setShadowLayer(AndroidUtilities.dpf2(4.0f), 0.0f, 0.0f)
@@ -62,7 +59,7 @@ public abstract class GlassMenuHelper {
     }
 
     public static BlurredBackgroundProvider scrimMenuBackgroundFill(Theme.ResourcesProvider resourcesProvider) {
-        if (app.freezgram.SmallElementsGlass.isEnabled()) return app.freezgram.LiquidGlassStyle.colors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled);
+        if (app.freezgram.SmallElementsGlass.isEnabled()) return app.freezgram.LiquidGlassStyle.surfaceColors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled);
         return scrimMenuGlass(resourcesProvider)
             .setShadowColor(0, 0)
             .build();
@@ -137,21 +134,24 @@ public abstract class GlassMenuHelper {
         }
     }
 
-    /**
-     * Не перенесено: {@code popupLayout.getSwipeBack().setForegroundDrawable(createFill(...))} —
-     * у нашего {@code PopupSwipeBackLayout} нет {@code setForegroundDrawable}. Подпанель
-     * swipe-back остаётся непрозрачной, как в апстриме.
-     */
+    /** Apply the same material to the main popup and its swipe-back panels. */
     public static void applyToPopup(BlurredBackgroundDrawableViewFactory factory,
                                     Theme.ResourcesProvider resourcesProvider,
                                     ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout) {
         popupLayout.setBackground(createPanelBackground(factory, resourcesProvider, popupLayout));
+        if (popupLayout.getSwipeBack() != null) {
+            popupLayout.getSwipeBack().setGlassForeground(app.freezgram.SmallElementsGlass.isEnabled()
+                    ? createFill(factory, resourcesProvider, popupLayout.getSwipeBack()) : null);
+        }
     }
 
     public static void applyToReactions(BlurredBackgroundDrawableViewFactory factory,
                                         Theme.ResourcesProvider resourcesProvider,
                                         ReactionsContainerLayout reactionsContainerLayout) {
-        if (app.freezgram.SmallElementsGlass.isEnabled()) factory = factory.withSource(app.freezgram.SmallElementsGlass.createSource(factory.getSource()));
+        if (app.freezgram.SmallElementsGlass.isEnabled()) {
+            factory = factory.withSource(app.freezgram.SmallElementsGlass.createSource(factory.getSource()));
+            factory.setDrawableConfigurator(app.freezgram.LiquidGlassStyle::configure);
+        }
         reactionsContainerLayout.setGlassBackground(factory, scrimMenuBackgroundFill(resourcesProvider));
     }
 
@@ -173,6 +173,7 @@ public abstract class GlassMenuHelper {
             applyToGaps(popupLayout, separatorColor(true, resourcesProvider));
             captureBlur(sourceBitmap, factory, rootView);
         } else {
+            if (popupLayout.getSwipeBack() != null) popupLayout.getSwipeBack().setGlassForeground(null);
             final Drawable background = popupLayout.getResources().getDrawable(R.drawable.popup_fixed_alert4).mutate();
             popupLayout.setBackgroundDrawable(background);
             popupLayout.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefaultSubmenuBackground, resourcesProvider));

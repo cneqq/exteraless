@@ -142,15 +142,14 @@ recording animation are unchanged; Default/Android styling retains its policy.
 
 **Other small elements** is an independent opt-in under shared Liquid Glass
 settings, included in backup and disabled by default. It covers ordinary Bulletin/UndoView notices, message action menus/reactions,
-and the share button beside a message; saved-message navigation, discussion and sponsor
+inline callback buttons and the share button beside a message; saved-message navigation, discussion and sponsor
 controls retain their previous appearance. The button uses shared optics over
 a wallpaper-only source, avoiding recursive capture of the cell itself. The
 source is recorded once per chat drawing frame and reuses glass drawables for
 visible cells. References/callbacks are released on detach or delegate change.
 Android below 13, software drawing, disabled blur or power saving retains the
 standard button background. Touch and sharing handlers are unchanged.
-No APK build was requested for this addition; GPU and scrolling behavior need
-phone verification when a build is requested.
+GPU and scrolling behavior require phone verification.
 
 For small-element notices the backdrop is a temporary in-memory snapshot, captured
 without Bulletin/UndoView contents to avoid feedback. The bitmap is never saved
@@ -160,11 +159,37 @@ appearance. System notifications are outside this setting. Legacy blurred notice
 animation is bypassed while this style is active so it does not replace the glass
 with an opaque bitmap. The usual position/alpha animation remains.
 Message menus bridge their existing capture into the RenderNode/AGSL renderer;
-shared optics apply to the menu and main reactions surface. The older independent
+shared optics apply to the message menu, swipe-back submenus, quick reactions,
+reaction/tag popup and chat header overflow menu. The older independent
 message-menu glass preference remains available when the small-elements toggle
-is off. Existing opaque swipe-back submenu surfaces are still not converted.
-No APK build was requested; snapshot placement, contrast and GPU performance
-require device verification.
+is off. The explicit small-elements choice uses the platform/blur/power policy
+instead of legacy server-controlled menu blur flags. The later opaque popup
+assignment no longer replaces the glass background.
+
+Popup materials retain a minimum tint (24% dark / 18% light) and a brighter contour,
+even at 100% panel transparency, so labels and quick reactions have a visible
+backing. Normal navigation/header transparency is unchanged. The reaction body
+and its two bubbles have independent drawables and independent cropped source
+recordings: resizing a bubble cannot overwrite a retained main-panel RenderNode.
+Captures include only the target region plus a 64dp margin instead of a separate
+full-screen texture for each shape. Shared blur and optional color enhancement
+are applied once to the raw menu snapshot.
+
+Callback buttons keep their existing neutral, red, green or blue meaning. Colored
+buttons add a translucent tint over glass; URL and other non-callback buttons
+retain their existing background. Actions, payloads, labels, loading indicators
+and touch feedback are unchanged. Button glass is released on detach/delegate
+change and when the style is disabled.
+
+**Attachment menu panels** is a separate, backed-up opt-in (default off) in the
+shared Liquid Glass editor. It changes the bottom attachment selector and caption
+controls, using an independent blur output and the shared optics/material policy.
+It does not change gallery items or other sheets/dialogs. With the setting off,
+these controls use their original factory and color providers.
+
+JVM harnesses exercise callback color preservation, reaction/source independence,
+cropped capture sizes and attachment opt-in/platform/blur/power fallback. Snapshot
+placement, contrast and GPU performance still require device verification.
 
 Glass power saving now treats the phone's system saver as mandatory, independently
 of the app's follow-system switch or battery threshold. The system receiver

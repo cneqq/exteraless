@@ -27,28 +27,40 @@ public final class SmallElementsGlass {
 
     /** Bridge existing bitmap captures into the same AGSL renderer used by the panels. */
     public static BlurredBackgroundSource createSource(BlurredBackgroundSource source) {
-        return new SnapshotSource(source);
+        return source instanceof SnapshotSource ? source : new SnapshotSource(source);
     }
 
     private static final class SnapshotSource extends BlurredBackgroundSourceRenderNode {
         private final BlurredBackgroundSource input;
         private Bitmap lastBitmap;
         private int lastRevision = Integer.MIN_VALUE;
+        private int lastLeft = Integer.MIN_VALUE, lastTop = Integer.MIN_VALUE;
         SnapshotSource(BlurredBackgroundSource source) { super(source); input = source; }
+        @Override public BlurredBackgroundDrawable createDrawable() {
+            // Each shape owns its recording. Reaction bubbles must not resize the main panel's source.
+            return new BlurredBackgroundDrawableRenderNode(new SnapshotSource(input));
+        }
         @Override public void draw(Canvas canvas, float left, float top, float right, float bottom) {
-            int width = Math.max(1, (int) Math.ceil(right) + AndroidUtilities.dp(64));
-            int height = Math.max(1, (int) Math.ceil(bottom) + AndroidUtilities.dp(64));
+            if (!canvas.isHardwareAccelerated()) { input.draw(canvas, left, top, right, bottom); return; }
+            int padding = AndroidUtilities.dp(64);
+            int originX = (int) Math.floor(left) - padding, originY = (int) Math.floor(top) - padding;
+            int width = Math.max(1, (int) Math.ceil(right) - originX + padding);
+            int height = Math.max(1, (int) Math.ceil(bottom) - originY + padding);
             Bitmap bitmap = input instanceof BlurredBackgroundSourceBitmap ? ((BlurredBackgroundSourceBitmap) input).getBitmap() : null;
             int revision = LiquidGlassStyle.revision();
-            if (bitmap == null || bitmap != lastBitmap || revision != lastRevision || needUpdateDisplayList(width, height)) {
-                lastBitmap = bitmap; lastRevision = revision;
+            if (bitmap == null || bitmap != lastBitmap || revision != lastRevision || originX != lastLeft || originY != lastTop || needUpdateDisplayList(width, height)) {
+                lastBitmap = bitmap; lastRevision = revision; lastLeft = originX; lastTop = originY;
                 Canvas capture = beginRecording(width, height);
-                input.draw(capture, 0, 0, width, height);
+                capture.translate(-originX, -originY);
+                input.draw(capture, originX, originY, originX + width, originY + height);
                 endRecording();
                 setBlur(AndroidUtilities.dpf2(LiquidGlassStyle.blurRadiusDp()), LiquidGlassStyle.enhanceColors()
                         ? org.telegram.messenger.utils.RenderNodeEffects.getSaturationX3RenderEffect() : null);
             }
-            super.draw(canvas, left, top, right, bottom);
+            canvas.save();
+            canvas.translate(originX, originY);
+            super.draw(canvas, left - originX, top - originY, right - originX, bottom - originY);
+            canvas.restore();
         }
     }
 

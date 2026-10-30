@@ -222,6 +222,11 @@ class PrivacyCheck {
   if(drawable.thickness!=12||drawable.intensity!=.55f)throw new AssertionError("Refraction settings");
   int original=LiquidGlassStyle.revision();AppearanceConfig.colors=false;
   if(LiquidGlassStyle.revision()==original)throw new AssertionError("Color switch must refresh optics");
+  AppearanceConfig.transparency=100;
+  var panelColors=LiquidGlassStyle.colors(null,()->true);
+  var popupColors=LiquidGlassStyle.surfaceColors(null,()->true);
+  if((panelColors.background.getColor(null,true)>>>24)!=0 || (popupColors.background.getColor(null,true)>>>24)<60
+       || popupColors.strokeTop<=panelColors.strokeTop)throw new AssertionError("Popup lost its backing/contour at full transparency");
   for(int value:new int[]{0,25,90,100}){
    int before=LiquidGlassStyle.revision();
    AppearanceConfig.transparency=value;AppearanceConfig.intensity=value;AppearanceConfig.blur=value%31;
@@ -255,14 +260,14 @@ class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawable{
 }
 class BlurredBackgroundProvider{
  interface ColorProvider{int getColor(Theme.ResourcesProvider r,boolean dark);}
- ColorProvider background;
+ ColorProvider background;float strokeTop;
 }
 class BlurredBackgroundProviderBuilder extends BlurredBackgroundProvider{
  BlurredBackgroundProviderBuilder(Theme.ResourcesProvider r){}
  BlurredBackgroundProviderBuilder setBackgroundColor(ColorProvider p){background=p;return this;}
  BlurredBackgroundProviderBuilder setStrokeColorTop(int a,int b){return this;}
  BlurredBackgroundProviderBuilder setStrokeColorBottom(int a,int b){return this;}
- BlurredBackgroundProviderBuilder setStrokeWidth(float a,float b){return this;}
+ BlurredBackgroundProviderBuilder setStrokeWidth(float a,float b){strokeTop=a;return this;}
  BlurredBackgroundProviderBuilder setShadowColor(int a,int b){return this;}
  BlurredBackgroundProviderBuilder setShadowLayer(float a,float b,float c){return this;}
  BlurredBackgroundProvider build(){return this;}

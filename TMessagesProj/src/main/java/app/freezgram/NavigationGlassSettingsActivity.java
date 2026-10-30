@@ -83,6 +83,17 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             smallInfo.setText(text(R.string.FreezgramSmallElementsInfo)); smallInfo.setTextSize(14);
             smallInfo.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText));
             smallInfo.setPadding(dp(22), 0, dp(22), dp(12)); content.addView(smallInfo);
+            org.telegram.ui.Cells.TextCheckCell attachments = new org.telegram.ui.Cells.TextCheckCell(context);
+            attachments.setTextAndCheck(text(R.string.FreezgramAttachmentPanelsGlass), AppearanceConfig.attachmentPanelsGlass(), false);
+            attachments.setOnClickListener(v -> {
+                AppearanceConfig.attachmentPanelsGlass.setConfigBool(!AppearanceConfig.attachmentPanelsGlass());
+                attachments.setChecked(AppearanceConfig.attachmentPanelsGlass()); geometryChanged = true;
+            });
+            content.addView(attachments);
+            TextView attachmentsInfo = new TextView(context);
+            attachmentsInfo.setText(text(R.string.FreezgramAttachmentPanelsGlassInfo)); attachmentsInfo.setTextSize(14);
+            attachmentsInfo.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText));
+            attachmentsInfo.setPadding(dp(22), 0, dp(22), dp(12)); content.addView(attachmentsInfo);
             enhanceColors = new org.telegram.ui.Cells.TextCheckCell(context);
             enhanceColors.setTextAndCheck(text(R.string.FreezgramGlassEnhanceColors), LiquidGlassStyle.enhanceColors(), false);
             enhanceColors.setOnClickListener(v -> {

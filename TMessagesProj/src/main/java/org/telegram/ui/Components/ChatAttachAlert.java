@@ -1335,7 +1335,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         iBlur3SourceColor = new BlurredBackgroundSourceColor();
         iBlur3SourceColor.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor();
+            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor(true, false, app.exteraless.appearance.AppearanceConfig.attachmentPanelsGlass());
             iBlur3SourceGlass = new BlurredBackgroundSourceRenderNode(null);
             iBlur3SourceGlass.setupRenderer(new RenderNodeWithHash.Renderer() {
                 @Override
@@ -1381,6 +1381,15 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             iBlur3FactoryLiquidGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
             iBlur3FactoryFrostedLiquidGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            attachmentPanelsSource = new BlurredBackgroundSourceRenderNode(iBlur3SourceColor);
+            attachmentPanelsSource.setUnderSource(iBlur3SourceColor);
+            attachmentPanelsSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
+        } else {
+            attachmentPanelsSource = null;
+        }
+        attachmentPanelsFactory = new BlurredBackgroundDrawableViewFactory(attachmentPanelsSource != null ? attachmentPanelsSource : iBlur3SourceColor);
+        attachmentPanelsFactory.setLiquidGlassEffectAllowed(SharedConfig.chatBlurEnabled());
         iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
 
         iBlur3Capture = (canvas, position) -> {
@@ -2770,6 +2779,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         buttonsRecyclerView.setAdaptiveOverScroll();
 
         iBlur3FactoryLiquidGlass.setSourceRootView(new ViewPositionWatcher(containerView), containerView);
+        attachmentPanelsFactory.setSourceRootView(new ViewPositionWatcher(containerView), containerView);
         iBlur3FactoryFrostedLiquidGlass.setSourceRootView(new ViewPositionWatcher(containerView), containerView);
         iBlur3FactoryFade.setSourceRootView(new ViewPositionWatcher(containerView), containerView);
 
@@ -2797,7 +2807,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
         containerView.addView(bottomFadeView, LayoutHelper.createFrameMatchParent());
 
-        BlurredBackgroundDrawable tabsViewBackground = iBlur3FactoryLiquidGlass.create(buttonsRecyclerViewWrapper, BlurredBackgroundProviderImpl.mainTabs(resourcesProvider));
+        BlurredBackgroundDrawable tabsViewBackground = createAttachmentPanel(buttonsRecyclerViewWrapper, BlurredBackgroundProviderImpl.mainTabs(resourcesProvider));
         tabsViewBackground.setRadius(dp(56 / 2f));
         tabsViewBackground.setPadding(dp(7));
         buttonsRecyclerViewWrapper.setBackground(tabsViewBackground);
@@ -3158,7 +3168,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         emojiViewChildBg.setThickness(dp(32));
         emojiViewChildBg.setIntensity(0.4f);
 
-        captionContainerBg = iBlur3FactoryLiquidGlass.create(captionContainer, BlurredBackgroundProviderImpl.inputFieldDialogActivity(resourcesProvider));
+        captionContainerBg = createAttachmentPanel(captionContainer, BlurredBackgroundProviderImpl.inputFieldDialogActivity(resourcesProvider));
         captionContainerBg.setRadius(dp(22));
         captionContainerBg.setPadding(dp(7));
         captionContainer.setPadding(dp(7), dp(5), dp(7), dp(5));
@@ -3567,7 +3577,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
         commentTextView.addView(moveCaptionButton, LayoutHelper.createFrame(40, 40, Gravity.BOTTOM | Gravity.RIGHT, 0, 0, 0, 4));
 
-        BlurredBackgroundDrawable drawable2 = iBlur3FactoryLiquidGlass.create(topCommentContainer, BlurredBackgroundProviderImpl.inputFieldDialogActivity(resourcesProvider));
+        BlurredBackgroundDrawable drawable2 = createAttachmentPanel(topCommentContainer, BlurredBackgroundProviderImpl.inputFieldDialogActivity(resourcesProvider));
         drawable2.setRadius(dp(22));
         drawable2.setPadding(dp(7));
         topCommentContainer.setBackground(drawable2);
@@ -7508,6 +7518,18 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
 
 
+    private final @Nullable BlurredBackgroundSourceRenderNode attachmentPanelsSource;
+    private final BlurredBackgroundDrawableViewFactory attachmentPanelsFactory;
+
+    private BlurredBackgroundDrawable createAttachmentPanel(View view, BlurredBackgroundProvider fallback) {
+        if (!app.exteraless.appearance.AppearanceConfig.attachmentPanelsGlass()) return iBlur3FactoryLiquidGlass.create(view, fallback);
+        BlurredBackgroundDrawable drawable = attachmentPanelsFactory.create(view,
+                app.freezgram.LiquidGlassStyle.surfaceColors(resourcesProvider, () -> Build.VERSION.SDK_INT >= 33
+                        && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied()));
+        app.freezgram.LiquidGlassStyle.configure(drawable);
+        return drawable;
+    }
+
     /* Blur */
 
     private final @Nullable DownscaleScrollableNoiseSuppressor scrollableViewNoiseSuppressor;
@@ -7561,7 +7583,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
         final int mergedPositionsCount = RectFMergeBounding.mergeOverlapping(iBlur3Positions, hasFastScroll ? 3 : 2, iBlur3PositionsMerged);
         scrollableViewNoiseSuppressor.setupRenderNodes(iBlur3PositionsMerged, mergedPositionsCount);
+        scrollableViewNoiseSuppressor.setNavigationGlassBlur(AndroidUtilities.dpf2(app.freezgram.LiquidGlassStyle.blurRadiusDp()), app.freezgram.LiquidGlassStyle.enhanceColors());
         scrollableViewNoiseSuppressor.invalidateResultRenderNodes(iBlur3Capture, containerView.getMeasuredWidth(), containerView.getMeasuredHeight());
+        if (attachmentPanelsSource != null) attachmentPanelsSource.invalidateDisplayListForDrawables();
     }
 
     @SuppressLint("ViewConstructor")
