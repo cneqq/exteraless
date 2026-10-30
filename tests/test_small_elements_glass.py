@@ -75,6 +75,12 @@ class PrivacyCheck {
   if(one.source==two.source)throw new AssertionError("Reaction shapes must not share mutable recordings");
   var own=(SnapshotSource)one.source;own.draw(c,1000,2000,1100,2050);
   if(c.nodes.get(c.nodes.size()-1).w!=228||c.nodes.get(c.nodes.size()-1).h!=178)throw new AssertionError("Capture should be cropped around the target, not the entire screen");
+  var gift=new SnapshotSource(input,true);gift.draw(c,0,0,100,50);int calls=input.calls;
+  if(c.nodes.get(c.nodes.size()-1).blur!=24)throw new AssertionError("Gift used shared blur");
+  LiquidGlassStyle.rev++;gift.draw(c,0,0,100,50);
+  if(input.calls!=calls)throw new AssertionError("Shared settings altered gift profile");
+  GiftGlassStyle.rev++;gift.draw(c,0,0,100,50);
+  if(input.calls!=calls+1||!((SnapshotSource)gift.createDrawable().source).gift)throw new AssertionError("Gift settings or cloned profile lost");
  }
 }
 class Canvas{java.util.ArrayList<BlurredBackgroundSourceRenderNode> nodes=new java.util.ArrayList<>();boolean isHardwareAccelerated(){return true;}void translate(float x,float y){}void save(){}void restore(){}}class Bitmap{}
@@ -86,12 +92,13 @@ class BlurredBackgroundSourceBitmap implements BlurredBackgroundSource{
  public void draw(Canvas c,float l,float t,float r,float b){calls++;}
 }
 class BlurredBackgroundSourceRenderNode implements BlurredBackgroundSource{
- int w,h;boolean recorded;BlurredBackgroundSourceRenderNode(BlurredBackgroundSource fallback){}
+ float blur;int w,h;boolean recorded;BlurredBackgroundSourceRenderNode(BlurredBackgroundSource fallback){}
  BlurredBackgroundDrawable createDrawable(){return new BlurredBackgroundDrawable();}
  boolean needUpdateDisplayList(int width,int height){return !recorded||w!=width||h!=height;}
  Canvas beginRecording(int width,int height){w=width;h=height;return new Canvas();}void endRecording(){recorded=true;}
- void setBlur(float radius,Object effect){}public void draw(Canvas c,float l,float t,float r,float b){c.nodes.add(this);}
+ void setBlur(float radius,Object effect){blur=radius;}public void draw(Canvas c,float l,float t,float r,float b){c.nodes.add(this);}
 }
+class GiftGlassStyle{static int rev=99;static int revision(){return rev;}static int blurRadiusDp(){return 24;}}
 class LiquidGlassStyle{static int rev;static int revision(){return rev;}static int blurRadiusDp(){return 6;}static boolean enhanceColors(){return true;}}
 class AndroidUtilities{static int dp(int n){return n;}static float dpf2(int n){return n;}}
 class RenderNodeEffects{static Object getSaturationX3RenderEffect(){return null;}}

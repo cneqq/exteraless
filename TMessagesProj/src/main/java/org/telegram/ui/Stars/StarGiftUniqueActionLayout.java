@@ -81,6 +81,7 @@ public class StarGiftUniqueActionLayout {
                     new int[] { 0x30FFFFFF, 0x00FFFFFF, 0x12000000 },
                     new float[] { 0, .38f, 1 }, Shader.TileMode.CLAMP));
         }
+        glassHighlightPaint.setAlpha((int) (255 * app.exteraless.appearance.AppearanceConfig.giftGlassIntensity() / 100f));
         glassHighlightPaint.setStyle(Paint.Style.FILL);
         canvas.drawPaint(glassHighlightPaint);
         glassEdgeRect.set(backgroundRect);
@@ -88,6 +89,7 @@ public class StarGiftUniqueActionLayout {
         glassEdgePaint.setStyle(Paint.Style.STROKE);
         glassEdgePaint.setStrokeWidth(dp(1));
         glassEdgePaint.setColor(0x60FFFFFF);
+        glassEdgePaint.setAlpha((int) (96 * app.exteraless.appearance.AppearanceConfig.giftGlassIntensity() / 100f));
         canvas.drawRoundRect(glassEdgeRect, dp(13.5f), dp(13.5f), glassEdgePaint);
     }
 

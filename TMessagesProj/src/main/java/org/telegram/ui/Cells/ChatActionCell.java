@@ -3557,8 +3557,9 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         }
         int slot = gift ? 1 : 0;
         if (serviceGlass[slot] == null) {
-            serviceGlass[slot] = serviceGlassFactory.create(this, app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate,
-                    gift ? app.freezgram.SmallElementsGlass::areGiftCardsEnabled : app.freezgram.SmallElementsGlass::isEnabled));
+            serviceGlass[slot] = gift ? serviceGlassFactory.withSource(app.freezgram.SmallElementsGlass.createGiftSource(serviceGlassFactory.getSource()))
+                    .create(this, app.freezgram.GiftGlassStyle.colors(themeDelegate))
+                    : serviceGlassFactory.create(this, app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate, app.freezgram.SmallElementsGlass::isEnabled));
             serviceGlass[slot].setCallback(this);
         }
         if (path != null) path.computeBounds(serviceGlassBounds, true); else serviceGlassBounds.set(rect);
@@ -3569,7 +3570,8 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
                 (int) Math.ceil(serviceGlassBounds.right), (int) Math.ceil(serviceGlassBounds.bottom));
         drawable.setRadius(radius);
         drawable.setAlpha((int) (255 * (fromParent ? getAlpha() : 1f) * (isFloating() ? .75f : 1f)));
-        app.freezgram.LiquidGlassStyle.configure(drawable); drawable.updateColors();
+        if (gift) app.freezgram.GiftGlassStyle.configure(drawable); else app.freezgram.LiquidGlassStyle.configure(drawable);
+        drawable.updateColors();
         canvas.save();
         if (path != null) canvas.clipPath(path);
         drawable.draw(canvas); canvas.restore();

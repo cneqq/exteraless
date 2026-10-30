@@ -113,4 +113,6 @@
     <string name="FreezgramTransitionStyle">Анимации переходов</string>
     <string name="FreezgramTransitionStandard">Стандартные</string>
     <string name="FreezgramTransitionSmooth">Плавные</string>
+    <string name="FreezgramGiftGlassSettings">Подарки</string>
+    <string name="FreezgramGiftGlassInfo">Отдельное стекло для карточек подарков в чатах и предпросмотра отправки. NFT сохраняют непрозрачный фон в своих цветах; прозрачность и размытие применяются к обычным подаркам.</string>
 </resources>

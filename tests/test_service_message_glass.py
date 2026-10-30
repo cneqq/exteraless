@@ -9,7 +9,7 @@ class ServiceGlassTests(unittest.TestCase):
  def test_service_and_gift_materials_do_not_share_geometry_and_keep_fallback(self):
   source=(JAVA/'org/telegram/ui/Cells/ChatActionCell.java').read_text()
   methods='\n'.join(method(source,s) for s in ['    public void setServiceGlassFactory(', '    private void releaseServiceGlass()', '    private boolean drawServiceGlass('])
-  aliases={'org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory':'Factory','org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable':'Drawable','app.freezgram.LiquidGlassStyle':'LiquidGlassStyle','app.freezgram.SmallElementsGlass':'SmallElementsGlass'}
+  aliases={'org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory':'Factory','org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable':'Drawable','app.freezgram.GiftGlassStyle':'GiftGlassStyle','app.freezgram.LiquidGlassStyle':'LiquidGlassStyle','app.freezgram.SmallElementsGlass':'SmallElementsGlass'}
   for a,b in aliases.items():methods=methods.replace(a,b)
   run_java('''
 class PrivacyCheck{
@@ -42,17 +42,18 @@ class PrivacyCheck{
 class Canvas{boolean hardware=true;int clips;boolean isHardwareAccelerated(){return hardware;}void save(){}void restore(){}void clipPath(Path p){clips++;}}
 class Path{void computeBounds(RectF r,boolean exact){r.left=0;r.top=0;r.right=100;r.bottom=24;}}
 class RectF{float left,top,right,bottom;void set(RectF r){left=r.left;top=r.top;right=r.right;bottom=r.bottom;}boolean isEmpty(){return right<=left||bottom<=top;}}
-class Factory{Drawable create(Object cell,Object colors){return new Drawable();}}
+class Factory{Object getSource(){return null;}Factory withSource(Object s){return this;}Drawable create(Object cell,Object colors){return new Drawable();}}
 class Drawable{int right,alpha;Object callback;void setCallback(Object o){callback=o;}void setBounds(int l,int t,int r,int b){right=r;}void setRadius(float r){}void setAlpha(int a){alpha=a;}void updateColors(){}void draw(Canvas c){}}
 class Star{boolean glass,colored;boolean hasColoredBackdrop(){return colored;}void setGlassBackground(boolean b){glass=b;}}
-class SmallElementsGlass{static boolean enabled=true,gifts=true;static boolean isEnabled(){return enabled;}static boolean areGiftCardsEnabled(){return gifts;}}
+class SmallElementsGlass{static boolean enabled=true,gifts=true;static boolean isEnabled(){return enabled;}static boolean areGiftCardsEnabled(){return gifts;}static Object createGiftSource(Object s){return s;}}
+class GiftGlassStyle{static Object colors(Object p){return null;}static void configure(Drawable d){}}
 class LiquidGlassStyle{static Object surfaceColors(Object p,java.util.function.BooleanSupplier e){return null;}static void configure(Drawable d){}}
 class MessageObject{static int TYPE_GIFT_PREMIUM=1,TYPE_GIFT_PREMIUM_CHANNEL=2,TYPE_GIFT_STARS=3,TYPE_GIFT_OFFER=4;boolean star=true;int type;boolean isStarGiftAction(){return star;}}
 '''.replace('METHODS',methods))
 
  def test_collectible_keeps_opaque_background_and_glass_finish(self):
   source=(JAVA/'org/telegram/ui/Stars/StarGiftUniqueActionLayout.java').read_text()
-  render=method(source,'    private void drawGiftBackground(')
+  render=method(source,'    private void drawGiftBackground(').replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig')
   run_java('''
 class PrivacyCheck {
  boolean glassBackground,colored;boolean hasColoredBackdrop(){return colored;}
@@ -73,7 +74,8 @@ class PrivacyCheck {
   if(p.glassHighlightPaint.shader!=shader)throw new AssertionError("Highlight shader not reused");
  }
 }
-class Paint{Object shader;enum Style{FILL,STROKE}void setShader(Object o){shader=o;}void setStyle(Style s){}void setStrokeWidth(float f){}void setColor(int c){}}
+class Paint{Object shader;enum Style{FILL,STROKE}void setShader(Object o){shader=o;}void setStyle(Style s){}void setStrokeWidth(float f){}void setColor(int c){}void setAlpha(int a){}}
+class AppearanceConfig{static int giftGlassIntensity(){return 70;}}
 class Shader{enum TileMode{CLAMP}}
 class LinearGradient{LinearGradient(float a,float b,float c,float d,int[] colors,float[] positions,Shader.TileMode t){}}
 class RectF{float height(){return 200;}void set(RectF r){}void inset(float x,float y){}}

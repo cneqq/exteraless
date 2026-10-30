@@ -468,6 +468,21 @@ object AppearanceConfig {
     fun attachmentPanelsGlass(): Boolean { ensureLoaded(); return attachmentPanelsGlass.Bool() }
 
     @JvmField
+    val giftGlassBlur = addConfig("FreezgramGiftGlassBlur", ConfigItem.configTypeInt, 24)
+    @JvmStatic
+    fun giftGlassBlur(): Int { ensureLoaded(); return giftGlassBlur.Int().coerceIn(0, 30) }
+
+    @JvmField
+    val giftGlassIntensity = addConfig("FreezgramGiftGlassIntensity", ConfigItem.configTypeInt, 70)
+    @JvmStatic
+    fun giftGlassIntensity(): Int { ensureLoaded(); return giftGlassIntensity.Int().coerceIn(0, 100) }
+
+    @JvmField
+    val giftGlassTransparency = addConfig("FreezgramGiftGlassTransparency", ConfigItem.configTypeInt, 75)
+    @JvmStatic
+    fun giftGlassTransparency(): Int { ensureLoaded(); return giftGlassTransparency.Int().coerceIn(0, 100) }
+
+    @JvmField
     val giftCardsGlass = addConfig("FreezgramGiftCardsGlass", ConfigItem.configTypeBool, true)
     @JvmStatic
     fun giftCardsGlass(): Boolean { ensureLoaded(); return giftCardsGlass.Bool() }

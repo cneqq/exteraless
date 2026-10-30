@@ -116,6 +116,14 @@ public class SendGiftSheet extends BottomSheetWithRecyclerListView implements No
     private final long send_paid_messages_stars;
 //    private final ChatActionCell payActionCell;
     private final ChatActionCell actionCell;
+    private org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode giftPreviewSource;
+    private void prepareGiftGlass(Canvas canvas) {
+        if (giftPreviewSource == null || !canvas.isHardwareAccelerated() || !app.freezgram.SmallElementsGlass.areGiftCardsEnabled()
+                || chatView.getWidth() <= 0 || chatView.getHeight() <= 0) return;
+        Canvas capture = giftPreviewSource.beginRecording(chatView.getWidth(), chatView.getHeight());
+        chatView.drawWallpaperForGlass(capture);
+        giftPreviewSource.endRecording();
+    }
 
     private final TLRPC.MessageAction action;
     private final MessageObject messageObject;
@@ -190,7 +198,12 @@ public class SendGiftSheet extends BottomSheetWithRecyclerListView implements No
             this.name = chat == null ? "" : chat.title;
         }
 
-        actionCell = new ChatActionCell(context, false, resourcesProvider);
+        actionCell = new ChatActionCell(context, false, resourcesProvider) {
+            @Override protected void onDraw(Canvas canvas) {
+                prepareGiftGlass(canvas);
+                super.onDraw(canvas);
+            }
+        };
         actionCell.setDelegate(new ChatActionCell.ChatActionCellDelegate() {});
 
         chatView = new SizeNotifierFrameLayout(context) {
@@ -244,6 +257,14 @@ public class SendGiftSheet extends BottomSheetWithRecyclerListView implements No
 
         final Drawable drawable = PreviewView.getBackgroundDrawable(null, currentAccount, dialogId, Theme.isCurrentThemeDark());
         chatView.setBackgroundImage(drawable, false);
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            giftPreviewSource = new org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode(null);
+            var factory = new org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory(
+                    new org.telegram.ui.Components.chat.ViewPositionWatcher(chatView), chatView,
+                    app.freezgram.SmallElementsGlass.createGiftSource(giftPreviewSource));
+            factory.setLiquidGlassEffectAllowed(true);
+            actionCell.setServiceGlassFactory(factory);
+        }
         Integer color = null;
         BlurredBackgroundSourceColor sourceColor = new BlurredBackgroundSourceColor();
         if (drawable instanceof ColorDrawable) {
