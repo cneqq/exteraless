@@ -340,6 +340,7 @@ public final class EtgBackup {
         bool(list, "attachmentPanelsGlass", AppearanceConfig.attachmentPanelsGlass);
         bool(list, "smallElementsGlass", AppearanceConfig.smallElementsGlass);
         bool(list, "foldersLiquidGlass", AppearanceConfig.foldersLiquidGlass);
+        bool(list, "chatHeaderGlassDim", AppearanceConfig.chatHeaderGlassDim);
         bool(list, "glassWallpaperDim", AppearanceConfig.glassWallpaperDim);
         bool(list, "glassEnhanceColors", AppearanceConfig.glassEnhanceColors);
         integer(list, "navigationGlassBlur", AppearanceConfig.navigationGlassBlur, 0, 30);

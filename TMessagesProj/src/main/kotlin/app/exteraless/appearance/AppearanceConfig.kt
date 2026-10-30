@@ -473,6 +473,11 @@ object AppearanceConfig {
     fun foldersLiquidGlass(): Boolean { ensureLoaded(); return foldersLiquidGlass.Bool() }
 
     @JvmField
+    val chatHeaderGlassDim = addConfig("FreezgramChatHeaderGlassDim", ConfigItem.configTypeBool, false)
+    @JvmStatic
+    fun chatHeaderGlassDim(): Boolean { ensureLoaded(); return chatHeaderGlassDim.Bool() }
+
+    @JvmField
     val glassWallpaperDim = addConfig("FreezgramGlassWallpaperDim", ConfigItem.configTypeBool, true)
     @JvmStatic
     fun glassWallpaperDim(): Boolean { ensureLoaded(); return glassWallpaperDim.Bool() }

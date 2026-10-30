@@ -327,3 +327,14 @@ rendering, including particles already alive when the setting changes. The style
 is backed up, defaults to the previous appearance and is shared by the app's
 existing snow effect surfaces. Java/XML syntax and resource names were checked;
 no APK build or phone visual verification was performed.
+
+
+**Darken chat header glass** is an independent opt-in in the shared Liquid Glass
+editor (default off, backed up and included in the style revision/reset). It
+uses a black material tint with at least 40% opacity on the iOS chat header and
+the panels below it, independently of wallpaper dimming and panel transparency.
+Existing opaque tint settings can increase that opacity. Text/icons are drawn
+above the material and are not dimmed. Navigation/composer materials and ordinary
+fallback colors remain unchanged. The header sample previews it. Regression
+checks cover black tint, disabling, cache refresh and isolation from navigation;
+no APK build or phone verification was performed.

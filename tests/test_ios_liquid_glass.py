@@ -227,6 +227,13 @@ class PrivacyCheck {
   var popupColors=LiquidGlassStyle.surfaceColors(null,()->true);
   if((panelColors.background.getColor(null,true)>>>24)!=0 || (popupColors.background.getColor(null,true)>>>24)<60
        || popupColors.strokeTop<=panelColors.strokeTop)throw new AssertionError("Popup lost its backing/contour at full transparency");
+  int beforeDim=LiquidGlassStyle.revision();AppearanceConfig.headerDim=true;
+  int dimmed=LiquidGlassStyle.headerColors(null,()->true).background.getColor(null,false);
+  if((dimmed&0xffffff)!=0||(dimmed>>>24)<102||LiquidGlassStyle.revision()==beforeDim)throw new AssertionError("Header dim is missing or cached");
+  if(panelColors.background.getColor(null,false)>>>24!=0)throw new AssertionError("Header dim leaked into navigation");
+  if((LiquidGlassStyle.headerColors(null,()->false).background.getColor(null,false)&0xffffff)!=0xeeeeee)throw new AssertionError("Header fallback changed");
+  AppearanceConfig.headerDim=false;
+  if(LiquidGlassStyle.headerColors(null,()->true).background.getColor(null,false)>>>24!=0)throw new AssertionError("Header dim did not turn off");
   for(int value:new int[]{0,25,90,100}){
    int before=LiquidGlassStyle.revision();
    AppearanceConfig.transparency=value;AppearanceConfig.intensity=value;AppearanceConfig.blur=value%31;
@@ -240,6 +247,7 @@ class PrivacyCheck {
 class Build{static class VERSION{static int SDK_INT;}}
 class MainTabsUiHelper{static boolean ios;static boolean isIosNavigationBar(){return ios;}}
 class AppearanceConfig{
+ static boolean headerDim;static boolean chatHeaderGlassDim(){return headerDim;}
  static boolean glass,colors=true;static boolean glassEnhanceColors(){return colors;}static int blur=6,intensity=55,transparency=-1;
  static boolean iosLiquidGlassNavigation(){return glass;}
  static int navigationGlassBlur(){return blur;}

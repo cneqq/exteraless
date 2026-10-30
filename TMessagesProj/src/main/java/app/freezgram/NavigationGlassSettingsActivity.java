@@ -38,7 +38,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
     private GlassPreview preview;
     private AvatarCornersSeekBar blur, intensity, transparency, width, lift, composerLift, composerSide, composerContent;
     private boolean geometryChanged;
-    private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors, wallpaperDim;
+    private org.telegram.ui.Cells.TextCheckCell contacts, enhanceColors, wallpaperDim, headerDim;
 
     private String text(int id) { return LocaleController.getString(id); }
 
@@ -117,6 +117,13 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 enhanceColors.setChecked(LiquidGlassStyle.enhanceColors()); geometryChanged = true; preview.invalidate();
             });
             content.addView(enhanceColors);
+            headerDim = new org.telegram.ui.Cells.TextCheckCell(context);
+            headerDim.setTextAndCheck(text(R.string.FreezgramChatHeaderGlassDim), AppearanceConfig.chatHeaderGlassDim(), false);
+            headerDim.setOnClickListener(v -> {
+                AppearanceConfig.chatHeaderGlassDim.setConfigBool(!AppearanceConfig.chatHeaderGlassDim());
+                headerDim.setChecked(AppearanceConfig.chatHeaderGlassDim()); geometryChanged = true; preview.invalidate();
+            });
+            content.addView(headerDim);
             wallpaperDim = new org.telegram.ui.Cells.TextCheckCell(context);
             wallpaperDim.setTextAndCheck(text(R.string.FreezgramGlassWallpaperDim), AppearanceConfig.glassWallpaperDim(), false);
             wallpaperDim.setOnClickListener(v -> {
@@ -203,6 +210,8 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
         reset.setPadding(dp(22), dp(20), dp(22), dp(24));
         reset.setOnClickListener(v -> {
             if (mode == 1) {
+                AppearanceConfig.chatHeaderGlassDim.setConfigBool(false);
+                headerDim.setChecked(false);
                 AppearanceConfig.glassWallpaperDim.setConfigBool(true);
                 wallpaperDim.setChecked(true);
                 AppearanceConfig.glassEnhanceColors.setConfigBool(true);
@@ -313,6 +322,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
                 source = new BlurredBackgroundSourceRenderNode(null);
                 glass = createGlass(30, 0);
                 headerGlass = createGlass(23, 0);
+                headerGlass.setColorProvider(LiquidGlassStyle.headerColors(resourceProvider, this::effectsEnabled));
                 fieldGlass = createGlass(24, 7);
                 leftGlass = createGlass(24, 7);
                 rightGlass = createGlass(24, 7);

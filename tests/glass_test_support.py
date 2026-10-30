@@ -18,6 +18,8 @@ def run_java(source):
             source = re.sub(r'class AppearanceConfig\s*\{', 'class AppearanceConfig { static boolean glassEnhanceColors(){return true;}', source)
         if 'glassWallpaperDim()' not in source:
             source = re.sub(r'class AppearanceConfig\s*\{', 'class AppearanceConfig { static boolean glassWallpaperDim(){return true;}', source)
+        if 'chatHeaderGlassDim()' not in source:
+            source = re.sub(r'class AppearanceConfig\s*\{', 'class AppearanceConfig { static boolean chatHeaderGlassDim(){return false;}', source)
         source += shared
     if 'isGlassPowerSaverApplied()' in source:
         source = source.replace('org.telegram.messenger.LiteMode', 'LiteMode')

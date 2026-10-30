@@ -24,7 +24,7 @@ public final class IosLiquidGlassChatHeader {
     }
 
     public static BlurredBackgroundProvider colors(Theme.ResourcesProvider resourcesProvider) {
-        return LiquidGlassStyle.colors(resourcesProvider, () -> isEnabled());
+        return LiquidGlassStyle.headerColors(resourcesProvider, () -> isEnabled());
     }
 
     public static void refresh(BlurredBackgroundDrawable drawable) {

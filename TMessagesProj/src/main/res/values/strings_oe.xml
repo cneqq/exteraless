@@ -135,4 +135,5 @@
     <string name="FreezgramSnowStyle">Snow appearance</string>
     <string name="FreezgramSnowStyleFlakes">Snowflakes</string>
     <string name="FreezgramSnowStyleDots">Dots</string>
+    <string name="FreezgramChatHeaderGlassDim">Darken chat header glass</string>
 </resources>

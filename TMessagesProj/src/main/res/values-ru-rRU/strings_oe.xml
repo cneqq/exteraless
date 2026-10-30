@@ -108,4 +108,5 @@
     <string name="FreezgramSnowStyle">Вид снега</string>
     <string name="FreezgramSnowStyleFlakes">Снежинки</string>
     <string name="FreezgramSnowStyleDots">Точки</string>
+    <string name="FreezgramChatHeaderGlassDim">Затемнять стекло шапки чата</string>
 </resources>
