@@ -325,7 +325,7 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
 
         private boolean effectsEnabled() {
             return Build.VERSION.SDK_INT >= 33 && org.telegram.messenger.SharedConfig.chatBlurEnabled()
-                    && !org.telegram.messenger.LiteMode.isPowerSaverApplied();
+                    && !org.telegram.messenger.LiteMode.isGlassPowerSaverApplied();
         }
 
         private BlurredBackgroundDrawable createGlass(int radius, int padding) {

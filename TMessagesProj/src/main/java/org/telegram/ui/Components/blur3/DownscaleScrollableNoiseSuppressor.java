@@ -141,6 +141,7 @@ public class DownscaleScrollableNoiseSuppressor {
         private final RenderNode[] renderNodeDownsampled;
         private final RenderNode[] renderNodeRestored;
         private final boolean simpleMode;
+        private final boolean stabilizeScroll;
 
         private int scaleX, scaleY;
         private float scrollX, scrollY;
@@ -150,6 +151,11 @@ public class DownscaleScrollableNoiseSuppressor {
         }
 
         public DownscaledRenderNode(String name, int subeffects, boolean simpleModeNotAllowed) {
+            this(name, subeffects, simpleModeNotAllowed, false);
+        }
+
+        public DownscaledRenderNode(String name, int subeffects, boolean simpleModeNotAllowed, boolean stabilizeScroll) {
+            this.stabilizeScroll = stabilizeScroll;
             renderNodeDownsampled = new RenderNode[1 + subeffects];
             for (int a = 0; a < (subeffects + 1); a++) {
                 renderNodeDownsampled[a] = new RenderNode(name + "_down_" + subeffects);
@@ -281,7 +287,7 @@ public class DownscaleScrollableNoiseSuppressor {
             scrollX = scaleX >= 2 ? ((scrollX + dx) % scaleX) : 0;
             scrollY = scaleY >= 2 ? ((scrollY + dy) % scaleY) : 0;
 
-            if (allowNoiseSuppress) {
+            if (allowNoiseSuppress || stabilizeScroll) {
                 renderNodeOriginalWithOffset.setTranslationX(scrollX);
                 renderNodeOriginalWithOffset.setTranslationY(scrollY);
 
@@ -453,7 +459,7 @@ public class DownscaleScrollableNoiseSuppressor {
 
         private SourcePart() {
             if (navigationGlassEnabled) {
-                renderNodesForNavigation = new DownscaledRenderNode("navigation", 0, true);
+                renderNodesForNavigation = new DownscaledRenderNode("navigation", 0, true, true);
                 renderNodesForNavigation.setScale(navigationBlurRadius == 0 ? 1 : 4, navigationBlurRadius == 0 ? 1 : 4);
                 renderNodesForNavigation.setPrimaryEffectBlur(navigationBlurRadius, navigationEnhanceColors ? RenderNodeEffects.getSaturationX3RenderEffect() : null);
             } else {

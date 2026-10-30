@@ -99,6 +99,7 @@ class DownscaleScrollableNoiseSuppressor {
   Object colorEffect;float radius;int scaleX;RenderNode input;RenderNode[] renderNodeRestored={new RenderNode(null)};
   DownscaledRenderNode(String name,int effects){}
   DownscaledRenderNode(String name,int effects,boolean simple){}
+  DownscaledRenderNode(String name,int effects,boolean simple,boolean stabilize){}
   void setScale(int x,int y){scaleX=x;}
   void setPrimaryEffectBlur(float r){radius=r;}
   void setPrimaryEffectBlur(float r,Object e){radius=r;colorEffect=e;}
@@ -175,7 +176,7 @@ class RectF{float top,bottom;void set(int l,int t,int r,int b){top=t;bottom=b;}}
         toggle=method(path.read_text(), '    public void setLiquidGlassEffectAllowed(boolean allowed)')
         run_java('''
 class PrivacyCheck{
- LiquidGlassEffect liquidGlassEffect;RenderNode renderNodeFill=new RenderNode();boolean renderNodeInvalidated;int invalidations;
+ boolean liquidGlassRequested;LiquidGlassEffect liquidGlassEffect;RenderNode renderNodeFill=new RenderNode();boolean renderNodeInvalidated;int invalidations;
  void invalidateSelf(){invalidations++;}
  TOGGLE
  public static void main(String[] args){

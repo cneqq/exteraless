@@ -315,6 +315,28 @@ public class LiteMode {
         getValue(false);
     }
 
+    /** Glass always respects the phone's saver, independently of the app's battery-threshold preference. */
+    public static boolean isGlassPowerSaverApplied() {
+        return isPowerSaverApplied() || isSystemPowerSaveMode();
+    }
+
+    private static final java.util.HashSet<Utilities.Callback<Boolean>> glassPowerSaverListeners = new java.util.HashSet<>();
+    public static void addGlassPowerSaverListener(Utilities.Callback<Boolean> listener) { glassPowerSaverListeners.add(listener); }
+    public static void removeGlassPowerSaverListener(Utilities.Callback<Boolean> listener) { glassPowerSaverListeners.remove(listener); }
+    private static void notifyGlassPowerSaverListeners() {
+        boolean applied = isGlassPowerSaverApplied();
+        for (Utilities.Callback<Boolean> listener : new java.util.ArrayList<>(glassPowerSaverListeners)) listener.run(applied);
+    }
+
+    private static void invalidateGlassViewTree(android.view.View view) {
+        if (view == null) return;
+        view.invalidate();
+        if (view instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) invalidateGlassViewTree(group.getChildAt(i));
+        }
+    }
+
     private static boolean isSystemPowerSaveMode() {
         long now = System.currentTimeMillis();
         if (lastSystemSaverChecked != 0 && now - lastSystemSaverChecked < 3000) {
@@ -348,12 +370,17 @@ public class LiteMode {
         if (context == null) {
             return;
         }
-        if (followSystemSaver && systemSaverReceiver == null) {
+        if (systemSaverReceiver == null) {
             systemSaverReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context c, Intent intent) {
                     lastSystemSaverChecked = 0;
-                    AndroidUtilities.runOnUIThread(() -> getValue(false));
+                    AndroidUtilities.runOnUIThread(() -> {
+                        getValue(false);
+                        notifyGlassPowerSaverListeners();
+                        java.util.List<android.view.View> roots = AndroidUtilities.allGlobalViews();
+                        if (roots != null) for (android.view.View root : roots) invalidateGlassViewTree(root);
+                    });
                 }
             };
             android.content.IntentFilter filter = new android.content.IntentFilter();
@@ -366,12 +393,6 @@ public class LiteMode {
                 systemSaverReceiver = null;
                 FileLog.e(e);
             }
-        } else if (!followSystemSaver && systemSaverReceiver != null) {
-            try {
-                context.unregisterReceiver(systemSaverReceiver);
-            } catch (Throwable ignore) {
-            }
-            systemSaverReceiver = null;
         }
     }
 
@@ -396,6 +417,7 @@ public class LiteMode {
     }
 
     private static void onPowerSaverApplied(boolean powerSaverApplied) {
+        AndroidUtilities.runOnUIThread(LiteMode::notifyGlassPowerSaverListeners);
         if (powerSaverApplied) {
             onFlagsUpdate(getValue(true), PRESET_POWER_SAVER);
         } else {

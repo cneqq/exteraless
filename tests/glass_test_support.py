@@ -19,4 +19,11 @@ def run_java(source):
         if 'glassWallpaperDim()' not in source:
             source = re.sub(r'class AppearanceConfig\s*\{', 'class AppearanceConfig { static boolean glassWallpaperDim(){return true;}', source)
         source += shared
+    if 'isGlassPowerSaverApplied()' in source:
+        source = source.replace('org.telegram.messenger.LiteMode', 'LiteMode')
+        if 'class LiteMode' not in source:
+            source += '\nclass LiteMode{static boolean isGlassPowerSaverApplied(){return false;}}'
+        elif 'static boolean isGlassPowerSaverApplied()' not in source:
+            body = 'return isPowerSaverApplied();' if 'static boolean isPowerSaverApplied()' in source else 'return false;'
+            source = re.sub(r'class LiteMode\s*\{', 'class LiteMode { static boolean isGlassPowerSaverApplied(){'+body+'}', source)
     run_source(source)

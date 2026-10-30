@@ -42330,7 +42330,7 @@ public class ChatActivity extends BaseFragment implements
         @Override
         public boolean drawShareButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds) {
             if (Build.VERSION.SDK_INT < 33 || !canvas.isHardwareAccelerated() || contentView == null
-                    || !SharedConfig.chatBlurEnabled() || LiteMode.isPowerSaverApplied()) return false;
+                    || !SharedConfig.chatBlurEnabled() || LiteMode.isGlassPowerSaverApplied()) return false;
             if (!ViewPositionWatcher.computeRectInParent(cell, contentView, smallElementsCellBounds)) return false;
             int width = contentView.getWidth(), height = contentView.getHeight();
             if (width <= 0 || height <= 0) return false;

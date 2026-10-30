@@ -165,3 +165,15 @@ message-menu glass preference remains available when the small-elements toggle
 is off. Existing opaque swipe-back submenu surfaces are still not converted.
 No APK build was requested; snapshot placement, contrast and GPU performance
 require device verification.
+
+Glass power saving now treats the phone's system saver as mandatory, independently
+of the app's follow-system switch or battery threshold. The system receiver
+invalidates visible view trees and notifies glass-specific listeners. RenderNode
+drawables release/refuse AGSL effects in saver, retain the requested state for
+restoration, refresh cached colors when saver changes, and skip backdrop capture
+for fully opaque fallback fills. Shared glass surfaces use an opaque fallback in
+saver. This does not change the app's other LiteMode preference semantics.
+The independent downscaled navigation/header capture output now enables the
+existing fractional-scroll phase compensation: restored and input translations
+cancel, keeping the capture viewport fixed while reducing resampling jitter.
+Device verification of slow scrolling and system-saver transitions is required.

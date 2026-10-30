@@ -1260,13 +1260,13 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
             .addGlobal(NotificationCenter.appUpdateLoading)
             .addGlobal(NotificationCenter.needSetDayNightTheme);
 
-        LiteMode.addOnPowerSaverAppliedListener(iosGlassPowerSaverListener);
+        LiteMode.addGlassPowerSaverListener(iosGlassPowerSaverListener);
         return super.onFragmentCreate();
     }
 
     @Override
     public void onFragmentDestroy() {
-        LiteMode.removeOnPowerSaverAppliedListener(iosGlassPowerSaverListener);
+        LiteMode.removeGlassPowerSaverListener(iosGlassPowerSaverListener);
         Bulletin.removeDelegate(this);
         Bulletin.removeDelegate(contentView);
 

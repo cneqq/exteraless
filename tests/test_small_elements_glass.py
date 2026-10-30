@@ -24,7 +24,7 @@ class PrivacyCheck {
 class Build{static class VERSION{static int SDK_INT;}}
 class AppearanceConfig{static boolean opt;static boolean smallElementsGlass(){return opt;}}
 class SharedConfig{static boolean blur;static boolean chatBlurEnabled(){return blur;}}
-class LiteMode{static boolean saver;static boolean isPowerSaverApplied(){return saver;}}
+class LiteMode{static boolean saver;static boolean isGlassPowerSaverApplied(){return saver;}}
 '''.replace('GATE', gate))
 
     def test_snapshot_bridge_updates_when_bitmap_or_settings_change(self):

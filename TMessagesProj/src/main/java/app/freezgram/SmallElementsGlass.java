@@ -22,7 +22,7 @@ public final class SmallElementsGlass {
     private SmallElementsGlass() {}
     public static boolean isEnabled() {
         return AppearanceConfig.smallElementsGlass() && Build.VERSION.SDK_INT >= 33
-                && SharedConfig.chatBlurEnabled() && !LiteMode.isPowerSaverApplied();
+                && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
     }
 
     /** Bridge existing bitmap captures into the same AGSL renderer used by the panels. */

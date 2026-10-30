@@ -21,7 +21,7 @@ public final class ChatComposerGlass {
 
     public static boolean isEnabled() {
         return isRequested() && Build.VERSION.SDK_INT >= 33
-                && SharedConfig.chatBlurEnabled() && !LiteMode.isPowerSaverApplied();
+                && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
     }
 
     public static boolean useIosLayout(boolean complexState, int widthDp) {

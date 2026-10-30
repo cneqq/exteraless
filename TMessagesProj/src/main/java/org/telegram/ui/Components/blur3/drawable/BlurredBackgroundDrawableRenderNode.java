@@ -56,6 +56,8 @@ public class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawab
     }
 
     private LiquidGlassEffect liquidGlassEffect;
+    private boolean liquidGlassRequested;
+    private Boolean glassPowerSaverState;
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void setLiquidGlassEffectAllowed() {
@@ -64,6 +66,8 @@ public class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawab
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void setLiquidGlassEffectAllowed(boolean allowed) {
+        liquidGlassRequested = allowed;
+        allowed = allowed && !org.telegram.messenger.LiteMode.isGlassPowerSaverApplied();
         if (allowed == (liquidGlassEffect != null)) return;
         if (allowed) {
             liquidGlassEffect = new LiquidGlassEffect(renderNodeFill);
@@ -148,7 +152,7 @@ public class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawab
                 backgroundColor
             );
         }
-        source.draw(c, sL, sT, sR, sB);
+        if (Color.alpha(backgroundColor) != 255) source.draw(c, sL, sT, sR, sB);
         c.save();
         renderNodeFill.endRecording();
 
@@ -199,6 +203,14 @@ public class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawab
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            boolean saver = org.telegram.messenger.LiteMode.isGlassPowerSaverApplied();
+            if (glassPowerSaverState == null || glassPowerSaverState != saver) {
+                glassPowerSaverState = saver;
+                updateColors();
+            }
+            setLiquidGlassEffectAllowed(liquidGlassRequested);
+        }
         if (boundProps.boundsWithPadding.isEmpty()) {
             return;
         }

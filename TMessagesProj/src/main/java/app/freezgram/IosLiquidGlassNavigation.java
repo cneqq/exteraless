@@ -20,7 +20,7 @@ public final class IosLiquidGlassNavigation {
 
     public static boolean isEnabled() {
         return isRequested() && Build.VERSION.SDK_INT >= 33
-                && SharedConfig.chatBlurEnabled() && !LiteMode.isPowerSaverApplied();
+                && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
     }
 
     public static BlurredBackgroundProvider colors(Theme.ResourcesProvider resourcesProvider) {

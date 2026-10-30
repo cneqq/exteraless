@@ -5396,11 +5396,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 foldersSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
                 foldersFactory = new BlurredBackgroundDrawableViewFactory(foldersSource);
                 foldersFactory.setSourceRootView(viewPositionWatcher, contentView);
-                foldersFactory.setLiquidGlassEffectAllowed(!LiteMode.isPowerSaverApplied());
+                foldersFactory.setLiquidGlassEffectAllowed(!LiteMode.isGlassPowerSaverApplied());
             }
             BlurredBackgroundDrawable filterTabsViewBackground = foldersFactory.create(filterTabsView,
                     app.exteraless.appearance.AppearanceConfig.foldersLiquidGlass()
-                            ? app.freezgram.LiquidGlassStyle.colors(resourceProvider, () -> Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isPowerSaverApplied())
+                            ? app.freezgram.LiquidGlassStyle.colors(resourceProvider, () -> Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied())
                             : BlurredBackgroundProviderImpl.topPanel(resourceProvider));
             foldersGlassDrawable = app.exteraless.appearance.AppearanceConfig.foldersLiquidGlass() ? filterTabsViewBackground : null;
             filterTabsViewBackground.setRadius(dp(18));
@@ -14872,7 +14872,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
         scrollableViewNoiseSuppressor.setupRenderNodes(iBlur3Positions, hasBottomBlur ? 2 : 1);
         if (foldersGlassDrawable != null) {
-            boolean enabled = Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isPowerSaverApplied();
+            boolean enabled = Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
             if (foldersGlassEnabled == null || foldersGlassEnabled != enabled || foldersGlassRevision != app.freezgram.LiquidGlassStyle.revision()) {
                 foldersGlassEnabled = enabled; foldersGlassRevision = app.freezgram.LiquidGlassStyle.revision();
                 app.freezgram.LiquidGlassStyle.configure(foldersGlassDrawable);

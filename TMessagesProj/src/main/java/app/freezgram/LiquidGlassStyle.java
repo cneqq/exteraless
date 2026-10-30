@@ -28,7 +28,8 @@ public final class LiquidGlassStyle {
     public static BlurredBackgroundProvider colors(Theme.ResourcesProvider resourcesProvider, BooleanSupplier enabled) {
         return new BlurredBackgroundProviderBuilder(resourcesProvider)
                 .setBackgroundColor((r, dark) -> Theme.multAlpha(Theme.getColor(Theme.key_windowBackgroundWhite, r),
-                        enabled.getAsBoolean() ? overlayAlpha(dark) : .82f))
+                        enabled.getAsBoolean() ? overlayAlpha(dark)
+                                : org.telegram.messenger.LiteMode.isGlassPowerSaverApplied() ? 1f : .82f))
                 .setStrokeColorTop(0x66ffffff, 0x4dffffff)
                 .setStrokeColorBottom(0x24000000, 0x26ffffff)
                 .setStrokeWidth(AndroidUtilities.dpf2(.9f), AndroidUtilities.dpf2(.5f))
