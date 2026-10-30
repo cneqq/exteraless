@@ -3549,6 +3549,12 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         if (gift && (currentMessageObject == null || !(currentMessageObject.isStarGiftAction()
                 || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM_CHANNEL
                 || currentMessageObject.type == MessageObject.TYPE_GIFT_STARS || currentMessageObject.type == MessageObject.TYPE_GIFT_OFFER))) return false;
+        if (gift && starGiftLayout != null && starGiftLayout.hasColoredBackdrop()) {
+            // The collectible layout draws opaque gift colors with its own glass finish.
+            // Do not capture wallpaper underneath the card or leave a transparent outer rim.
+            starGiftLayout.setGlassBackground(true);
+            return true;
+        }
         int slot = gift ? 1 : 0;
         if (serviceGlass[slot] == null) {
             serviceGlass[slot] = serviceGlassFactory.create(this, app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate,

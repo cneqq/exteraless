@@ -8,6 +8,7 @@ import static org.telegram.ui.Stars.StarsIntroActivity.setGiftImage;
 
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
@@ -63,6 +64,32 @@ public class StarGiftUniqueActionLayout {
 
     private boolean glassBackground;
     public void setGlassBackground(boolean enabled) { glassBackground = enabled; }
+    public boolean hasColoredBackdrop() { return backdrop != null; }
+
+    private final Paint glassHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final RectF glassEdgeRect = new RectF();
+    private final Paint glassEdgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private float glassHighlightHeight = -1;
+
+    private void drawGiftBackground(Canvas canvas) {
+        // Collectible backdrops are part of the gift: never replace them with wallpaper.
+        if (!glassBackground || hasColoredBackdrop()) canvas.drawPaint(backgroundPaint);
+        if (!glassBackground || !hasColoredBackdrop()) return;
+        if (glassHighlightHeight != backgroundRect.height()) {
+            glassHighlightHeight = backgroundRect.height();
+            glassHighlightPaint.setShader(new LinearGradient(0, 0, 0, glassHighlightHeight,
+                    new int[] { 0x30FFFFFF, 0x00FFFFFF, 0x12000000 },
+                    new float[] { 0, .38f, 1 }, Shader.TileMode.CLAMP));
+        }
+        glassHighlightPaint.setStyle(Paint.Style.FILL);
+        canvas.drawPaint(glassHighlightPaint);
+        glassEdgeRect.set(backgroundRect);
+        glassEdgeRect.inset(dp(.5f), dp(.5f));
+        glassEdgePaint.setStyle(Paint.Style.STROKE);
+        glassEdgePaint.setStrokeWidth(dp(1));
+        glassEdgePaint.setColor(0x60FFFFFF);
+        canvas.drawRoundRect(glassEdgeRect, dp(13.5f), dp(13.5f), glassEdgePaint);
+    }
 
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private int gradientRadius;
@@ -515,7 +542,7 @@ public class StarGiftUniqueActionLayout {
         canvas.scale(s, s, backgroundRect.centerX(), backgroundRect.centerY());
         canvas.save();
         canvas.clipPath(backgroundPath);
-        if (!glassBackground) canvas.drawPaint(backgroundPaint);
+        drawGiftBackground(canvas);
 
         canvas.save();
         canvas.translate(cx, dp(10 + 55));

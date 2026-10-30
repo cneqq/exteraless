@@ -25,6 +25,9 @@ class PrivacyCheck{
   if(!p.drawServiceGlass(c,null,card,20,true,true))throw new AssertionError("Gift missing");
   if(p.serviceGlass[0]==p.serviceGlass[1]||service.right!=100||p.serviceGlass[1].right!=200||service.alpha!=127||c.clips!=1)throw new AssertionError("Shared/misaligned recordings");
   if(!p.starGiftLayout.glass)throw new AssertionError("Unique-gift fill still covers glass");
+  p.starGiftLayout.colored=true;p.serviceGlass[1]=null;
+  if(!p.drawServiceGlass(c,null,card,20,true,true)||p.serviceGlass[1]!=null||!p.starGiftLayout.glass)throw new AssertionError("Collectible replaced with wallpaper glass");
+  p.starGiftLayout.colored=false;p.drawServiceGlass(c,null,card,20,true,true);
   p.overrideBackground=1;if(p.drawServiceGlass(c,text,null,11,false,true))throw new AssertionError("Explicit background overwritten");p.overrideBackground=-1;
   c.hardware=false;if(p.drawServiceGlass(c,text,null,11,false,true))throw new AssertionError("Software path has no fallback");c.hardware=true;
   SmallElementsGlass.enabled=false;if(p.drawServiceGlass(c,text,null,11,false,true))throw new AssertionError("Small opt-out ignored");
@@ -41,11 +44,41 @@ class Path{void computeBounds(RectF r,boolean exact){r.left=0;r.top=0;r.right=10
 class RectF{float left,top,right,bottom;void set(RectF r){left=r.left;top=r.top;right=r.right;bottom=r.bottom;}boolean isEmpty(){return right<=left||bottom<=top;}}
 class Factory{Drawable create(Object cell,Object colors){return new Drawable();}}
 class Drawable{int right,alpha;Object callback;void setCallback(Object o){callback=o;}void setBounds(int l,int t,int r,int b){right=r;}void setRadius(float r){}void setAlpha(int a){alpha=a;}void updateColors(){}void draw(Canvas c){}}
-class Star{boolean glass;void setGlassBackground(boolean b){glass=b;}}
+class Star{boolean glass,colored;boolean hasColoredBackdrop(){return colored;}void setGlassBackground(boolean b){glass=b;}}
 class SmallElementsGlass{static boolean enabled=true,gifts=true;static boolean isEnabled(){return enabled;}static boolean areGiftCardsEnabled(){return gifts;}}
 class LiquidGlassStyle{static Object surfaceColors(Object p,java.util.function.BooleanSupplier e){return null;}static void configure(Drawable d){}}
 class MessageObject{static int TYPE_GIFT_PREMIUM=1,TYPE_GIFT_PREMIUM_CHANNEL=2,TYPE_GIFT_STARS=3,TYPE_GIFT_OFFER=4;boolean star=true;int type;boolean isStarGiftAction(){return star;}}
 '''.replace('METHODS',methods))
+
+ def test_collectible_keeps_opaque_background_and_glass_finish(self):
+  source=(JAVA/'org/telegram/ui/Stars/StarGiftUniqueActionLayout.java').read_text()
+  render=method(source,'    private void drawGiftBackground(')
+  run_java('''
+class PrivacyCheck {
+ boolean glassBackground,colored;boolean hasColoredBackdrop(){return colored;}
+ Paint backgroundPaint=new Paint(),glassHighlightPaint=new Paint(),glassEdgePaint=new Paint();
+ RectF backgroundRect=new RectF(),glassEdgeRect=new RectF();float glassHighlightHeight=-1;
+ static float dp(float n){return n;}
+ RENDER
+ public static void main(String[] args){
+  var p=new PrivacyCheck();
+  for(boolean colored:new boolean[]{false,true})for(boolean glass:new boolean[]{false,true}){
+   p.colored=colored;p.glassBackground=glass;var c=new Canvas();p.drawGiftBackground(c);
+   int fills=(!glass||colored?1:0)+(glass&&colored?1:0);
+   if(c.fills!=fills||c.edges!=(glass&&colored?1:0))throw new AssertionError("Gift base or glass finish missing");
+   if(colored&&c.first!=p.backgroundPaint)throw new AssertionError("Opaque gift gradient must draw first");
+  }
+  p.colored=p.glassBackground=true;var c=new Canvas();p.drawGiftBackground(c);
+  Object shader=p.glassHighlightPaint.shader;p.drawGiftBackground(c);
+  if(p.glassHighlightPaint.shader!=shader)throw new AssertionError("Highlight shader not reused");
+ }
+}
+class Paint{Object shader;enum Style{FILL,STROKE}void setShader(Object o){shader=o;}void setStyle(Style s){}void setStrokeWidth(float f){}void setColor(int c){}}
+class Shader{enum TileMode{CLAMP}}
+class LinearGradient{LinearGradient(float a,float b,float c,float d,int[] colors,float[] positions,Shader.TileMode t){}}
+class RectF{float height(){return 200;}void set(RectF r){}void inset(float x,float y){}}
+class Canvas{int fills,edges;Paint first;void drawPaint(Paint p){if(first==null)first=p;fills++;}void drawRoundRect(RectF r,float x,float y,Paint p){edges++;}}
+'''.replace('RENDER',render))
 
  def test_gift_cards_require_opt_in_supported_platform_blur_and_no_power_saver(self):
   policy=method((JAVA/'app/freezgram/SmallElementsGlass.java').read_text(),'    public static boolean areGiftCardsEnabled()')
