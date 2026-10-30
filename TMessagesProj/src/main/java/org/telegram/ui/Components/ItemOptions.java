@@ -155,6 +155,11 @@ public class ItemOptions {
 
     private boolean blur;
     private boolean blurForMenu;
+    private boolean customMenuBackground;
+    private boolean useSmallGlassForMenu() {
+        return !customMenuBackground && scrimView != null && app.freezgram.SmallElementsGlass.isEnabled();
+    }
+
     private boolean longPressSelectionEnabled = true;
 
     public ItemOptions setLongPressSelectionEnabled(boolean enabled) {
@@ -1175,6 +1180,7 @@ public class ItemOptions {
     }
 
     public ItemOptions setBlurBackground(BlurredBackgroundDrawableViewFactory factory, BlurredBackgroundProvider colorProvider, boolean multiwindow) {
+        customMenuBackground = true;
         if (layout instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
             layout.setBackground(factory.create(layout, multiwindow)
                 .setColorProvider(colorProvider)
@@ -1186,6 +1192,7 @@ public class ItemOptions {
     }
 
     public ItemOptions setBlurBackground(BlurringShader.BlurManager blurManager, float ox, float oy) {
+        customMenuBackground = true;
         Drawable baseDrawable = context.getResources().getDrawable(R.drawable.popup_fixed_alert4).mutate();
         if (layout instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
             layout.setBackground(
@@ -1318,7 +1325,7 @@ public class ItemOptions {
             }
         }
 
-        if ((blur || blurForMenu) && scrimBlur3SourceBitmap == null) {
+        if ((blur || blurForMenu || useSmallGlassForMenu()) && scrimBlur3SourceBitmap == null) {
             scrimBlur3SourceBitmap = new BlurredBackgroundSourceBitmap();
         }
 
@@ -1355,7 +1362,7 @@ public class ItemOptions {
             x = point[0] = 0;
         }
 
-        if (dimAlpha > 0 || blur || blurForMenu) {
+        if (dimAlpha > 0 || blur || blurForMenu || useSmallGlassForMenu()) {
             DimView dimViewLocal = dimView = new DimView(context);
             preDrawListener = () -> {
                 dimViewLocal.invalidate();
@@ -1544,17 +1551,43 @@ public class ItemOptions {
             }
         }
 
-        if (blurForMenu && scrimBlur3SourceBitmap != null) {
+        if ((blurForMenu || useSmallGlassForMenu()) && scrimBlur3SourceBitmap != null) {
             setGapBackgroundColor(Theme.multAlpha(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, resourcesProvider), 0.06f));
-            BlurredBackgroundDrawable bg = new BlurredBackgroundDrawableViewFactory(scrimBlur3SourceBitmap)
-                .create(layout, true)
-                .setColorProvider(BlurredBackgroundProviderImpl.scrimMenuBackground(resourcesProvider))
+            boolean liquid = useSmallGlassForMenu();
+            BlurredBackgroundDrawableViewFactory menuFactory = new BlurredBackgroundDrawableViewFactory(
+                    liquid ? app.freezgram.SmallElementsGlass.createSource(scrimBlur3SourceBitmap) : scrimBlur3SourceBitmap);
+            menuFactory.setLiquidGlassEffectAllowed(liquid);
+            if (liquid) menuFactory.setSourceRootView(new org.telegram.ui.Components.chat.ViewPositionWatcher(pointContainer), pointContainer);
+            BlurredBackgroundDrawable bg = menuFactory.create(layout, true)
+                .setColorProvider(liquid ? app.freezgram.LiquidGlassStyle.surfaceColors(resourcesProvider, app.freezgram.SmallElementsGlass::isEnabled)
+                        : BlurredBackgroundProviderImpl.scrimMenuBackground(resourcesProvider))
                 .setPadding(dp(8))
                 .setHasPadding(true)
                 .setRadius(dp(12));
 
+            if (liquid) app.freezgram.LiquidGlassStyle.configure(bg);
             bg.setSourceOffset(X + this.translateX, Y + this.translateY);
             layout.setBackground(bg);
+            if (liquid && !(layout instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout)) {
+                // Grouped menus have their own opaque child panels; replace each panel,
+                // with multiwindow position tracking, rather than drawing behind them.
+                layout.setBackground(null);
+                for (int i = 0; i < layout.getChildCount(); i++) {
+                    View child = layout.getChildAt(i);
+                    if (child instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
+                        app.exteraless.appearance.GlassMenuHelper.applyToPopup(menuFactory, resourcesProvider,
+                                (ActionBarPopupWindow.ActionBarPopupWindowLayout) child);
+                    }
+                }
+            }
+            if (liquid && layout instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
+                var popup = (ActionBarPopupWindow.ActionBarPopupWindowLayout) layout;
+                if (popup.getSwipeBack() != null) {
+                    BlurredBackgroundDrawable fill = app.exteraless.appearance.GlassMenuHelper.createFill(menuFactory, resourcesProvider, popup.getSwipeBack());
+                    fill.setSourceOffset(X + this.translateX, Y + this.translateY);
+                    popup.getSwipeBack().setGlassForeground(fill);
+                }
+            }
         }
 
         actionBarPopupWindow.setScaleOut(scaleOut);
@@ -1718,6 +1751,7 @@ public class ItemOptions {
     }
 
     public ItemOptions setBackgroundColor(int color) {
+        customMenuBackground = true;
         for (int j = 0; j < layout.getChildCount(); ++j) {
             View child = j == layout.getChildCount() - 1 ? lastLayout : layout.getChildAt(j);
             if (child instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
@@ -2057,20 +2091,29 @@ public class ItemOptions {
                 cachedBitmap = null;
             }
 
-            if (blur || blurForMenu) {
+            if (blur || blurForMenu || useSmallGlassForMenu()) {
                 blurPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
                 scrimView.setAlpha(0.0f);
-                ScrimOptions.makeGlobalBlurBitmaps(pointContainer, (bitmapBg, bitmapOptions) -> {
-                    scrimView.setAlpha(1.0f);
-                    if (blur) blurBitmap = bitmapBg;
-                    if (scrimBlur3SourceBitmap != null) {
-                        scrimBlur3SourceBitmap.setBitmap(bitmapOptions);
+                if (!blur && useSmallGlassForMenu()) {
+                    AndroidUtilities.makeGlobalBlurBitmap(bitmap -> {
+                        scrimView.setAlpha(1.0f);
+                        scrimBlur3SourceBitmap.setBitmap(bitmap);
                         Blur3Utils.checkBitmapSourceMatrixScale(scrimBlur3SourceBitmap, DimView.this);
-                        if (layout != null) {
-                            layout.invalidate();
+                        if (layout != null) layout.invalidate();
+                    }, 4f, 0, pointContainer, null);
+                } else {
+                    ScrimOptions.makeGlobalBlurBitmaps(pointContainer, (bitmapBg, bitmapOptions) -> {
+                        scrimView.setAlpha(1.0f);
+                        if (blur) blurBitmap = bitmapBg;
+                        if (scrimBlur3SourceBitmap != null) {
+                            scrimBlur3SourceBitmap.setBitmap(bitmapOptions);
+                            Blur3Utils.checkBitmapSourceMatrixScale(scrimBlur3SourceBitmap, DimView.this);
+                            if (layout != null) {
+                                layout.invalidate();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
 

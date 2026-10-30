@@ -2340,6 +2340,23 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         return Theme.getColor(key, resourcesProvider);
     }
 
+    private Drawable blurBackgroundOverride;
+    private java.util.function.BooleanSupplier blurBackgroundOverrideEnabled;
+
+    public void setBlurBackgroundOverride(Drawable drawable, java.util.function.BooleanSupplier enabled) {
+        blurBackgroundOverride = drawable;
+        blurBackgroundOverrideEnabled = enabled;
+        invalidate();
+    }
+
+    private boolean drawBlurBackgroundOverride(Canvas canvas) {
+        if (blurBackgroundOverride == null || blurBackgroundOverrideEnabled == null
+                || !canvas.isHardwareAccelerated() || !blurBackgroundOverrideEnabled.getAsBoolean()) return false;
+        blurBackgroundOverride.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
+        blurBackgroundOverride.draw(canvas);
+        return true;
+    }
+
     public void setDrawBlurBackground(SizeNotifierFrameLayout contentView) {
         blurredBackground = true;
         this.contentView = contentView;
@@ -2555,7 +2572,7 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
             glassDrawableMenu.draw(canvas);
         }
 
-        if (blurredBackground && actionBarColor != Color.TRANSPARENT) {
+        if (blurredBackground && actionBarColor != Color.TRANSPARENT && !drawBlurBackgroundOverride(canvas)) {
             rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
             blurScrimPaint.setColor(actionBarColor);
             if (adaptiveBackground) {
@@ -2867,7 +2884,7 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
 
     // --- Spring Animation ---
     public void onDrawCrossfadeBackground(Canvas canvas) {
-        if (blurredBackground && actionBarColor != Color.TRANSPARENT) {
+        if (blurredBackground && actionBarColor != Color.TRANSPARENT && !drawBlurBackgroundOverride(canvas)) {
             rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
             blurScrimPaint.setColor(actionBarColor);
             contentView.drawBlurRect(canvas, getY(), rectTmp, blurScrimPaint, true);

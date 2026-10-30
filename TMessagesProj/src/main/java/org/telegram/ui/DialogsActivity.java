@@ -978,6 +978,15 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
         @Override
         public void drawBlurRect(Canvas canvas, float y, Rect rectTmp, Paint blurScrimPaint, boolean top) {
+            if (top && isDialogsHeaderGlassEnabled() && canvas.isHardwareAccelerated()) {
+                // The ActionBar draws its own material. Leave the underlying list visible;
+                // retain the normal background for stories/search/folders outside its bounds.
+                canvas.save();
+                canvas.clipOutRect(0, actionBar.getY(), getMeasuredWidth(), actionBar.getY() + actionBar.getMeasuredHeight());
+                drawBlurRect(canvas, y, rectTmp, blurScrimPaint, false);
+                canvas.restore();
+                return;
+            }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || !SharedConfig.chatBlurEnabled() || iBlur3SourceGlassFrosted == null || !BlurredBackgroundProviderImpl.checkBlurEnabled(currentAccount, resourceProvider)) {
                 canvas.drawRect(rectTmp, blurScrimPaint);
                 return;
@@ -5685,6 +5694,21 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             showSearch(false, false, false);
         }
         actionBar.setDrawBlurBackground(contentView);
+        actionBar.setBlurBackgroundOverride(null, null);
+        dialogsHeaderGlassDrawable = null;
+        dialogsHeaderGlassSource = null;
+        if (app.exteraless.appearance.AppearanceConfig.dialogsHeaderGlass() && Build.VERSION.SDK_INT >= 33) {
+            dialogsHeaderGlassSource = new BlurredBackgroundSourceRenderNode(iBlur3SourceColor);
+            dialogsHeaderGlassSource.setUnderSource(iBlur3SourceColor);
+            dialogsHeaderGlassSource.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_HEADER_GLASS);
+            BlurredBackgroundDrawableViewFactory headerFactory = new BlurredBackgroundDrawableViewFactory(dialogsHeaderGlassSource);
+            headerFactory.setSourceRootView(viewPositionWatcher, contentView);
+            headerFactory.setLiquidGlassEffectAllowed(true);
+            dialogsHeaderGlassDrawable = headerFactory.create(actionBar,
+                    app.freezgram.LiquidGlassStyle.colors(resourceProvider, this::isDialogsHeaderGlassEnabled));
+            dialogsHeaderGlassDrawable.setRadius(dp(20));
+            actionBar.setBlurBackgroundOverride(dialogsHeaderGlassDrawable, this::isDialogsHeaderGlassEnabled);
+        }
 
         rightSlidingDialogContainer = new RightSlidingDialogContainer(context) {
 
@@ -14811,6 +14835,15 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     /* Blur */
 
+    private BlurredBackgroundSourceRenderNode dialogsHeaderGlassSource;
+    private BlurredBackgroundDrawable dialogsHeaderGlassDrawable;
+
+    private boolean isDialogsHeaderGlassEnabled() {
+        return dialogsHeaderGlassDrawable != null && app.exteraless.appearance.AppearanceConfig.dialogsHeaderGlass()
+                && Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied()
+                && !inPreviewMode && searchAnimationProgress == 0 && progressToActionMode == 0;
+    }
+
     private ViewPositionWatcher viewPositionWatcher;
     private BlurredBackgroundDrawable foldersGlassDrawable;
     private int foldersGlassRevision = Integer.MIN_VALUE;
@@ -14881,6 +14914,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 }
                 foldersGlassDrawable.updateColors();
             }
+        }
+        if (dialogsHeaderGlassDrawable != null) {
+            app.freezgram.LiquidGlassStyle.configure(dialogsHeaderGlassDrawable);
+            dialogsHeaderGlassDrawable.updateColors();
+            dialogsHeaderGlassSource.invalidateDisplayListForDrawables();
         }
         scrollableViewNoiseSuppressor.setNavigationGlassBlur(AndroidUtilities.dpf2(app.freezgram.LiquidGlassStyle.blurRadiusDp()), app.freezgram.LiquidGlassStyle.enhanceColors());
         scrollableViewNoiseSuppressor.invalidateResultRenderNodes(iBlur3Capture, fragmentView.getMeasuredWidth(), fragmentView.getMeasuredHeight());

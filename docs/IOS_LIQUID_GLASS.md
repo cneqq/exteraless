@@ -202,3 +202,18 @@ The independent downscaled navigation/header capture output now enables the
 existing fractional-scroll phase compensation: restored and input translations
 cancel, keeping the capture viewport fixed while reducing resampling jitter.
 Device verification of slow scrolling and system-saver transitions is required.
+
+
+The shared editor also provides **Chat list header**, independently from folder
+and small-element glass and off by default. It uses the weak capture output for
+the ActionBar above folders; the original opaque underlay is excluded only from
+that rectangle. The ActionBar draws the material once. Search, selection mode,
+previews, software drawing, unsupported platforms and power saving retain the
+original background path. Shared optics and source recordings are refreshed on
+scroll and style changes. The preference is included in backup.
+
+Ordinary ItemOptions menus (including the chat list overflow) follow Other small
+elements. Their snapshots use the shared RenderNode material and visible contour.
+Explicit custom/color backgrounds and custom blur factories retain their own
+styling. This changes menu surfaces, not their commands or button handlers.
+Device checks are needed for header scrolling/transitions and popup placement.
