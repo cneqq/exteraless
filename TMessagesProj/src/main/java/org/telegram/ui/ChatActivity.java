@@ -18710,6 +18710,15 @@ public class ChatActivity extends BaseFragment implements
         }
 
         @Override
+        protected void onBackgroundViewInvalidate() {
+            super.onBackgroundViewInvalidate();
+            // Animated wallpaper/snow can change while the message list stays still.
+            if (invalidateBlurredSourcesView != null) {
+                invalidateMergedVisibleBlurredPositionsAndSources(BLUR_INVALIDATE_FLAG_WALLPAPER);
+            }
+        }
+
+        @Override
         public void onUpdateBackgroundDrawable(Drawable drawable) {
             super.onUpdateBackgroundDrawable(drawable);
             if (drawable instanceof MotionBackgroundDrawable) {
@@ -52128,6 +52137,7 @@ public class ChatActivity extends BaseFragment implements
     private static final int BLUR_INVALIDATE_FLAG_SCROLL = 1;
     private static final int BLUR_INVALIDATE_FLAG_POSITIONS = 1 << 1;
     private static final int BLUR_INVALIDATE_FLAG_CLIP = 1 << 2;
+    private static final int BLUR_INVALIDATE_FLAG_WALLPAPER = 1 << 3;
 
     private void invalidateMergedVisibleBlurredPositionsAndSourcesPositions() {
         invalidateMergedVisibleBlurredPositionsAndSources(BLUR_INVALIDATE_FLAG_POSITIONS);
@@ -52166,7 +52176,8 @@ public class ChatActivity extends BaseFragment implements
         //if (BitwiseUtils.hasFlag(flags, BLUR_INVALIDATE_FLAG_POSITIONS | BLUR_INVALIDATE_FLAG_SCROLL)) {
         final boolean blurChanged = scrollableViewNoiseSuppressor.setNavigationGlassBlur(
                 AndroidUtilities.dpf2(app.freezgram.LiquidGlassStyle.blurRadiusDp()), app.freezgram.LiquidGlassStyle.enhanceColors());
-        final boolean hasChanges = scrollableViewNoiseSuppressor.invalidateResultRenderNodes(contentView::drawList, contentView.getWidth(), contentView.getHeight()) | blurChanged;
+        final boolean hasChanges = scrollableViewNoiseSuppressor.invalidateResultRenderNodes(contentView::drawList, contentView.getWidth(), contentView.getHeight()) | blurChanged
+                | BitwiseUtils.hasFlag(flags, BLUR_INVALIDATE_FLAG_WALLPAPER);
         if (hasChanges) {
             if (glassBackgroundSourceRenderNode != null) {
                 glassBackgroundSourceRenderNode.invalidateDisplayListForDrawables();
