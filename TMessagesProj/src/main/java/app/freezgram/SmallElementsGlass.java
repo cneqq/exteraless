@@ -26,7 +26,7 @@ public final class SmallElementsGlass {
     }
 
     public static boolean areGiftCardsEnabled() {
-        return AppearanceConfig.giftCardsGlass() && Build.VERSION.SDK_INT >= 33
+        return GiftGlassStyle.style() == GiftGlassStyle.GLASS && Build.VERSION.SDK_INT >= 33
                 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
     }
 

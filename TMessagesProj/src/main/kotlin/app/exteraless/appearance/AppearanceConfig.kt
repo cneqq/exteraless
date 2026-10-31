@@ -483,6 +483,11 @@ object AppearanceConfig {
     fun giftGlassTransparency(): Int { ensureLoaded(); return giftGlassTransparency.Int().coerceIn(0, 100) }
 
     @JvmField
+    val giftCardStyle = addConfig("FreezgramGiftCardStyle", ConfigItem.configTypeInt, 1)
+    @JvmStatic
+    fun giftCardStyle(): Int { ensureLoaded(); return giftCardStyle.Int().coerceIn(0, 2) }
+
+    @JvmField
     val giftCardsGlass = addConfig("FreezgramGiftCardsGlass", ConfigItem.configTypeBool, true)
     @JvmStatic
     fun giftCardsGlass(): Boolean { ensureLoaded(); return giftCardsGlass.Bool() }

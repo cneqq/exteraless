@@ -141,5 +141,9 @@
     <string name="FreezgramTransitionStandard">Standard</string>
     <string name="FreezgramTransitionSmooth">Smooth</string>
     <string name="FreezgramGiftGlassSettings">Gifts</string>
-    <string name="FreezgramGiftGlassInfo">Independent glass settings for gift cards in chats and the sending preview. Collectible gifts retain their opaque backdrop colors; transparency and blur apply to ordinary gift cards.</string>
+    <string name="FreezgramGiftGlassInfo">Choose a background for gift cards in chats and both previews. Glass has independent blur, intensity and transparency. Soft gradient is an opaque theme-colored finish. Collectible gifts retain their own backdrop colors.</string>
+    <string name="FreezgramGiftCardStyle">Card background</string>
+    <string name="FreezgramGiftCardOrdinary">Ordinary</string>
+    <string name="FreezgramGiftCardGlass">Glass</string>
+    <string name="FreezgramGiftCardSoft">Soft gradient</string>
 </resources>

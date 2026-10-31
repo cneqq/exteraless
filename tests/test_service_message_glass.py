@@ -14,6 +14,7 @@ class ServiceGlassTests(unittest.TestCase):
   run_java('''
 class PrivacyCheck{
  Factory serviceGlassFactory=new Factory();Drawable[] serviceGlass=new Drawable[2];RectF serviceGlassBounds=new RectF();Object themeDelegate;
+ GiftGlassStyle.SoftCard softGiftBackground=new GiftGlassStyle.SoftCard();
  int overrideBackground=-1;MessageObject currentMessageObject=new MessageObject();Star starGiftLayout=new Star();boolean floating;
  float getAlpha(){return .5f;}boolean isFloating(){return floating;}
  METHODS
@@ -35,6 +36,11 @@ class PrivacyCheck{
   SmallElementsGlass.gifts=false;if(p.drawServiceGlass(c,null,card,20,true,true))throw new AssertionError("Gift opt-out ignored");
   SmallElementsGlass.gifts=true;p.currentMessageObject.star=false;p.currentMessageObject.type=-1;
   if(p.drawServiceGlass(c,null,card,20,true,true))throw new AssertionError("Unrelated wallet/action card changed");
+  p.currentMessageObject.star=true;GiftGlassStyle.selected=2;p.starGiftLayout=null;p.serviceGlassFactory=null;c.hardware=false;
+  if(!p.drawServiceGlass(c,null,card,20,true,true)||p.softGiftBackground.calls!=1)throw new AssertionError("Soft background depends on glass hardware or factory");
+  p.currentMessageObject.star=false;p.currentMessageObject.type=-1;
+  if(p.drawServiceGlass(c,null,card,20,true,true))throw new AssertionError("Soft style changed unrelated card");
+  GiftGlassStyle.selected=1;
   Drawable gift=p.serviceGlass[1];p.setServiceGlassFactory(new Factory());
   if(service.callback!=null||gift.callback!=null||p.serviceGlass[0]!=null||p.serviceGlass[1]!=null)throw new AssertionError("Old recording retained");
  }
@@ -46,17 +52,18 @@ class Factory{Object getSource(){return null;}Factory withSource(Object s){retur
 class Drawable{int right,alpha;Object callback;void setCallback(Object o){callback=o;}void setBounds(int l,int t,int r,int b){right=r;}void setRadius(float r){}void setAlpha(int a){alpha=a;}void updateColors(){}void draw(Canvas c){}}
 class Star{boolean glass,colored;boolean hasColoredBackdrop(){return colored;}void setGlassBackground(boolean b){glass=b;}}
 class SmallElementsGlass{static boolean enabled=true,gifts=true;static boolean isEnabled(){return enabled;}static boolean areGiftCardsEnabled(){return gifts;}static Object createGiftSource(Object s){return s;}}
-class GiftGlassStyle{static Object colors(Object p){return null;}static void configure(Drawable d){}}
+class GiftGlassStyle{static int SOFT=2,selected=1;static int style(){return selected;}static class SoftCard{int calls;void draw(Canvas c,RectF r,float radius,Object p,float a,boolean o){calls++;}}static Object colors(Object p){return null;}static void configure(Drawable d){}}
 class LiquidGlassStyle{static Object surfaceColors(Object p,java.util.function.BooleanSupplier e){return null;}static void configure(Drawable d){}}
 class MessageObject{static int TYPE_GIFT_PREMIUM=1,TYPE_GIFT_PREMIUM_CHANNEL=2,TYPE_GIFT_STARS=3,TYPE_GIFT_OFFER=4;boolean star=true;int type;boolean isStarGiftAction(){return star;}}
 '''.replace('METHODS',methods))
 
  def test_collectible_keeps_opaque_background_and_glass_finish(self):
   source=(JAVA/'org/telegram/ui/Stars/StarGiftUniqueActionLayout.java').read_text()
-  render=method(source,'    private void drawGiftBackground(').replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig')
+  render=method(source,'    private void drawGiftBackground(').replace('app.exteraless.appearance.AppearanceConfig','AppearanceConfig').replace('app.freezgram.GiftGlassStyle','GiftGlassStyle')
   run_java('''
 class PrivacyCheck {
  boolean glassBackground,colored;boolean hasColoredBackdrop(){return colored;}
+ GiftGlassStyle.SoftCard softGiftBackground=new GiftGlassStyle.SoftCard();Object resourcesProvider;
  Paint backgroundPaint=new Paint(),glassHighlightPaint=new Paint(),glassEdgePaint=new Paint();
  RectF backgroundRect=new RectF(),glassEdgeRect=new RectF();float glassHighlightHeight=-1;
  static float dp(float n){return n;}
@@ -72,14 +79,17 @@ class PrivacyCheck {
   p.colored=p.glassBackground=true;var c=new Canvas();p.drawGiftBackground(c);
   Object shader=p.glassHighlightPaint.shader;p.drawGiftBackground(c);
   if(p.glassHighlightPaint.shader!=shader)throw new AssertionError("Highlight shader not reused");
+  GiftGlassStyle.selected=2;c=new Canvas();p.drawGiftBackground(c);
+  if(c.fills!=1||c.first!=p.backgroundPaint||c.soft!=1)throw new AssertionError("Soft NFT lost native gradient or finish");
  }
 }
 class Paint{Object shader;enum Style{FILL,STROKE}void setShader(Object o){shader=o;}void setStyle(Style s){}void setStrokeWidth(float f){}void setColor(int c){}void setAlpha(int a){}}
+class GiftGlassStyle{static int SOFT=2,selected=1;static int style(){return selected;}static class SoftCard{void draw(Canvas c,RectF r,float rad,Object p,float a,boolean o){c.soft++;}}}
 class AppearanceConfig{static int giftGlassIntensity(){return 70;}}
 class Shader{enum TileMode{CLAMP}}
 class LinearGradient{LinearGradient(float a,float b,float c,float d,int[] colors,float[] positions,Shader.TileMode t){}}
 class RectF{float height(){return 200;}void set(RectF r){}void inset(float x,float y){}}
-class Canvas{int fills,edges;Paint first;void drawPaint(Paint p){if(first==null)first=p;fills++;}void drawRoundRect(RectF r,float x,float y,Paint p){edges++;}}
+class Canvas{int fills,edges,soft;Paint first;void drawPaint(Paint p){if(first==null)first=p;fills++;}void drawRoundRect(RectF r,float x,float y,Paint p){edges++;}}
 '''.replace('RENDER',render))
 
  def test_gift_cards_require_opt_in_supported_platform_blur_and_no_power_saver(self):
@@ -88,13 +98,14 @@ class Canvas{int fills,edges;Paint first;void drawPaint(Paint p){if(first==null)
 class PrivacyCheck{
  POLICY
  public static void main(String[] args){
-  for(int sdk:new int[]{24,32,33,36})for(boolean opt:new boolean[]{false,true})for(boolean blur:new boolean[]{false,true})for(boolean saver:new boolean[]{false,true}){
-   Build.VERSION.SDK_INT=sdk;AppearanceConfig.opt=opt;SharedConfig.blur=blur;LiteMode.saver=saver;
-   if(areGiftCardsEnabled()!=(opt&&sdk>=33&&blur&&!saver))throw new AssertionError("Gift eligibility changed");
+  for(int sdk:new int[]{24,32,33,36})for(boolean opt:new boolean[]{false,true})for(int style:new int[]{0,1,2})for(boolean blur:new boolean[]{false,true})for(boolean saver:new boolean[]{false,true}){
+   Build.VERSION.SDK_INT=sdk;AppearanceConfig.opt=opt;GiftGlassStyle.selected=style;SharedConfig.blur=blur;LiteMode.saver=saver;
+   if(areGiftCardsEnabled()!=(opt&&style==1&&sdk>=33&&blur&&!saver))throw new AssertionError("Gift eligibility changed");
   }
  }
 }
 class Build{static class VERSION{static int SDK_INT;}}
+class GiftGlassStyle{static int GLASS=1,selected;static int style(){return AppearanceConfig.opt?selected:0;}}
 class AppearanceConfig{static boolean opt;static boolean giftCardsGlass(){return opt;}}
 class SharedConfig{static boolean blur;static boolean chatBlurEnabled(){return blur;}}
 class LiteMode{static boolean saver;static boolean isGlassPowerSaverApplied(){return saver;}}

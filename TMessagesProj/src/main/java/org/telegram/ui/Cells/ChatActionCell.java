@@ -3543,12 +3543,22 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             serviceGlass[i] = null;
         }
     }
+    private final app.freezgram.GiftGlassStyle.SoftCard softGiftBackground = new app.freezgram.GiftGlassStyle.SoftCard();
     private boolean drawServiceGlass(Canvas canvas, Path path, RectF rect, float radius, boolean gift, boolean fromParent) {
-        boolean enabled = gift ? app.freezgram.SmallElementsGlass.areGiftCardsEnabled() : app.freezgram.SmallElementsGlass.isEnabled();
-        if (!enabled || serviceGlassFactory == null || overrideBackground >= 0 || !canvas.isHardwareAccelerated()) return false;
+        if (overrideBackground >= 0) return false;
         if (gift && (currentMessageObject == null || !(currentMessageObject.isStarGiftAction()
                 || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM_CHANNEL
                 || currentMessageObject.type == MessageObject.TYPE_GIFT_STARS || currentMessageObject.type == MessageObject.TYPE_GIFT_OFFER))) return false;
+        if (gift && app.freezgram.GiftGlassStyle.style() == app.freezgram.GiftGlassStyle.SOFT) {
+            if (starGiftLayout != null) {
+                starGiftLayout.setGlassBackground(true);
+            } else {
+                softGiftBackground.draw(canvas, rect, radius, themeDelegate, fromParent ? getAlpha() : 1f, false);
+            }
+            return true;
+        }
+        boolean enabled = gift ? app.freezgram.SmallElementsGlass.areGiftCardsEnabled() : app.freezgram.SmallElementsGlass.isEnabled();
+        if (!enabled || serviceGlassFactory == null || !canvas.isHardwareAccelerated()) return false;
         if (gift && starGiftLayout != null && starGiftLayout.hasColoredBackdrop()) {
             // The collectible layout draws opaque gift colors with its own glass finish.
             // Do not capture wallpaper underneath the card or leave a transparent outer rim.

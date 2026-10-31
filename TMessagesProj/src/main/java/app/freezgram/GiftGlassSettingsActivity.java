@@ -16,7 +16,9 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.TextCheckCell;
+import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.ActionBar.AlertDialog;
+import android.graphics.RectF;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode;
 import org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable;
@@ -41,23 +43,38 @@ public final class GiftGlassSettingsActivity extends BaseFragment {
         info.setText(LocaleController.getString(R.string.FreezgramGiftGlassInfo));
         info.setTextSize(14); info.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText));
         info.setPadding(dp(22), dp(12), dp(22), dp(12)); content.addView(info);
-        TextCheckCell enabled = new TextCheckCell(context);
-        enabled.setTextAndCheck(LocaleController.getString(R.string.FreezgramGiftCardsGlass), AppearanceConfig.giftCardsGlass(), false);
-        enabled.setOnClickListener(v -> {
-            AppearanceConfig.giftCardsGlass.setConfigBool(!AppearanceConfig.giftCardsGlass());
-            enabled.setChecked(AppearanceConfig.giftCardsGlass()); changed = true; preview.invalidate();
-        }); content.addView(enabled);
-        slider(context, content, R.string.FreezgramPanelBlur, 30, AppearanceConfig.giftGlassBlur(), value -> {
+        TextSettingsCell style = new TextSettingsCell(context);
+        Runnable updateStyle = () -> style.setTextAndValue(LocaleController.getString(R.string.FreezgramGiftCardStyle), styleNames()[GiftGlassStyle.style()], false);
+        updateStyle.run(); content.addView(style);
+        LinearLayout optics = new LinearLayout(context); optics.setOrientation(LinearLayout.VERTICAL);
+        optics.setVisibility(GiftGlassStyle.style() == GiftGlassStyle.GLASS ? View.VISIBLE : View.GONE);
+        content.addView(optics);
+        style.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(LocaleController.getString(R.string.FreezgramGiftCardStyle));
+            builder.setItems(styleNames(), (dialog, which) -> {
+                AppearanceConfig.giftCardStyle.setConfigInt(which);
+                AppearanceConfig.giftCardsGlass.setConfigBool(which != GiftGlassStyle.ORDINARY);
+                changed = true; updateStyle.run(); preview.invalidate();
+                optics.setVisibility(which == GiftGlassStyle.GLASS ? View.VISIBLE : View.GONE);
+            });
+            showDialog(builder.create());
+        });
+        slider(context, optics, R.string.FreezgramPanelBlur, 30, AppearanceConfig.giftGlassBlur(), value -> {
             AppearanceConfig.giftGlassBlur.setConfigInt(value); changed = true; preview.invalidate();
         });
-        slider(context, content, R.string.FreezgramPanelIntensity, 100, AppearanceConfig.giftGlassIntensity(), value -> {
+        slider(context, optics, R.string.FreezgramPanelIntensity, 100, AppearanceConfig.giftGlassIntensity(), value -> {
             AppearanceConfig.giftGlassIntensity.setConfigInt(value); changed = true; preview.invalidate();
         });
-        slider(context, content, R.string.FreezgramPanelTransparency, 100, AppearanceConfig.giftGlassTransparency(), value -> {
+        slider(context, optics, R.string.FreezgramPanelTransparency, 100, AppearanceConfig.giftGlassTransparency(), value -> {
             AppearanceConfig.giftGlassTransparency.setConfigInt(value); changed = true; preview.invalidate();
         });
         fragmentView = scroll;
         return scroll;
+    }
+    private String[] styleNames() {
+        return new String[] {LocaleController.getString(R.string.FreezgramGiftCardOrdinary),
+                LocaleController.getString(R.string.FreezgramGiftCardGlass), LocaleController.getString(R.string.FreezgramGiftCardSoft)};
     }
     private void slider(Context context, LinearLayout content, int title, int max, int value, AvatarCornersSeekBar.OnDrag drag) {
         AvatarCornersSeekBar slider = new AvatarCornersSeekBar(context, drag, 0, max, LocaleController.getString(title), "0", String.valueOf(max));
@@ -73,6 +90,8 @@ public final class GiftGlassSettingsActivity extends BaseFragment {
     private static int dp(float n) { return AndroidUtilities.dp(n); }
     private final class Preview extends View {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final GiftGlassStyle.SoftCard soft = new GiftGlassStyle.SoftCard();
+        private final RectF bounds = new RectF();
         private BlurredBackgroundSourceRenderNode wallpaper;
         private BlurredBackgroundDrawable glass;
         Preview(Context context) {
@@ -91,14 +110,16 @@ public final class GiftGlassSettingsActivity extends BaseFragment {
         @Override protected void onDraw(Canvas canvas) {
             backdrop(canvas);
             int left = Math.max(dp(16), (getWidth() - dp(220)) / 2), right = getWidth() - left;
-            if (glass != null && canvas.isHardwareAccelerated() && SmallElementsGlass.areGiftCardsEnabled()) {
+            bounds.set(left, dp(16), right, getHeight() - dp(16));
+            if (GiftGlassStyle.style() == GiftGlassStyle.SOFT) {
+                soft.draw(canvas, bounds, dp(20), resourceProvider, 1f, false);
+            } else if (glass != null && canvas.isHardwareAccelerated() && SmallElementsGlass.areGiftCardsEnabled()) {
                 Canvas capture = wallpaper.beginRecording(getWidth(), getHeight()); backdrop(capture); wallpaper.endRecording();
                 ((BlurredBackgroundDrawableRenderNode) glass).setLiquidGlassEffectAllowed(true);
                 GiftGlassStyle.configure(glass); glass.updateColors();
                 glass.setBounds(left, dp(16), right, getHeight() - dp(16)); glass.draw(canvas);
             } else {
-                paint.setColor(getThemedColor(Theme.key_chat_serviceBackground));
-                canvas.drawRoundRect(left, dp(16), right, getHeight() - dp(16), dp(20), dp(20), paint);
+                canvas.drawRoundRect(bounds, dp(20), dp(20), Theme.getThemePaint(Theme.key_paint_chatActionBackground, resourceProvider));
             }
             paint.setColor(getThemedColor(Theme.key_chat_serviceText)); paint.setTextAlign(Paint.Align.CENTER);
             paint.setTextSize(dp(60)); canvas.drawText("🎁", getWidth() / 2f, dp(115), paint);

@@ -71,7 +71,13 @@ public class StarGiftUniqueActionLayout {
     private final Paint glassEdgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float glassHighlightHeight = -1;
 
+    private final app.freezgram.GiftGlassStyle.SoftCard softGiftBackground = new app.freezgram.GiftGlassStyle.SoftCard();
     private void drawGiftBackground(Canvas canvas) {
+        if (glassBackground && app.freezgram.GiftGlassStyle.style() == app.freezgram.GiftGlassStyle.SOFT) {
+            if (hasColoredBackdrop()) canvas.drawPaint(backgroundPaint);
+            softGiftBackground.draw(canvas, backgroundRect, dp(14), resourcesProvider, 1f, hasColoredBackdrop());
+            return;
+        }
         // Collectible backdrops are part of the gift: never replace them with wallpaper.
         if (!glassBackground || hasColoredBackdrop()) canvas.drawPaint(backgroundPaint);
         if (!glassBackground || !hasColoredBackdrop()) return;
