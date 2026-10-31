@@ -176,7 +176,9 @@ public abstract class BlurredBackgroundDrawable extends Drawable implements Glas
 
     public BlurredBackgroundSource getUnwrappedSource() {
         BlurredBackgroundSource source = getSource();
-        while (source instanceof BlurredBackgroundSourceWrapped) {
+        // Subclasses can apply dimming, filters or render the displayed wallpaper.
+        // Only the plain forwarding wrapper is safe to bypass.
+        while (source != null && source.getClass() == BlurredBackgroundSourceWrapped.class) {
             source = ((BlurredBackgroundSourceWrapped) source).getSource();
         }
 
@@ -647,7 +649,7 @@ public abstract class BlurredBackgroundDrawable extends Drawable implements Glas
             drawSourceBitmap(canvas, (BlurredBackgroundSourceBitmap) source);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && source instanceof BlurredBackgroundSourceRenderNode) {
             drawSourceRenderNode(canvas, (BlurredBackgroundSourceRenderNode) source);
-        } else if (source instanceof BlurredBackgroundSourceWrapped) {
+        } else if (source != null && source.getClass() == BlurredBackgroundSourceWrapped.class) {
             drawSource(canvas, ((BlurredBackgroundSourceWrapped) source).getSource());
         } else if (source != null) {
             drawSourceAny(canvas, source);
