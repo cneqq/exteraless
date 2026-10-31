@@ -25,6 +25,10 @@ public final class SmallElementsGlass {
                 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
     }
 
+    public static boolean areServiceBubblesEnabled() {
+        return isEnabled() || MessageSurfaceStyle.glassEnabled(0);
+    }
+
     public static boolean areGiftCardsEnabled() {
         return GiftGlassStyle.style() == GiftGlassStyle.GLASS && Build.VERSION.SDK_INT >= 33
                 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();

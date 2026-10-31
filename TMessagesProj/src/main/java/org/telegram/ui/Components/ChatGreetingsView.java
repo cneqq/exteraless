@@ -427,9 +427,10 @@ public class ChatGreetingsView extends LinearLayout {
         if (!preview) {
             descriptionView.setVisibility(View.VISIBLE);
         }
+        stickerContainer.setVisibility(View.VISIBLE);
         stickerToSendView.setVisibility(View.VISIBLE);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if ((!showSticker || getMeasuredHeight() > MeasureSpec.getSize(heightMeasureSpec)) && !preview) {
+        if ((!showSticker || MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.UNSPECIFIED && getMeasuredHeight() > MeasureSpec.getSize(heightMeasureSpec)) && !preview) {
             descriptionView.setVisibility(View.GONE);
             stickerToSendView.setVisibility(View.GONE);
             stickerContainer.setVisibility(View.GONE);
@@ -467,11 +468,29 @@ public class ChatGreetingsView extends LinearLayout {
         viewTranslationX = 0;
     }
 
+    private org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory glassFactory;
+    private org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable glassBackground;
+    public void setGlassBackgroundFactory(org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory factory) {
+        if (glassBackground != null) glassBackground.setCallback(null);
+        glassBackground = null; glassFactory = factory; invalidate();
+    }
+    private boolean drawGreetingGlass(Canvas canvas) {
+        if (glassFactory == null || !canvas.isHardwareAccelerated() || !app.freezgram.SmallElementsGlass.areServiceBubblesEnabled()) return false;
+        if (glassBackground == null) {
+            glassBackground = glassFactory.create(this, app.freezgram.LiquidGlassStyle.surfaceColors(resourcesProvider, app.freezgram.SmallElementsGlass::areServiceBubblesEnabled));
+            glassBackground.setCallback(this);
+        }
+        glassBackground.setBounds(0, 0, getWidth(), getHeight()); glassBackground.setRadius(dp(16));
+        app.freezgram.LiquidGlassStyle.configure(glassBackground); glassBackground.updateColors(); glassBackground.draw(canvas);
+        return true;
+    }
+    @Override protected boolean verifyDrawable(Drawable drawable) { return drawable == glassBackground || super.verifyDrawable(drawable); }
+
     private boolean disableBackground;
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        if (!disableBackground) {
+        if (!disableBackground && !drawGreetingGlass(canvas)) {
             if (resourcesProvider != null) {
                 resourcesProvider.applyServiceShaderMatrix(getMeasuredWidth(), backgroundHeight, viewTranslationX, viewTop + dp(4));
             } else {
@@ -505,6 +524,8 @@ public class ChatGreetingsView extends LinearLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (glassBackground != null) glassBackground.setCallback(null);
+        glassBackground = null;
     }
 
     private void fetchSticker() {

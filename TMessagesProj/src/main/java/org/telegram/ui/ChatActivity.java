@@ -34903,6 +34903,7 @@ public class ChatActivity extends BaseFragment implements
                 }
             };
             updateGreetingLock();
+            greetingsViewContainer.setGlassBackgroundFactory(actionGlassFactory);
             greetingsViewContainer.setListener((sticker) -> {
                 animatingDocuments.put(sticker, 0);
                 SendMessagesHelper.getInstance(currentAccount).sendSticker(sticker, null, dialog_id, null, null, null, replyingQuote, null, true, 0, 0, false, null, getMessageChatSendParams(), 0, getSendMonoForumPeerId(), getSendMessageSuggestionParams());
@@ -34952,6 +34953,7 @@ public class ChatActivity extends BaseFragment implements
                         }
                     };
                     updateGreetingLock();
+                    greetingsViewContainer.setGlassBackgroundFactory(actionGlassFactory);
                     greetingsViewContainer.setListener((sticker) -> {
                         animatingDocuments.put(sticker, 0);
                         SendMessagesHelper.getInstance(currentAccount).sendSticker(sticker, null, dialog_id, null, null, null, replyingQuote, null, true, 0, 0, false, null, getMessageChatSendParams(), 0, getSendMonoForumPeerId(), getSendMessageSuggestionParams());

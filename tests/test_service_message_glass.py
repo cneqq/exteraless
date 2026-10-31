@@ -52,7 +52,7 @@ class RectF{float left,top,right,bottom;void set(RectF r){left=r.left;top=r.top;
 class Factory{Object getSource(){return null;}Factory withSource(Object s){return this;}Drawable create(Object cell,Object colors){return new Drawable();}}
 class Drawable{int right,alpha;Object callback;void setCallback(Object o){callback=o;}void setBounds(int l,int t,int r,int b){right=r;}void setRadius(float r){}void setAlpha(int a){alpha=a;}void updateColors(){}void draw(Canvas c){}}
 class Star{boolean glass,colored;boolean hasColoredBackdrop(){return colored;}void setGlassBackground(boolean b){glass=b;}}
-class SmallElementsGlass{static boolean enabled=true,gifts=true;static boolean isEnabled(){return enabled;}static boolean areGiftCardsEnabled(){return gifts;}static Object createGiftSource(Object s){return s;}}
+class SmallElementsGlass{static boolean enabled=true,gifts=true;static boolean isEnabled(){return enabled;}static boolean areServiceBubblesEnabled(){return enabled;}static boolean areGiftCardsEnabled(){return gifts;}static Object createGiftSource(Object s){return s;}}
 class Theme{static Object key_paint_chatActionBackground,key_paint_chatActionBackgroundDarken;}
 class GiftGlassStyle{static int ORDINARY=0,SOFT=2,selected=1;static boolean customOrdinary(){return false;}static void drawOrdinary(Canvas c,RectF r,float f,Object p,Object d){}static int style(){return selected;}static class SoftCard{int calls;void draw(Canvas c,RectF r,float radius,Object p,float a,boolean o){calls++;}}static Object colors(Object p){return null;}static void configure(Drawable d){}}
 class LiquidGlassStyle{static Object surfaceColors(Object p,java.util.function.BooleanSupplier e){return null;}static void configure(Drawable d){}}

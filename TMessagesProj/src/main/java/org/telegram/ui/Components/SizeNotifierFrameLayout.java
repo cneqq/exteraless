@@ -210,7 +210,7 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
             }
             themeAnimationValue = Utilities.clamp(themeAnimationValue + AndroidUtilities.screenRefreshTime / 200, 1f, 0);
             // Keep an opaque base when wallpaper patterns do not cover every pixel.
-            canvas.drawColor(Theme.getColor(Theme.key_windowBackgroundWhite) | 0xff000000);
+            canvas.drawColor(wallpaperBaseColor(backgroundDrawable));
             for (int a = 0; a < 2; a++) {
                 Drawable drawable = a == 0 ? oldBackgroundDrawable : backgroundDrawable;
                 if (drawable == null) {
@@ -573,6 +573,17 @@ public class SizeNotifierFrameLayout extends FrameLayout implements Theme.Colora
                 backgroundView.invalidate();
             }
         }
+    }
+
+    private static int wallpaperBaseColor(Drawable drawable) {
+        if (drawable instanceof ColorDrawable) return ((ColorDrawable) drawable).getColor() | 0xff000000;
+        if (drawable instanceof MotionBackgroundDrawable) {
+            MotionBackgroundDrawable motion = (MotionBackgroundDrawable) drawable;
+            if (motion.getIntensity() < 0) return 0xff000000;
+            int[] colors = motion.getColors();
+            if (colors != null && colors.length > 0) return colors[0] | 0xff000000;
+        }
+        return Theme.getColor(Theme.key_windowBackgroundWhite) | 0xff000000;
     }
 
     private void checkSnowflake(Canvas canvas) {

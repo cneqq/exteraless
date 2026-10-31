@@ -3565,7 +3565,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             }
             return true;
         }
-        boolean enabled = gift ? app.freezgram.SmallElementsGlass.areGiftCardsEnabled() : app.freezgram.SmallElementsGlass.isEnabled();
+        boolean enabled = gift ? app.freezgram.SmallElementsGlass.areGiftCardsEnabled() : app.freezgram.SmallElementsGlass.areServiceBubblesEnabled();
         if (!enabled || serviceGlassFactory == null || !canvas.isHardwareAccelerated()) return false;
         if (gift && starGiftLayout != null && starGiftLayout.hasColoredBackdrop()) {
             // The collectible layout draws opaque gift colors with its own glass finish.
@@ -3577,7 +3577,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         if (serviceGlass[slot] == null) {
             serviceGlass[slot] = gift ? serviceGlassFactory.withSource(app.freezgram.SmallElementsGlass.createGiftSource(serviceGlassFactory.getSource()))
                     .create(this, app.freezgram.GiftGlassStyle.colors(themeDelegate))
-                    : serviceGlassFactory.create(this, app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate, app.freezgram.SmallElementsGlass::isEnabled));
+                    : serviceGlassFactory.create(this, app.freezgram.LiquidGlassStyle.surfaceColors(themeDelegate, app.freezgram.SmallElementsGlass::areServiceBubblesEnabled));
             serviceGlass[slot].setCallback(this);
         }
         if (path != null) path.computeBounds(serviceGlassBounds, true); else serviceGlassBounds.set(rect);
