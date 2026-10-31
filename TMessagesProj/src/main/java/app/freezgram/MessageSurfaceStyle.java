@@ -1,12 +1,6 @@
 package app.freezgram;
 
-import android.graphics.Canvas;
-import android.graphics.LinearGradient;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Shader;
 import android.os.Build;
-import androidx.core.graphics.ColorUtils;
 import app.exteraless.appearance.AppearanceConfig;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.SharedConfig;
@@ -45,20 +39,5 @@ public final class MessageSurfaceStyle {
     public static final class Surface {
         public BlurredBackgroundDrawable glass;
         public int glassProfile = -1;
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final RectF last = new RectF();
-        private int lastColor;
-        private LinearGradient gradient;
-        public void gradient(Canvas canvas, RectF bounds, int profile, Theme.ResourcesProvider provider, float alpha) {
-            int color = baseColor(provider, profile);
-            if (gradient == null || !last.equals(bounds) || lastColor != color) {
-                last.set(bounds); lastColor = color;
-                gradient = new LinearGradient(bounds.left, bounds.top, bounds.right, bounds.bottom,
-                        ColorUtils.blendARGB(color, 0xffffffff, .10f), ColorUtils.blendARGB(color, 0xff000000, .10f), Shader.TileMode.CLAMP);
-                paint.setShader(gradient);
-            }
-            paint.setAlpha((int) (255 * alpha * opacity(profile) / 100f));
-            canvas.drawRect(bounds, paint);
-        }
     }
 }

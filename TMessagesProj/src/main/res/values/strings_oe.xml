@@ -157,5 +157,6 @@
     <string name="FreezgramOutgoingSurface">My messages</string>
     <string name="FreezgramCommentsSurface">Comments button</string>
     <string name="FreezgramMessageSurfaceStyle">Background style</string>
-    <string name="FreezgramMessageSurfacesInfo">Separate backgrounds for messages and comment buttons. Ordinary keeps the current theme. Glass needs Android 13+, chat blur and power saver off. Album backgrounds keep their original layout.</string>
+    <string name="FreezgramMessageSurfacesInfo">Separate normal or glass backgrounds for incoming messages, my messages and comments. The preview uses actual message cells and current wallpaper. Glass requires Android 13+, chat blur and power saver off. Album backgrounds keep their original layout.</string>
+    <string name="FreezgramCommentsPreview">Channel post with comments</string>
 </resources>

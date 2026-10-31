@@ -515,7 +515,7 @@ object AppearanceConfig {
     @JvmField
     val incomingSurfaceStyle = addConfig("FreezgramIncomingSurfaceStyle", ConfigItem.configTypeInt, 0)
     @JvmStatic
-    fun incomingSurfaceStyle(): Int { ensureLoaded(); return incomingSurfaceStyle.Int().coerceIn(0, 2) }
+    fun incomingSurfaceStyle(): Int { ensureLoaded(); return if (incomingSurfaceStyle.Int() == 1) 1 else 0 }
 
     @JvmField
     val incomingSurfaceOpacity = addConfig("FreezgramIncomingSurfaceOpacity", ConfigItem.configTypeInt, 80)
@@ -535,7 +535,7 @@ object AppearanceConfig {
     @JvmField
     val outgoingSurfaceStyle = addConfig("FreezgramOutgoingSurfaceStyle", ConfigItem.configTypeInt, 0)
     @JvmStatic
-    fun outgoingSurfaceStyle(): Int { ensureLoaded(); return outgoingSurfaceStyle.Int().coerceIn(0, 2) }
+    fun outgoingSurfaceStyle(): Int { ensureLoaded(); return if (outgoingSurfaceStyle.Int() == 1) 1 else 0 }
 
     @JvmField
     val outgoingSurfaceOpacity = addConfig("FreezgramOutgoingSurfaceOpacity", ConfigItem.configTypeInt, 80)
@@ -555,7 +555,7 @@ object AppearanceConfig {
     @JvmField
     val commentsSurfaceStyle = addConfig("FreezgramCommentsSurfaceStyle", ConfigItem.configTypeInt, 0)
     @JvmStatic
-    fun commentsSurfaceStyle(): Int { ensureLoaded(); return commentsSurfaceStyle.Int().coerceIn(0, 2) }
+    fun commentsSurfaceStyle(): Int { ensureLoaded(); return if (commentsSurfaceStyle.Int() == 1) 1 else 0 }
 
     @JvmField
     val commentsSurfaceOpacity = addConfig("FreezgramCommentsSurfaceOpacity", ConfigItem.configTypeInt, 80)

@@ -20,6 +20,7 @@ import org.telegram.ui.Components.LayoutHelper;
 
 public final class MessageSurfaceSettingsActivity extends BaseFragment {
     private boolean changed;
+    private MessageSurfacePreview preview;
     private String text(int id) { return LocaleController.getString(id); }
     @Override public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back); actionBar.setTitle(text(R.string.FreezgramMessageSurfaces));
@@ -28,6 +29,8 @@ public final class MessageSurfaceSettingsActivity extends BaseFragment {
         });
         ScrollView scroll = new ScrollView(context); scroll.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
         LinearLayout content = new LinearLayout(context); content.setOrientation(LinearLayout.VERTICAL); scroll.addView(content);
+        preview = new MessageSurfacePreview(context, currentAccount, resourceProvider);
+        content.addView(preview, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         section(context, content, R.string.FreezgramIncomingSurface, 0,
                 value -> AppearanceConfig.incomingSurfaceStyle.setConfigInt(value), value -> AppearanceConfig.incomingSurfaceOpacity.setConfigInt(value),
                 value -> AppearanceConfig.incomingSurfaceBlur.setConfigInt(value), value -> AppearanceConfig.incomingSurfaceIntensity.setConfigInt(value));
@@ -44,7 +47,7 @@ public final class MessageSurfaceSettingsActivity extends BaseFragment {
     private void section(Context context, LinearLayout content, int title, int profile, IntConsumer setStyle, IntConsumer setOpacity, IntConsumer setBlur, IntConsumer setIntensity) {
         TextView header = new TextView(context); header.setText(text(title)); header.setTextSize(16);
         header.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueHeader)); header.setPadding(dp(20), dp(24), dp(20), dp(8)); content.addView(header);
-        String[] names = {text(R.string.FreezgramGiftCardOrdinary), text(R.string.FreezgramGiftCardGlass), text(R.string.FreezgramGiftCardSoft)};
+        String[] names = {text(R.string.FreezgramGiftCardOrdinary), text(R.string.FreezgramGiftCardGlass)};
         TextSettingsCell selector = new TextSettingsCell(context);
         Runnable refresh = () -> selector.setTextAndValue(text(R.string.FreezgramMessageSurfaceStyle), names[MessageSurfaceStyle.style(profile)], false);
         refresh.run(); content.addView(selector);
@@ -58,11 +61,11 @@ public final class MessageSurfaceSettingsActivity extends BaseFragment {
         visibility.run();
         selector.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(context); builder.setTitle(text(title));
-            builder.setItems(names, (dialog, which) -> { setStyle.accept(which); changed = true; refresh.run(); visibility.run(); }); showDialog(builder.create());
+            builder.setItems(names, (dialog, which) -> { setStyle.accept(which); changed = true; refresh.run(); visibility.run(); preview.refresh(); }); showDialog(builder.create());
         });
     }
     private void slider(Context context, LinearLayout content, int title, int max, int value, IntConsumer setter) {
-        AvatarCornersSeekBar slider = new AvatarCornersSeekBar(context, v -> { setter.accept(v); changed = true; }, 0, max, text(title), "0", String.valueOf(max));
+        AvatarCornersSeekBar slider = new AvatarCornersSeekBar(context, v -> { setter.accept(v); changed = true; preview.refresh(); }, 0, max, text(title), "0", String.valueOf(max));
         slider.setValue(value); content.addView(slider, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 112));
     }
     @Override public void onFragmentDestroy() {
