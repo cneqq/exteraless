@@ -152,4 +152,10 @@
     <string name="FreezgramGiftGradientAngle">Gradient direction</string>
     <string name="FreezgramGiftGradientOutline">Outline intensity</string>
     <string name="FreezgramGiftCorners">Card corner radius</string>
+    <string name="FreezgramMessageSurfaces">Messages</string>
+    <string name="FreezgramIncomingSurface">Incoming messages</string>
+    <string name="FreezgramOutgoingSurface">My messages</string>
+    <string name="FreezgramCommentsSurface">Comments button</string>
+    <string name="FreezgramMessageSurfaceStyle">Background style</string>
+    <string name="FreezgramMessageSurfacesInfo">Separate backgrounds for messages and comment buttons. Ordinary keeps the current theme. Glass needs Android 13+, chat blur and power saver off. Album backgrounds keep their original layout.</string>
 </resources>

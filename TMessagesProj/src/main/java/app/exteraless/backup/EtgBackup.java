@@ -337,6 +337,18 @@ public final class EtgBackup {
         integer(list, "giftGradientStrength", AppearanceConfig.giftGradientStrength, 0, 100);
         integer(list, "giftGradientAngle", AppearanceConfig.giftGradientAngle, 0, 360);
         integer(list, "giftGradientOutline", AppearanceConfig.giftGradientOutline, 0, 100);
+        integer(list, "incomingSurfaceStyle", AppearanceConfig.incomingSurfaceStyle, 0, 2);
+        integer(list, "incomingSurfaceOpacity", AppearanceConfig.incomingSurfaceOpacity, 0, 100);
+        integer(list, "incomingSurfaceBlur", AppearanceConfig.incomingSurfaceBlur, 0, 30);
+        integer(list, "incomingSurfaceIntensity", AppearanceConfig.incomingSurfaceIntensity, 0, 100);
+        integer(list, "outgoingSurfaceStyle", AppearanceConfig.outgoingSurfaceStyle, 0, 2);
+        integer(list, "outgoingSurfaceOpacity", AppearanceConfig.outgoingSurfaceOpacity, 0, 100);
+        integer(list, "outgoingSurfaceBlur", AppearanceConfig.outgoingSurfaceBlur, 0, 30);
+        integer(list, "outgoingSurfaceIntensity", AppearanceConfig.outgoingSurfaceIntensity, 0, 100);
+        integer(list, "commentsSurfaceStyle", AppearanceConfig.commentsSurfaceStyle, 0, 2);
+        integer(list, "commentsSurfaceOpacity", AppearanceConfig.commentsSurfaceOpacity, 0, 100);
+        integer(list, "commentsSurfaceBlur", AppearanceConfig.commentsSurfaceBlur, 0, 30);
+        integer(list, "commentsSurfaceIntensity", AppearanceConfig.commentsSurfaceIntensity, 0, 100);
         integer(list, "giftCardStyle", AppearanceConfig.giftCardStyle, 0, 2);
         integer(list, "giftGlassBlur", AppearanceConfig.giftGlassBlur, 0, 30);
         integer(list, "giftGlassIntensity", AppearanceConfig.giftGlassIntensity, 0, 100);

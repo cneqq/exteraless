@@ -95,6 +95,12 @@ public final class NavigationGlassSettingsActivity extends BaseFragment {
             smallInfo.setText(text(R.string.FreezgramSmallElementsInfo)); smallInfo.setTextSize(14);
             smallInfo.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText));
             smallInfo.setPadding(dp(22), 0, dp(22), dp(12)); content.addView(smallInfo);
+            TextView messages = new TextView(context);
+            messages.setText(text(R.string.FreezgramMessageSurfaces)); messages.setTextSize(16);
+            messages.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueText));
+            messages.setPadding(dp(22), dp(18), dp(22), dp(18));
+            messages.setOnClickListener(v -> presentFragment(new MessageSurfaceSettingsActivity()));
+            content.addView(messages);
             TextView gifts = new TextView(context);
             gifts.setText(text(R.string.FreezgramGiftGlassSettings)); gifts.setTextSize(16);
             gifts.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueText));

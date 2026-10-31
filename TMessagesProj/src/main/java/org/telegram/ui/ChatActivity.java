@@ -42388,7 +42388,44 @@ public class ChatActivity extends BaseFragment implements
     private int smallElementsRevision = Integer.MIN_VALUE;
     private final RectF smallElementsCellBounds = new RectF();
 
+    private final BlurredBackgroundSourceRenderNode[] messageSources = new BlurredBackgroundSourceRenderNode[3];
+    private final long[] messageFrames = {Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE};
+
     private class ChatMessageCellDelegate implements ChatMessageCell.ChatMessageCellDelegate {
+        @Override public boolean drawMessageSurface(ChatMessageCell cell, Canvas canvas, RectF bounds, int profile,
+                app.freezgram.MessageSurfaceStyle.Surface surface, float alpha) {
+            if (app.freezgram.MessageSurfaceStyle.style(profile) == 2) {
+                surface.gradient(canvas, bounds, profile, themeDelegate, alpha); return true;
+            }
+            if (!app.freezgram.MessageSurfaceStyle.glassEnabled(profile) || !canvas.isHardwareAccelerated() || contentView == null) return false;
+            if (!ViewPositionWatcher.computeRectInParent(cell, contentView, smallElementsCellBounds)) return false;
+            int width = contentView.getWidth(), height = contentView.getHeight();
+            if (width <= 0 || height <= 0) return false;
+            var source = messageSources[profile];
+            if (source == null) source = messageSources[profile] = new BlurredBackgroundSourceRenderNode(navbarContentSourceWallpaper);
+            long frame = contentView.getDrawingTime();
+            if (messageFrames[profile] != frame || source.needUpdateDisplayList(width, height)) {
+                messageFrames[profile] = frame;
+                Canvas capture = source.beginRecording(width, height);
+                navbarContentSourceWallpaper.draw(capture, 0, 0, width, height); source.endRecording();
+                source.setBlur(AndroidUtilities.dpf2(app.freezgram.MessageSurfaceStyle.blur(profile)));
+                source.invalidateDisplayListForDrawables();
+            }
+            if (surface.glass == null || surface.glassProfile != profile) {
+                if (surface.glass != null) surface.glass.setCallback(null);
+                surface.glassProfile = profile;
+                surface.glass = source.createDrawable(); surface.glass.setCallback(cell);
+                surface.glass.setColorProvider(app.freezgram.MessageSurfaceStyle.colors(themeDelegate, profile));
+            }
+            var glass = surface.glass;
+            glass.setSourceOffset(smallElementsCellBounds.left, smallElementsCellBounds.top);
+            bounds.roundOut(AndroidUtilities.rectTmp2); glass.setBounds(AndroidUtilities.rectTmp2);
+            glass.setRadius(0); glass.setAlpha((int) (255 * alpha)); glass.setThickness(dp(12));
+            glass.setIntensity(app.freezgram.MessageSurfaceStyle.intensity(profile) / 100f);
+            ((org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawableRenderNode) glass).setLiquidGlassEffectAllowed(true);
+            glass.updateColors(); glass.draw(canvas); return true;
+        }
+
         private BlurredBackgroundDrawable drawCellElementGlass(ChatMessageCell cell, Canvas canvas, RectF bounds,
                 BlurredBackgroundDrawable cached, float[] radii) {
             if (!app.freezgram.SmallElementsGlass.isEnabled()) return null;

@@ -1,0 +1,50 @@
+import shutil,unittest
+from pathlib import Path
+from test_personal_privacy import method,run_java
+JAVA=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java'
+@unittest.skipUnless(shutil.which('java'),'Java source launcher required')
+class MessageSurfaceTests(unittest.TestCase):
+ def test_profiles_are_independent_and_glass_respects_platform_and_power(self):
+  source=(JAVA/'app/freezgram/MessageSurfaceStyle.java').read_text()
+  helpers='\n'.join(method(source,'    public static '+signature) for signature in ['int style(', 'int opacity(', 'int blur(', 'int intensity(', 'boolean glassEnabled('])
+  run_java('''
+class PrivacyCheck{
+ HELPERS
+ public static void main(String[] args){
+  if(style(0)!=0||style(1)!=1||style(2)!=2||opacity(0)!=20||opacity(1)!=50||opacity(2)!=80||blur(0)!=3||blur(1)!=10||blur(2)!=24||intensity(0)!=10||intensity(1)!=50||intensity(2)!=90)throw new AssertionError("Profiles are coupled");
+  for(int sdk:new int[]{24,32,33,36})for(boolean blur:new boolean[]{false,true})for(boolean saver:new boolean[]{false,true}){
+   Build.VERSION.SDK_INT=sdk;SharedConfig.blur=blur;LiteMode.saver=saver;
+   if(glassEnabled(1)!=(sdk>=33&&blur&&!saver)||glassEnabled(0)||glassEnabled(2))throw new AssertionError("Glass fallback ignored");
+  }
+ }
+}
+class AppearanceConfig{
+ static int incomingSurfaceStyle(){return 0;}static int outgoingSurfaceStyle(){return 1;}static int commentsSurfaceStyle(){return 2;}
+ static int incomingSurfaceOpacity(){return 20;}static int outgoingSurfaceOpacity(){return 50;}static int commentsSurfaceOpacity(){return 80;}
+ static int incomingSurfaceBlur(){return 3;}static int outgoingSurfaceBlur(){return 10;}static int commentsSurfaceBlur(){return 24;}
+ static int incomingSurfaceIntensity(){return 10;}static int outgoingSurfaceIntensity(){return 50;}static int commentsSurfaceIntensity(){return 90;}
+}
+class Build{static class VERSION{static int SDK_INT;}}class SharedConfig{static boolean blur;static boolean chatBlurEnabled(){return blur;}}class LiteMode{static boolean saver;static boolean isGlassPowerSaverApplied(){return saver;}}
+'''.replace('HELPERS',helpers))
+
+ def test_native_shape_and_fallback_are_kept(self):
+  source=(JAVA/'org/telegram/ui/Cells/ChatMessageCell.java').read_text()
+  body=method(source,'    private void drawConfiguredMessageBackground(').replace('app.freezgram.MessageSurfaceStyle','Style')
+  run_java('''
+class PrivacyCheck{
+ Message currentMessageObject=new Message();Object currentPosition,backgroundCacheParams;Delegate delegate=new Delegate();Shape currentBackgroundDrawable=new Shape();RectF messageSurfaceBounds=new RectF();Object messageSurface;
+ BODY
+ public static void main(String[] args){
+  for(int style:new int[]{0,1,2})for(boolean success:new boolean[]{false,true})for(boolean grouped:new boolean[]{false,true}){
+   var p=new PrivacyCheck();var c=new Canvas();Style.style=style;p.delegate.success=success;if(grouped)p.currentPosition=new Object();
+   p.drawConfiguredMessageBackground(c,.5f);
+   boolean attempt=style!=0&&!grouped;
+   if(p.delegate.calls!=(attempt?1:0)||p.currentBackgroundDrawable.draws!=(attempt&&success?0:1)||c.depth!=0||c.clips!=(attempt?1:0))throw new AssertionError("Native bubble shape/fallback lost");
+  }
+ }
+}
+class Message{boolean isOutOwner(){return false;}}class Style{static int style;static int style(int p){return style;}}
+class Delegate{boolean success;int calls;boolean drawMessageSurface(Object cell,Canvas c,RectF b,int profile,Object s,float alpha){calls++;if(alpha!=.5f)throw new AssertionError("Bubble animation alpha lost");return success;}}
+class Shape{int draws;Object getBounds(){return null;}Object makePath(Object params){return null;}void drawCached(Canvas c,Object p){draws++;}}
+class Canvas{int depth,clips;void save(){depth++;}void restore(){depth--;}void clipPath(Object p){clips++;}}class RectF{void set(Object r){}}
+'''.replace('BODY',body))

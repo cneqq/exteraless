@@ -573,6 +573,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     public interface ChatMessageCellDelegate {
         default org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable drawBotButtonGlass(ChatMessageCell cell, Canvas canvas,
                 RectF bounds, float[] radii, org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable cached) { return null; }
+        default boolean drawMessageSurface(ChatMessageCell cell, Canvas canvas, RectF bounds, int profile,
+                app.freezgram.MessageSurfaceStyle.Surface surface, float alpha) { return false; }
         default boolean drawShareButtonGlass(ChatMessageCell cell, Canvas canvas, RectF bounds) { return false; }
 
         default boolean isReplyOrSelf() {
@@ -1732,6 +1734,22 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
 
     private boolean hideSideButtonByQuickShare;
+    private final app.freezgram.MessageSurfaceStyle.Surface messageSurface = new app.freezgram.MessageSurfaceStyle.Surface();
+    private final app.freezgram.MessageSurfaceStyle.Surface commentsSurface = new app.freezgram.MessageSurfaceStyle.Surface();
+    private final RectF messageSurfaceBounds = new RectF();
+    private void drawConfiguredMessageBackground(Canvas canvas, float alpha) {
+        int profile = currentMessageObject.isOutOwner() ? 1 : 0;
+        boolean custom = false;
+        if (delegate != null && currentPosition == null && app.freezgram.MessageSurfaceStyle.style(profile) != 0) {
+            messageSurfaceBounds.set(currentBackgroundDrawable.getBounds());
+            canvas.save();
+            canvas.clipPath(currentBackgroundDrawable.makePath(backgroundCacheParams));
+            custom = delegate.drawMessageSurface(this, canvas, messageSurfaceBounds, profile, messageSurface, alpha);
+            canvas.restore();
+        }
+        if (!custom) currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+    }
+
     private org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable shareGlassBackground;
     public org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable getShareGlassBackground() { return shareGlassBackground; }
     public void setShareGlassBackground(org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable drawable) { shareGlassBackground = drawable; }
@@ -6507,6 +6525,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (messageSurface.glass != null) messageSurface.glass.setCallback(null);
+        if (commentsSurface.glass != null) commentsSurface.glass.setCallback(null);
+        messageSurface.glass = null; commentsSurface.glass = null;
         if (shareGlassBackground != null) { shareGlassBackground.setCallback(null); shareGlassBackground = null; }
         releaseBotGlass();
 
@@ -13601,7 +13622,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     @Override
     protected boolean verifyDrawable(@NonNull Drawable who) {
-        if (who == shareGlassBackground || super.verifyDrawable(who) || who == selectorDrawable[0] || who == animatedInfoLayout || who == selectorDrawable[1] || who == linkPreviewSelector || who == nameLayoutSelector || who == replySelector || reactionsLayoutInBubble != null && reactionsLayoutInBubble.verifyDrawable(who) || who instanceof LoadingDrawable) {
+        if ((messageSurface != null && who == messageSurface.glass) || (commentsSurface != null && who == commentsSurface.glass) || who == shareGlassBackground || super.verifyDrawable(who) || who == selectorDrawable[0] || who == animatedInfoLayout || who == selectorDrawable[1] || who == linkPreviewSelector || who == nameLayoutSelector || who == replySelector || reactionsLayoutInBubble != null && reactionsLayoutInBubble.verifyDrawable(who) || who instanceof LoadingDrawable) {
             return true;
         }
         if (pollAddButtonDrawable != null && pollAddButtonDrawable.verifyDrawable(who)) {
@@ -21366,7 +21387,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 //                } else {
                 currentSelectedBackgroundAlpha = 0;
                 currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                drawConfiguredMessageBackground(canvas, alphaInternal);
 //                }
                 if (currentBackgroundShadowDrawable != null && currentPosition == null) {
                     currentBackgroundShadowDrawable.setAlpha((int) (255 * alphaInternal));
@@ -21375,7 +21396,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             } else {
                 if (isHighlightedAnimated) {
                     currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                    currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                    drawConfiguredMessageBackground(canvas, alphaInternal);
                     currentSelectedBackgroundAlpha = getHighlightAlpha();
                     if (currentPosition == null) {
                         currentBackgroundSelectedDrawable.setAlpha((int) (alphaInternal * currentSelectedBackgroundAlpha * 255));
@@ -21383,7 +21404,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     }
                 } else if (selectedBackgroundProgress != 0 && (currentMessageObject == null || !currentMessageObject.preview) && !(currentMessagesGroup != null && currentMessagesGroup.isDocuments)) {
                     currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                    currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                    drawConfiguredMessageBackground(canvas, alphaInternal);
                     currentSelectedBackgroundAlpha = selectedBackgroundProgress;
                     currentBackgroundSelectedDrawable.setAlpha((int) (currentSelectedBackgroundAlpha * alphaInternal * 255));
                     currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
@@ -21408,7 +21429,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         if (NaConfig.INSTANCE.getTranslucentDeletedMessages().Bool() && bubbleAyuDeleted() && currentMessageObject.isOutOwner()) {
                             currentBackgroundDrawable.setAlpha((int) (255 * 0.75f));
                         }
-                        currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                        drawConfiguredMessageBackground(canvas, alphaInternal);
                     }
                 }
                 if (currentBackgroundShadowDrawable != null && currentPosition == null) {
@@ -24089,6 +24110,13 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     endX - dp(14),
                     layoutHeight - dp(h) + 1
             );
+            if (delegate != null && currentBackgroundDrawable != null && app.freezgram.MessageSurfaceStyle.style(2) != 0) {
+                messageSurfaceBounds.set(commentButtonRect);
+                canvas.save();
+                canvas.clipPath(currentBackgroundDrawable.makePath(backgroundCacheParams));
+                delegate.drawMessageSurface(this, canvas, messageSurfaceBounds, 2, commentsSurface, alpha);
+                canvas.restore();
+            }
             if (selectorDrawable[1] != null && selectorDrawableMaskType[1] == 2) {
                 int count = canvas.getSaveCount();
                 selectorDrawable[1].setBounds(commentButtonRect);
