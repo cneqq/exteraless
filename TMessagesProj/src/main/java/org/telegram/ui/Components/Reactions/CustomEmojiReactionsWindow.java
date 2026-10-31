@@ -326,6 +326,27 @@ public class CustomEmojiReactionsWindow {
             .setPadding(dp(8));
     }
 
+    private boolean usesSharedGlass;
+    public void setGlassBackgroundFactory(BlurredBackgroundDrawableViewFactory factory, BlurredBackgroundProvider provider) {
+        setBackgroundFactory(factory, provider);
+        usesSharedGlass = true;
+        blurredBackgroundDrawable.setPadding(0);
+        blurredBackgroundDrawable.setCallback(containerView);
+    }
+
+    private boolean drawSharedGlass(Canvas canvas, float radius) {
+        if (!usesSharedGlass || blurredBackgroundDrawable == null || !canvas.isHardwareAccelerated()
+                || !app.freezgram.SmallElementsGlass.isEnabled()) return false;
+        drawingRect.roundOut(AndroidUtilities.rectTmp2);
+        blurredBackgroundDrawable.setBounds(AndroidUtilities.rectTmp2);
+        blurredBackgroundDrawable.setRadius(radius);
+        blurredBackgroundDrawable.setAlpha(255);
+        app.freezgram.LiquidGlassStyle.configure(blurredBackgroundDrawable);
+        blurredBackgroundDrawable.updateColors();
+        blurredBackgroundDrawable.draw(canvas);
+        return true;
+    }
+
     public void setLongPressEnabled(boolean isEnabled) {
         this.selectAnimatedEmojiDialog.setLongPressEnabled(isEnabled);
     }
@@ -785,6 +806,10 @@ public class CustomEmojiReactionsWindow {
     }
 
     public class ContainerView extends FrameLayout {
+        @Override protected boolean verifyDrawable(Drawable drawable) {
+            return drawable == blurredBackgroundDrawable || super.verifyDrawable(drawable);
+        }
+
 
         Drawable shadow;
         Rect shadowPad = new Rect();
@@ -868,13 +893,15 @@ public class CustomEmojiReactionsWindow {
             float radius = AndroidUtilities.lerp(fromRadius, dp(type == TYPE_MESSAGE_EFFECTS ? 20 : 8), enterTransitionProgress);
 
             transitionReactions.clear();
-            if (type == TYPE_STORY || (reactionsContainerLayout.getDelegate() != null && reactionsContainerLayout.getDelegate().drawBackground())) {
+            if (drawSharedGlass(canvas, radius)) {
+                // This window owns a separate material; do not paint the legacy fill over it.
+            } else if (type == TYPE_STORY || (reactionsContainerLayout.getDelegate() != null && reactionsContainerLayout.getDelegate().drawBackground())) {
                 reactionsContainerLayout.getDelegate().drawRoundRect(canvas, drawingRect, radius, getX(), getBlurOffset(), 255, true);
             } else {
                 shadow.setAlpha((int) (Utilities.clamp(progressClpamped / 0.05f, 1f, 0f) * 255));
                 shadow.setBounds((int) drawingRect.left - shadowPad.left, (int) drawingRect.top - shadowPad.top, (int) drawingRect.right + shadowPad.right, (int) drawingRect.bottom + shadowPad.bottom);
 
-                if (blurredBackgroundDrawable != null) {
+                if (blurredBackgroundDrawable != null && !usesSharedGlass) {
                     AndroidUtilities.rectTmp.set(drawingRect);
                     AndroidUtilities.rectTmp.round(AndroidUtilities.rectTmp2);
                     AndroidUtilities.rectTmp2.inset(-dp(8), -dp(8));

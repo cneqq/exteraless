@@ -525,7 +525,9 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
             return;
         }
         reactionsWindow = new CustomEmojiReactionsWindow(type, fragment, allReactionsList, selectedReactions, this, resourcesProvider, forceAttachToParent);
-        if (backgroundFactory != null) {
+        if (glassBackgroundFactory != null && app.freezgram.SmallElementsGlass.isEnabled()) {
+            reactionsWindow.setGlassBackgroundFactory(glassBackgroundFactory, glassBackgroundColorProvider);
+        } else if (backgroundFactory != null) {
             reactionsWindow.setBackgroundFactory(backgroundFactory, backgroundColorProvider);
         }
         reactionsWindow.setLongPressEnabled(delegate == null || delegate.allowLongPress());
