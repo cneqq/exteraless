@@ -157,6 +157,8 @@
     <string name="FreezgramOutgoingSurface">My messages</string>
     <string name="FreezgramCommentsSurface">Comments button</string>
     <string name="FreezgramMessageSurfaceStyle">Background style</string>
-    <string name="FreezgramMessageSurfacesInfo">Separate normal or glass backgrounds for incoming messages, my messages and comments. The preview uses actual message cells and current wallpaper. Glass requires Android 13+, chat blur and power saver off. Album backgrounds keep their original layout.</string>
+    <string name="FreezgramMessageSurfacesInfo">Comments use the same background as their message. Same settings links my messages to incoming settings; disabling it restores my previous settings. The preview updates immediately. Glass needs Android 13+, chat blur and power saver off. Album backgrounds keep their original layout.</string>
     <string name="FreezgramCommentsPreview">Channel post with comments</string>
+    <string name="FreezgramSameMessageSurfaces">Same settings</string>
+    <string name="FreezgramAllMessagesSurface">All messages</string>
 </resources>

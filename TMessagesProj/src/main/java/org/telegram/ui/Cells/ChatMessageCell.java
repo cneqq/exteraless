@@ -1735,7 +1735,6 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     private boolean hideSideButtonByQuickShare;
     private final app.freezgram.MessageSurfaceStyle.Surface messageSurface = new app.freezgram.MessageSurfaceStyle.Surface();
-    private final app.freezgram.MessageSurfaceStyle.Surface commentsSurface = new app.freezgram.MessageSurfaceStyle.Surface();
     private final RectF messageSurfaceBounds = new RectF();
     private void drawConfiguredMessageBackground(Canvas canvas, float alpha) {
         int profile = currentMessageObject.isOutOwner() ? 1 : 0;
@@ -6526,8 +6525,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (messageSurface.glass != null) messageSurface.glass.setCallback(null);
-        if (commentsSurface.glass != null) commentsSurface.glass.setCallback(null);
-        messageSurface.glass = null; commentsSurface.glass = null;
+        messageSurface.glass = null;
         if (shareGlassBackground != null) { shareGlassBackground.setCallback(null); shareGlassBackground = null; }
         releaseBotGlass();
 
@@ -13622,7 +13620,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     @Override
     protected boolean verifyDrawable(@NonNull Drawable who) {
-        if ((messageSurface != null && who == messageSurface.glass) || (commentsSurface != null && who == commentsSurface.glass) || who == shareGlassBackground || super.verifyDrawable(who) || who == selectorDrawable[0] || who == animatedInfoLayout || who == selectorDrawable[1] || who == linkPreviewSelector || who == nameLayoutSelector || who == replySelector || reactionsLayoutInBubble != null && reactionsLayoutInBubble.verifyDrawable(who) || who instanceof LoadingDrawable) {
+        if ((messageSurface != null && who == messageSurface.glass) || who == shareGlassBackground || super.verifyDrawable(who) || who == selectorDrawable[0] || who == animatedInfoLayout || who == selectorDrawable[1] || who == linkPreviewSelector || who == nameLayoutSelector || who == replySelector || reactionsLayoutInBubble != null && reactionsLayoutInBubble.verifyDrawable(who) || who instanceof LoadingDrawable) {
             return true;
         }
         if (pollAddButtonDrawable != null && pollAddButtonDrawable.verifyDrawable(who)) {
@@ -24110,13 +24108,6 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     endX - dp(14),
                     layoutHeight - dp(h) + 1
             );
-            if (delegate != null && currentBackgroundDrawable != null && app.freezgram.MessageSurfaceStyle.style(2) != 0) {
-                messageSurfaceBounds.set(commentButtonRect);
-                canvas.save();
-                canvas.clipPath(currentBackgroundDrawable.makePath(backgroundCacheParams));
-                delegate.drawMessageSurface(this, canvas, messageSurfaceBounds, 2, commentsSurface, alpha);
-                canvas.restore();
-            }
             if (selectorDrawable[1] != null && selectorDrawableMaskType[1] == 2) {
                 int count = canvas.getSaveCount();
                 selectorDrawable[1].setBounds(commentButtonRect);

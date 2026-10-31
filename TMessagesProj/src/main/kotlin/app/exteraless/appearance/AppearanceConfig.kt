@@ -513,6 +513,11 @@ object AppearanceConfig {
     fun giftGradientOutline(): Int { ensureLoaded(); return giftGradientOutline.Int().coerceIn(0, 100) }
 
     @JvmField
+    val sameMessageSurfaces = addConfig("FreezgramSameMessageSurfaces", ConfigItem.configTypeBool, false)
+    @JvmStatic
+    fun sameMessageSurfaces(): Boolean { ensureLoaded(); return sameMessageSurfaces.Bool() }
+
+    @JvmField
     val incomingSurfaceStyle = addConfig("FreezgramIncomingSurfaceStyle", ConfigItem.configTypeInt, 0)
     @JvmStatic
     fun incomingSurfaceStyle(): Int { ensureLoaded(); return if (incomingSurfaceStyle.Int() == 1) 1 else 0 }
@@ -551,26 +556,6 @@ object AppearanceConfig {
     val outgoingSurfaceIntensity = addConfig("FreezgramOutgoingSurfaceIntensity", ConfigItem.configTypeInt, 70)
     @JvmStatic
     fun outgoingSurfaceIntensity(): Int { ensureLoaded(); return outgoingSurfaceIntensity.Int().coerceIn(0, 100) }
-
-    @JvmField
-    val commentsSurfaceStyle = addConfig("FreezgramCommentsSurfaceStyle", ConfigItem.configTypeInt, 0)
-    @JvmStatic
-    fun commentsSurfaceStyle(): Int { ensureLoaded(); return if (commentsSurfaceStyle.Int() == 1) 1 else 0 }
-
-    @JvmField
-    val commentsSurfaceOpacity = addConfig("FreezgramCommentsSurfaceOpacity", ConfigItem.configTypeInt, 80)
-    @JvmStatic
-    fun commentsSurfaceOpacity(): Int { ensureLoaded(); return commentsSurfaceOpacity.Int().coerceIn(0, 100) }
-
-    @JvmField
-    val commentsSurfaceBlur = addConfig("FreezgramCommentsSurfaceBlur", ConfigItem.configTypeInt, 24)
-    @JvmStatic
-    fun commentsSurfaceBlur(): Int { ensureLoaded(); return commentsSurfaceBlur.Int().coerceIn(0, 30) }
-
-    @JvmField
-    val commentsSurfaceIntensity = addConfig("FreezgramCommentsSurfaceIntensity", ConfigItem.configTypeInt, 70)
-    @JvmStatic
-    fun commentsSurfaceIntensity(): Int { ensureLoaded(); return commentsSurfaceIntensity.Int().coerceIn(0, 100) }
 
     @JvmField
     val giftCardStyle = addConfig("FreezgramGiftCardStyle", ConfigItem.configTypeInt, 1)

@@ -16,6 +16,7 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Components.LayoutHelper;
 
 public final class MessageSurfaceSettingsActivity extends BaseFragment {
@@ -31,18 +32,28 @@ public final class MessageSurfaceSettingsActivity extends BaseFragment {
         LinearLayout content = new LinearLayout(context); content.setOrientation(LinearLayout.VERTICAL); scroll.addView(content);
         preview = new MessageSurfacePreview(context, currentAccount, resourceProvider);
         content.addView(preview, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-        section(context, content, R.string.FreezgramIncomingSurface, 0,
-                value -> AppearanceConfig.incomingSurfaceStyle.setConfigInt(value), value -> AppearanceConfig.incomingSurfaceOpacity.setConfigInt(value),
-                value -> AppearanceConfig.incomingSurfaceBlur.setConfigInt(value), value -> AppearanceConfig.incomingSurfaceIntensity.setConfigInt(value));
-        section(context, content, R.string.FreezgramOutgoingSurface, 1,
-                value -> AppearanceConfig.outgoingSurfaceStyle.setConfigInt(value), value -> AppearanceConfig.outgoingSurfaceOpacity.setConfigInt(value),
-                value -> AppearanceConfig.outgoingSurfaceBlur.setConfigInt(value), value -> AppearanceConfig.outgoingSurfaceIntensity.setConfigInt(value));
-        section(context, content, R.string.FreezgramCommentsSurface, 2,
-                value -> AppearanceConfig.commentsSurfaceStyle.setConfigInt(value), value -> AppearanceConfig.commentsSurfaceOpacity.setConfigInt(value),
-                value -> AppearanceConfig.commentsSurfaceBlur.setConfigInt(value), value -> AppearanceConfig.commentsSurfaceIntensity.setConfigInt(value));
+        TextCheckCell same = new TextCheckCell(context);
+        same.setTextAndCheck(text(R.string.FreezgramSameMessageSurfaces), AppearanceConfig.sameMessageSurfaces(), false);
+        content.addView(same);
+        LinearLayout groups = new LinearLayout(context); groups.setOrientation(LinearLayout.VERTICAL); content.addView(groups);
+        rebuildGroups(context, groups);
+        same.setOnClickListener(v -> {
+            AppearanceConfig.sameMessageSurfaces.setConfigBool(!AppearanceConfig.sameMessageSurfaces());
+            same.setChecked(AppearanceConfig.sameMessageSurfaces()); changed = true;
+            rebuildGroups(context, groups); preview.refresh();
+        });
         TextView info = new TextView(context); info.setText(text(R.string.FreezgramMessageSurfacesInfo)); info.setTextSize(14);
         info.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText)); info.setPadding(dp(20), dp(12), dp(20), dp(20)); content.addView(info);
         fragmentView = scroll; return scroll;
+    }
+    private void rebuildGroups(Context context, LinearLayout content) {
+        content.removeAllViews();
+        section(context, content, AppearanceConfig.sameMessageSurfaces() ? R.string.FreezgramAllMessagesSurface : R.string.FreezgramIncomingSurface, 0,
+                value -> AppearanceConfig.incomingSurfaceStyle.setConfigInt(value), value -> AppearanceConfig.incomingSurfaceOpacity.setConfigInt(value),
+                value -> AppearanceConfig.incomingSurfaceBlur.setConfigInt(value), value -> AppearanceConfig.incomingSurfaceIntensity.setConfigInt(value));
+        if (!AppearanceConfig.sameMessageSurfaces()) section(context, content, R.string.FreezgramOutgoingSurface, 1,
+                value -> AppearanceConfig.outgoingSurfaceStyle.setConfigInt(value), value -> AppearanceConfig.outgoingSurfaceOpacity.setConfigInt(value),
+                value -> AppearanceConfig.outgoingSurfaceBlur.setConfigInt(value), value -> AppearanceConfig.outgoingSurfaceIntensity.setConfigInt(value));
     }
     private void section(Context context, LinearLayout content, int title, int profile, IntConsumer setStyle, IntConsumer setOpacity, IntConsumer setBlur, IntConsumer setIntensity) {
         TextView header = new TextView(context); header.setText(text(title)); header.setTextSize(16);

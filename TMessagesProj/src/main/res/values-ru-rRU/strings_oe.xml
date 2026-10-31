@@ -130,6 +130,8 @@
     <string name="FreezgramOutgoingSurface">Свои сообщения</string>
     <string name="FreezgramCommentsSurface">Кнопка «Комментарии»</string>
     <string name="FreezgramMessageSurfaceStyle">Вид фона</string>
-    <string name="FreezgramMessageSurfacesInfo">Обычный или стеклянный фон отдельно для входящих, своих сообщений и комментариев. В предпросмотре настоящие сообщения и текущие обои. Стеклу нужны Android 13+, размытие и выключенное энергосбережение. Фон альбомов сохраняет исходное оформление.</string>
+    <string name="FreezgramMessageSurfacesInfo">Комментарии используют фон своего сообщения. «Одинаковые настройки» применяют параметры входящих и к своим сообщениям; после выключения возвращаются прежние настройки своих сообщений. Предпросмотр обновляется сразу. Стеклу нужны Android 13+, размытие и выключенное энергосбережение. Фон альбомов сохраняет исходное оформление.</string>
     <string name="FreezgramCommentsPreview">Публикация с комментариями</string>
+    <string name="FreezgramSameMessageSurfaces">Одинаковые настройки</string>
+    <string name="FreezgramAllMessagesSurface">Все сообщения</string>
 </resources>

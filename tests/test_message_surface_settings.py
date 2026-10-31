@@ -6,12 +6,16 @@ JAVA=Path(__file__).resolve().parents[1]/'TMessagesProj/src/main/java'
 class MessageSurfaceTests(unittest.TestCase):
  def test_profiles_are_independent_and_glass_respects_platform_and_power(self):
   source=(JAVA/'app/freezgram/MessageSurfaceStyle.java').read_text()
-  helpers='\n'.join(method(source,'    public static '+signature) for signature in ['int style(', 'int opacity(', 'int blur(', 'int intensity(', 'boolean glassEnabled('])
+  helpers='\n'.join(method(source,'    public static '+signature) for signature in ['int settingsProfile(', 'int style(', 'int opacity(', 'int blur(', 'int intensity(', 'boolean glassEnabled('])
   run_java('''
 class PrivacyCheck{
  HELPERS
  public static void main(String[] args){
-  if(style(0)!=0||style(1)!=1||style(2)!=0||opacity(0)!=20||opacity(1)!=50||opacity(2)!=80||blur(0)!=3||blur(1)!=10||blur(2)!=24||intensity(0)!=10||intensity(1)!=50||intensity(2)!=90)throw new AssertionError("Profiles are coupled");
+  if(style(0)!=0||style(1)!=1||style(2)!=0||opacity(0)!=20||opacity(1)!=50||opacity(2)!=20||blur(0)!=3||blur(1)!=10||blur(2)!=3||intensity(0)!=10||intensity(1)!=50||intensity(2)!=10)throw new AssertionError("Profiles are coupled");
+  AppearanceConfig.linked=true;
+  if(style(1)!=style(0)||opacity(1)!=opacity(0)||blur(1)!=blur(0)||intensity(1)!=intensity(0)||settingsProfile(2)!=0)throw new AssertionError("Same settings failed to link all optical parameters");
+  AppearanceConfig.linked=false;
+  if(opacity(1)!=50||blur(1)!=10||style(1)!=1)throw new AssertionError("Unlink overwrote outgoing preferences");
   for(int sdk:new int[]{24,32,33,36})for(boolean blur:new boolean[]{false,true})for(boolean saver:new boolean[]{false,true}){
    Build.VERSION.SDK_INT=sdk;SharedConfig.blur=blur;LiteMode.saver=saver;
    if(glassEnabled(1)!=(sdk>=33&&blur&&!saver)||glassEnabled(0)||glassEnabled(2))throw new AssertionError("Glass fallback ignored");
@@ -19,6 +23,7 @@ class PrivacyCheck{
  }
 }
 class AppearanceConfig{
+ static boolean linked;static boolean sameMessageSurfaces(){return linked;}
  static int incomingSurfaceStyle(){return 0;}static int outgoingSurfaceStyle(){return 1;}static int commentsSurfaceStyle(){return 0;}
  static int incomingSurfaceOpacity(){return 20;}static int outgoingSurfaceOpacity(){return 50;}static int commentsSurfaceOpacity(){return 80;}
  static int incomingSurfaceBlur(){return 3;}static int outgoingSurfaceBlur(){return 10;}static int commentsSurfaceBlur(){return 24;}

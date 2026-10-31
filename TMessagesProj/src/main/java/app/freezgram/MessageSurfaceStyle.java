@@ -9,26 +9,29 @@ import org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable;
 import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundProvider;
 import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundProviderBuilder;
 
-/** Independent opt-ins for incoming bubbles, outgoing bubbles and comment strips. */
+/** Incoming settings also serve comments; optional linking applies them to outgoing messages. */
 public final class MessageSurfaceStyle {
     private MessageSurfaceStyle() {}
+    public static int settingsProfile(int profile) {
+        return profile == 1 && !AppearanceConfig.sameMessageSurfaces() ? 1 : 0;
+    }
     public static int style(int profile) {
-        return profile == 2 ? AppearanceConfig.commentsSurfaceStyle() : profile == 1 ? AppearanceConfig.outgoingSurfaceStyle() : AppearanceConfig.incomingSurfaceStyle();
+        return settingsProfile(profile) == 1 ? AppearanceConfig.outgoingSurfaceStyle() : AppearanceConfig.incomingSurfaceStyle();
     }
     public static int opacity(int profile) {
-        return profile == 2 ? AppearanceConfig.commentsSurfaceOpacity() : profile == 1 ? AppearanceConfig.outgoingSurfaceOpacity() : AppearanceConfig.incomingSurfaceOpacity();
+        return settingsProfile(profile) == 1 ? AppearanceConfig.outgoingSurfaceOpacity() : AppearanceConfig.incomingSurfaceOpacity();
     }
     public static int blur(int profile) {
-        return profile == 2 ? AppearanceConfig.commentsSurfaceBlur() : profile == 1 ? AppearanceConfig.outgoingSurfaceBlur() : AppearanceConfig.incomingSurfaceBlur();
+        return settingsProfile(profile) == 1 ? AppearanceConfig.outgoingSurfaceBlur() : AppearanceConfig.incomingSurfaceBlur();
     }
     public static int intensity(int profile) {
-        return profile == 2 ? AppearanceConfig.commentsSurfaceIntensity() : profile == 1 ? AppearanceConfig.outgoingSurfaceIntensity() : AppearanceConfig.incomingSurfaceIntensity();
+        return settingsProfile(profile) == 1 ? AppearanceConfig.outgoingSurfaceIntensity() : AppearanceConfig.incomingSurfaceIntensity();
     }
     public static boolean glassEnabled(int profile) {
         return style(profile) == 1 && Build.VERSION.SDK_INT >= 33 && SharedConfig.chatBlurEnabled() && !LiteMode.isGlassPowerSaverApplied();
     }
     public static int baseColor(Theme.ResourcesProvider provider, int profile) {
-        return Theme.getColor(profile == 1 ? Theme.key_chat_outBubble : Theme.key_chat_inBubble, provider) | 0xff000000;
+        return Theme.getColor(settingsProfile(profile) == 1 ? Theme.key_chat_outBubble : Theme.key_chat_inBubble, provider) | 0xff000000;
     }
     public static BlurredBackgroundProvider colors(Theme.ResourcesProvider provider, int profile) {
         return new BlurredBackgroundProviderBuilder(provider)
