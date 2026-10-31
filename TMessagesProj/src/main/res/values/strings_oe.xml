@@ -146,4 +146,10 @@
     <string name="FreezgramGiftCardOrdinary">Ordinary</string>
     <string name="FreezgramGiftCardGlass">Glass</string>
     <string name="FreezgramGiftCardSoft">Soft gradient</string>
+    <string name="FreezgramGiftPreviewUnavailable">Gift preview will appear when Telegram’s gift catalog is available.</string>
+    <string name="FreezgramGiftOpacity">Opacity</string>
+    <string name="FreezgramGiftGradientStrength">Gradient color intensity</string>
+    <string name="FreezgramGiftGradientAngle">Gradient direction</string>
+    <string name="FreezgramGiftGradientOutline">Outline intensity</string>
+    <string name="FreezgramGiftCorners">Card corner radius</string>
 </resources>

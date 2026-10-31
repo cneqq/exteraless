@@ -79,7 +79,12 @@ public class StarGiftUniqueActionLayout {
             return;
         }
         // Collectible backdrops are part of the gift: never replace them with wallpaper.
-        if (!glassBackground || hasColoredBackdrop()) canvas.drawPaint(backgroundPaint);
+        if (!glassBackground || hasColoredBackdrop()) {
+            if (!glassBackground && app.freezgram.GiftGlassStyle.style() == app.freezgram.GiftGlassStyle.ORDINARY
+                    && app.freezgram.GiftGlassStyle.customOrdinary()) {
+                app.freezgram.GiftGlassStyle.drawOrdinary(canvas, backgroundRect, dp(14), backgroundPaint, null);
+            } else canvas.drawPaint(backgroundPaint);
+        }
         if (!glassBackground || !hasColoredBackdrop()) return;
         if (glassHighlightHeight != backgroundRect.height()) {
             glassHighlightHeight = backgroundRect.height();
@@ -544,7 +549,8 @@ public class StarGiftUniqueActionLayout {
             backgroundPaint.setShader(gradient);
         }
         backgroundPath.rewind();
-        backgroundPath.addRoundRect(backgroundRect, dp(14), dp(14), Path.Direction.CW);
+        float cardRadius = app.freezgram.GiftGlassStyle.style() == app.freezgram.GiftGlassStyle.GLASS ? dp(14) : app.freezgram.GiftGlassStyle.cornerRadius(dp(14));
+        backgroundPath.addRoundRect(backgroundRect, cardRadius, cardRadius, Path.Direction.CW);
         canvas.save();
         float s = bounce.getScale(0.0125f);
         canvas.scale(s, s, backgroundRect.centerX(), backgroundRect.centerY());

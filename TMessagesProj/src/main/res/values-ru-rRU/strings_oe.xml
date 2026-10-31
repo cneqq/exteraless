@@ -119,4 +119,10 @@
     <string name="FreezgramGiftCardOrdinary">Обычная</string>
     <string name="FreezgramGiftCardGlass">Стекло</string>
     <string name="FreezgramGiftCardSoft">Мягкий градиент</string>
+    <string name="FreezgramGiftPreviewUnavailable">Предпросмотр появится после загрузки каталога подарков Telegram.</string>
+    <string name="FreezgramGiftOpacity">Непрозрачность</string>
+    <string name="FreezgramGiftGradientStrength">Насыщенность градиента</string>
+    <string name="FreezgramGiftGradientAngle">Направление градиента</string>
+    <string name="FreezgramGiftGradientOutline">Интенсивность обводки</string>
+    <string name="FreezgramGiftCorners">Скругление плашки</string>
 </resources>

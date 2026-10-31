@@ -483,6 +483,36 @@ object AppearanceConfig {
     fun giftGlassTransparency(): Int { ensureLoaded(); return giftGlassTransparency.Int().coerceIn(0, 100) }
 
     @JvmField
+    val giftOrdinaryOpacity = addConfig("FreezgramGiftOrdinaryOpacity", ConfigItem.configTypeInt, 100)
+    @JvmStatic
+    fun giftOrdinaryOpacity(): Int { ensureLoaded(); return giftOrdinaryOpacity.Int().coerceIn(0, 100) }
+
+    @JvmField
+    val giftCardCorners = addConfig("FreezgramGiftCardCorners", ConfigItem.configTypeInt, -1)
+    @JvmStatic
+    fun giftCardCorners(): Int { ensureLoaded(); return giftCardCorners.Int().coerceIn(-1, 40) }
+
+    @JvmField
+    val giftGradientOpacity = addConfig("FreezgramGiftGradientOpacity", ConfigItem.configTypeInt, 100)
+    @JvmStatic
+    fun giftGradientOpacity(): Int { ensureLoaded(); return giftGradientOpacity.Int().coerceIn(0, 100) }
+
+    @JvmField
+    val giftGradientStrength = addConfig("FreezgramGiftGradientStrength", ConfigItem.configTypeInt, 32)
+    @JvmStatic
+    fun giftGradientStrength(): Int { ensureLoaded(); return giftGradientStrength.Int().coerceIn(0, 100) }
+
+    @JvmField
+    val giftGradientAngle = addConfig("FreezgramGiftGradientAngle", ConfigItem.configTypeInt, 45)
+    @JvmStatic
+    fun giftGradientAngle(): Int { ensureLoaded(); return giftGradientAngle.Int().coerceIn(0, 360) }
+
+    @JvmField
+    val giftGradientOutline = addConfig("FreezgramGiftGradientOutline", ConfigItem.configTypeInt, 19)
+    @JvmStatic
+    fun giftGradientOutline(): Int { ensureLoaded(); return giftGradientOutline.Int().coerceIn(0, 100) }
+
+    @JvmField
     val giftCardStyle = addConfig("FreezgramGiftCardStyle", ConfigItem.configTypeInt, 1)
     @JvmStatic
     fun giftCardStyle(): Int { ensureLoaded(); return giftCardStyle.Int().coerceIn(0, 2) }

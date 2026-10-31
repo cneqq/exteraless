@@ -19,6 +19,7 @@ class PrivacyCheck{
  float getAlpha(){return .5f;}boolean isFloating(){return floating;}
  METHODS
  static int dp(int n){return n;}
+ Object getThemedPaint(Object key){return null;}boolean hasGradientService(){return true;}
  public static void main(String[] args){
   var p=new PrivacyCheck();var c=new Canvas();Path text=new Path();
   if(!p.drawServiceGlass(c,text,null,11,false,true))throw new AssertionError("Date/service missing");
@@ -52,7 +53,8 @@ class Factory{Object getSource(){return null;}Factory withSource(Object s){retur
 class Drawable{int right,alpha;Object callback;void setCallback(Object o){callback=o;}void setBounds(int l,int t,int r,int b){right=r;}void setRadius(float r){}void setAlpha(int a){alpha=a;}void updateColors(){}void draw(Canvas c){}}
 class Star{boolean glass,colored;boolean hasColoredBackdrop(){return colored;}void setGlassBackground(boolean b){glass=b;}}
 class SmallElementsGlass{static boolean enabled=true,gifts=true;static boolean isEnabled(){return enabled;}static boolean areGiftCardsEnabled(){return gifts;}static Object createGiftSource(Object s){return s;}}
-class GiftGlassStyle{static int SOFT=2,selected=1;static int style(){return selected;}static class SoftCard{int calls;void draw(Canvas c,RectF r,float radius,Object p,float a,boolean o){calls++;}}static Object colors(Object p){return null;}static void configure(Drawable d){}}
+class Theme{static Object key_paint_chatActionBackground,key_paint_chatActionBackgroundDarken;}
+class GiftGlassStyle{static int ORDINARY=0,SOFT=2,selected=1;static boolean customOrdinary(){return false;}static void drawOrdinary(Canvas c,RectF r,float f,Object p,Object d){}static int style(){return selected;}static class SoftCard{int calls;void draw(Canvas c,RectF r,float radius,Object p,float a,boolean o){calls++;}}static Object colors(Object p){return null;}static void configure(Drawable d){}}
 class LiquidGlassStyle{static Object surfaceColors(Object p,java.util.function.BooleanSupplier e){return null;}static void configure(Drawable d){}}
 class MessageObject{static int TYPE_GIFT_PREMIUM=1,TYPE_GIFT_PREMIUM_CHANNEL=2,TYPE_GIFT_STARS=3,TYPE_GIFT_OFFER=4;boolean star=true;int type;boolean isStarGiftAction(){return star;}}
 '''.replace('METHODS',methods))
@@ -84,7 +86,7 @@ class PrivacyCheck {
  }
 }
 class Paint{Object shader;enum Style{FILL,STROKE}void setShader(Object o){shader=o;}void setStyle(Style s){}void setStrokeWidth(float f){}void setColor(int c){}void setAlpha(int a){}}
-class GiftGlassStyle{static int SOFT=2,selected=1;static int style(){return selected;}static class SoftCard{void draw(Canvas c,RectF r,float rad,Object p,float a,boolean o){c.soft++;}}}
+class GiftGlassStyle{static int ORDINARY=0,SOFT=2,selected=1;static boolean customOrdinary(){return false;}static void drawOrdinary(Canvas c,RectF r,float f,Object p,Object d){}static int style(){return selected;}static class SoftCard{void draw(Canvas c,RectF r,float rad,Object p,float a,boolean o){c.soft++;}}}
 class AppearanceConfig{static int giftGlassIntensity(){return 70;}}
 class Shader{enum TileMode{CLAMP}}
 class LinearGradient{LinearGradient(float a,float b,float c,float d,int[] colors,float[] positions,Shader.TileMode t){}}

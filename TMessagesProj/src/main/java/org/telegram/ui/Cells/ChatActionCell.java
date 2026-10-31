@@ -3549,6 +3549,14 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         if (gift && (currentMessageObject == null || !(currentMessageObject.isStarGiftAction()
                 || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM || currentMessageObject.type == MessageObject.TYPE_GIFT_PREMIUM_CHANNEL
                 || currentMessageObject.type == MessageObject.TYPE_GIFT_STARS || currentMessageObject.type == MessageObject.TYPE_GIFT_OFFER))) return false;
+        if (gift && app.freezgram.GiftGlassStyle.style() == app.freezgram.GiftGlassStyle.ORDINARY
+                && app.freezgram.GiftGlassStyle.customOrdinary()) {
+            if (starGiftLayout == null) {
+                app.freezgram.GiftGlassStyle.drawOrdinary(canvas, rect, radius,
+                        getThemedPaint(Theme.key_paint_chatActionBackground), hasGradientService() ? getThemedPaint(Theme.key_paint_chatActionBackgroundDarken) : null);
+            }
+            return true;
+        }
         if (gift && app.freezgram.GiftGlassStyle.style() == app.freezgram.GiftGlassStyle.SOFT) {
             if (starGiftLayout != null) {
                 starGiftLayout.setGlassBackground(true);

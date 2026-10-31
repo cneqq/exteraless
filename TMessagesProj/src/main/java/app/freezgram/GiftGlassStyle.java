@@ -22,31 +22,54 @@ public final class GiftGlassStyle {
         return AppearanceConfig.giftCardsGlass() ? AppearanceConfig.giftCardStyle() : ORDINARY;
     }
 
-    /** Opaque theme-colored satin surface. Each card owns its shader and geometry. */
+    public static float cornerRadius(float nativeRadius) {
+        int corners = AppearanceConfig.giftCardCorners();
+        return corners < 0 ? nativeRadius : AndroidUtilities.dpf2(corners);
+    }
+    public static boolean customOrdinary() {
+        return AppearanceConfig.giftOrdinaryOpacity() != 100 || AppearanceConfig.giftCardCorners() >= 0;
+    }
+    public static void drawOrdinary(Canvas canvas, RectF bounds, float radius, Paint fill, Paint darken) {
+        canvas.saveLayerAlpha(bounds, (int) (255 * AppearanceConfig.giftOrdinaryOpacity() / 100f));
+        canvas.drawRoundRect(bounds, cornerRadius(radius), cornerRadius(radius), fill);
+        if (darken != null) canvas.drawRoundRect(bounds, cornerRadius(radius), cornerRadius(radius), darken);
+        canvas.restore();
+    }
+
+    /** Theme-colored satin surface. Each card owns its shader and geometry. */
     public static final class SoftCard {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final RectF edge = new RectF();
         private float left, top, right, bottom;
         private int lastAccent, lastBase;
         private boolean lastOverlay;
+        private int lastStrength, lastAngle;
         private LinearGradient gradient;
         public void draw(Canvas canvas, RectF bounds, float radius, Theme.ResourcesProvider provider, float alpha, boolean overlay) {
             int accent = Theme.getColor(Theme.key_windowBackgroundWhiteBlueText, provider);
             int base = Theme.getColor(Theme.key_windowBackgroundWhite, provider) | 0xff000000;
             boolean lightText = ColorUtils.calculateLuminance(Theme.getColor(Theme.key_chat_serviceText, provider)) > .5;
             if (lightText == (ColorUtils.calculateLuminance(base) > .5)) base = lightText ? 0xff202631 : 0xffeef2f7;
-            if (gradient == null || left != bounds.left || top != bounds.top || right != bounds.right || bottom != bounds.bottom
+            int strength = AppearanceConfig.giftGradientStrength(), angle = AppearanceConfig.giftGradientAngle();
+            if (gradient == null || lastStrength != strength || lastAngle != angle || left != bounds.left || top != bounds.top || right != bounds.right || bottom != bounds.bottom
                     || accent != lastAccent || base != lastBase || overlay != lastOverlay) {
                 left = bounds.left; top = bounds.top; right = bounds.right; bottom = bounds.bottom;
                 lastAccent = accent; lastBase = base; lastOverlay = overlay;
-                gradient = new LinearGradient(left, top, right, bottom,
-                        overlay ? 0x20ffffff : ColorUtils.blendARGB(base, accent, .32f) | 0xff000000,
-                        overlay ? 0x06000000 : ColorUtils.blendARGB(base, accent, .12f) | 0xff000000, Shader.TileMode.CLAMP);
+                lastStrength = strength; lastAngle = angle;
+                double radians = Math.toRadians(angle);
+                float cx = (left + right) / 2f, cy = (top + bottom) / 2f;
+                float length = (float) (Math.abs((right - left) * Math.cos(radians)) + Math.abs((bottom - top) * Math.sin(radians))) / 2f;
+                float dx = (float) Math.cos(radians) * length, dy = (float) Math.sin(radians) * length;
+                gradient = new LinearGradient(cx - dx, cy - dy, cx + dx, cy + dy,
+                        overlay ? ((int) (strength * 2.55f) << 24) | 0x00ffffff : ColorUtils.blendARGB(base, accent, strength / 100f) | 0xff000000,
+                        overlay ? 0x06000000 : ColorUtils.blendARGB(base, accent, strength / 100f * .375f) | 0xff000000, Shader.TileMode.CLAMP);
             }
             paint.setShader(gradient); paint.setStyle(Paint.Style.FILL);
-            paint.setAlpha((int) (255 * alpha)); canvas.drawRoundRect(bounds, radius, radius, paint);
+            float opacity = AppearanceConfig.giftGradientOpacity() / 100f;
+            radius = cornerRadius(radius);
+            paint.setAlpha((int) (255 * alpha * opacity)); canvas.drawRoundRect(bounds, radius, radius, paint);
             paint.setShader(null); paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(AndroidUtilities.dpf2(1));
-            paint.setColor(0x30ffffff); paint.setAlpha((int) (48 * alpha));
+            paint.setColor(0x30ffffff); paint.setAlpha((int) (255 * AppearanceConfig.giftGradientOutline() / 100f * alpha * opacity));
             edge.set(bounds); edge.inset(AndroidUtilities.dpf2(.5f), AndroidUtilities.dpf2(.5f));
             canvas.drawRoundRect(edge, radius, radius, paint);
         }

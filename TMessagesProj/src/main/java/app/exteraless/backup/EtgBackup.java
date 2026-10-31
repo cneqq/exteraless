@@ -331,6 +331,12 @@ public final class EtgBackup {
         bool(list, "iosLiquidGlassNavigation", AppearanceConfig.iosLiquidGlassNavigation);
         integer(list, "navigationPanelWidth", AppearanceConfig.navigationPanelWidth, 80, 100);
         integer(list, "navigationPanelLift", AppearanceConfig.navigationPanelLift, 0, 64);
+        integer(list, "giftOrdinaryOpacity", AppearanceConfig.giftOrdinaryOpacity, 0, 100);
+        integer(list, "giftCardCorners", AppearanceConfig.giftCardCorners, -1, 40);
+        integer(list, "giftGradientOpacity", AppearanceConfig.giftGradientOpacity, 0, 100);
+        integer(list, "giftGradientStrength", AppearanceConfig.giftGradientStrength, 0, 100);
+        integer(list, "giftGradientAngle", AppearanceConfig.giftGradientAngle, 0, 360);
+        integer(list, "giftGradientOutline", AppearanceConfig.giftGradientOutline, 0, 100);
         integer(list, "giftCardStyle", AppearanceConfig.giftCardStyle, 0, 2);
         integer(list, "giftGlassBlur", AppearanceConfig.giftGlassBlur, 0, 30);
         integer(list, "giftGlassIntensity", AppearanceConfig.giftGlassIntensity, 0, 100);
